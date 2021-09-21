@@ -21,7 +21,6 @@ namespace backend_testing_xunit
         public static void InitConfiguration()
         {
             Configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.test.json")
                 .Build();
         }
 

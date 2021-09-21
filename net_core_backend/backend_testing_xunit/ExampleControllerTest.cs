@@ -26,41 +26,41 @@ namespace backend_testing_xunit
         public ExampleControllerTest(IHttpContextAccessor http, IContextFactory factory, IMapper mapper) : base(http, factory)
         {
             //Configure identity
-            CreateIdentity("Someone's authentication token");
-            this.mapper = mapper;
+            //CreateIdentity("Someone's authentication token");
+            //this.mapper = mapper;
         }
 
         protected override void CreateIdentity(string auth)
         {
-            // Configure identity
-            base.CreateIdentity(auth);
+            //// Configure identity
+            //base.CreateIdentity(auth);
 
-            // Inject
-            service = new ExampleService(factory, http);
-            controller = new ExampleController(null, mapper, service)
-            {
-                ControllerContext = controllerContext,
-            };
+            //// Inject
+            //service = new ExampleService(factory, http);
+            //controller = new ExampleController(null, mapper, service)
+            //{
+            //    ControllerContext = controllerContext,
+            //};
         }
 
         [Fact]
         public async Task ExampleTest()
         {
-            // Inject
-            CreateIdentity("Someone's authentication token");
+            //// Inject
+            //CreateIdentity("Someone's authentication token");
 
-            // Arrange
-            DefaultModel dExample = null;
-            //using(var a = factory.CreateDbContext())
-            //{
-            //    dExample = await a.Example.Include(x => x.SomeOtherRelationship).FirstOrDefaultAsync();
-            //}
-            var expected = mapper.Map<ExampleViewModel>(dExample);
+            //// Arrange
+            //DefaultModel dExample = null;
+            ////using(var a = factory.CreateDbContext())
+            ////{
+            ////    dExample = await a.Example.Include(x => x.SomeOtherRelationship).FirstOrDefaultAsync();
+            ////}
+            //var expected = mapper.Map<ExampleViewModel>(dExample);
 
-            // Act
-            var result = await controller.AddSomething("Some word");
+            //// Act
+            //var result = await controller.AddSomething("Some word");
 
-            result = null;
+            //result = null;
 
             // Assert
             //Assert.Equal(Serialize(expected), Serialize(((OkObjectResult)result).Value));
