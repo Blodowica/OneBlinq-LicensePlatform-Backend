@@ -52,7 +52,7 @@ namespace net_core_backend.Services
                     throw new ArgumentException("This email isn't registered in our system");
                 }
 
-                if(!BC.Verify(model.Password, user.HashedPassword))
+                if(!BC.Verify(model.Password, user.Password))
                 {
                     throw new ArgumentException("Invalid password");
                 }
