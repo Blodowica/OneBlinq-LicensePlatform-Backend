@@ -15,7 +15,7 @@ namespace net_core_backend.Models
 
         public string Token { get; set; }
         public DateTime ExpiresAt { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime RevokedAt { get; set; }
         public bool Active { get; set; } = true;
         public int UserId { get; set; }
@@ -27,12 +27,12 @@ namespace net_core_backend.Models
 
         }
 
-        //public RefreshTokens(Users _user, string _token, DateTime _expiresAt)
-        //{
-        //    User = _user;
-        //    Token = _token;
-        //    ExpiresAt = _expiresAt;
-        //    CreatedAt = DateTime.UtcNow;
-        //}
+        public RefreshTokens(Users user, string token, DateTime expiresAt)
+        {
+            User = user;
+            UserId = user.Id;
+            Token = token;
+            ExpiresAt = expiresAt;
+        }
     }
 }

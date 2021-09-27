@@ -23,13 +23,13 @@ namespace net_core_backend.Models
         [JsonIgnore]
         public string Password { get; set; }
 
-        public Users(string _email, string _firstName, string _lastName, string _password, string _gumroadID = null)
+        public Users(string email, string firstName, string lastName, string password, string gumroadID = null)
         {
-            Email = _email;
-            FirstName = _firstName;
-            LastName = _lastName;
-            Password = _password;
-            GumroadID = _gumroadID;
+            Email = email;
+            FirstName = firstName;
+            LastName = lastName;
+            Password = password;
+            GumroadID = gumroadID;
         }
     }
 }

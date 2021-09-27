@@ -19,11 +19,12 @@ namespace net_core_backend.Models
 
         }
 
-        //public ActivationLogs(bool _successful, Licenses _license)
-        //{
-        //    CreatedAt = DateTime.UtcNow;
-        //    Successful = _successful;
-        //    License = _license;
-        //}
+        public ActivationLogs(bool successful, Licenses license)
+        {
+            CreatedAt = DateTime.UtcNow;
+            Successful = successful;
+            License = license;
+            LicenseId = license.Id;
+        }
     }
 }

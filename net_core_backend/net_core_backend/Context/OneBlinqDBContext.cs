@@ -113,6 +113,12 @@ namespace net_core_backend.Models
 
                 entity.Property(e => e.GumroadID)
                     .HasColumnName("gumroad_id");
+
+                entity.HasOne(l => l.User)
+                    .WithMany(u => u.Licenses)
+                    .HasForeignKey(l => l.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Licenses_Users");
             });
 
             modelBuilder.Entity<Products>(entity =>

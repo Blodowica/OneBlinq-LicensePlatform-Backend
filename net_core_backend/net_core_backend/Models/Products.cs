@@ -16,18 +16,13 @@ namespace net_core_backend.Models
 
         public virtual ICollection<LicenseProducts> LicenseProducts { get; set; }
 
-        public Products()
+        public Products(string productName, int price, string currency, string recurrance, string gumroadID)
         {
-
+            ProductName = productName;
+            Price = price;
+            Currency = currency;
+            Recurrance = recurrance;
+            GumroadID = gumroadID;
         }
-
-        //public Products(string _productName, int _price, string _currency, string _recurrance, string _gumroadID)
-        //{
-        //    ProductName = _productName;
-        //    Price = _price;
-        //    Currency = _currency;
-        //    Recurrance = _recurrance;
-        //    GumroadID = _gumroadID;
-        //}
     }
 }
