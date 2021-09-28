@@ -12,13 +12,12 @@ namespace net_core_backend.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public bool Admin { get; set; } = false;
-        [JsonIgnore]
-        public string GumroadID { get; set; }
+        public virtual ICollection<Licenses> Licenses { get; set; }
+        public virtual ICollection<AccessTokens> AccessTokens { get; set; }
+        public virtual ICollection<RefreshTokens> RefreshTokens { get; set; }
 
         [JsonIgnore]
-        public virtual ICollection<Licenses> Licenses { get; set; }
-        [JsonIgnore]
-        public virtual ICollection<RefreshTokens> RefreshTokens { get; set; }
+        public string GumroadID { get; set; }
 
         [JsonIgnore]
         public string Password { get; set; }

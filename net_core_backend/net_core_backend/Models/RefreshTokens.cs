@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -21,6 +22,12 @@ namespace net_core_backend.Models
         public int UserId { get; set; }
 
         public virtual Users User { get; set; }
+
+        [NotMapped]
+        public bool Expired => DateTime.UtcNow >= ExpiresAt;
+
+        [NotMapped]
+        public bool Useable => RevokedAt == null && !Expired;
 
         public RefreshTokens()
         {

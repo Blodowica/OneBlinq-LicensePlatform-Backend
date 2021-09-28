@@ -189,6 +189,29 @@ namespace net_core_backend.Models
                     .HasConstraintName("FK_ActivationLogs_Licenses");
             });
 
+            modelBuilder.Entity<AccessTokens>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasColumnName("id");
+
+                entity.Property(e => e.AccessToken)
+                    .IsRequired()
+                    .HasColumnName("access_token");
+
+                entity.Property(e => e.CreatedAt)
+                    .IsRequired()
+                    .HasColumnName("created_at");
+
+                entity.Property(e => e.Active)
+                    .HasColumnName("active");
+
+                entity.HasOne(t => t.User)
+                    .WithMany(u => u.AccessTokens)
+                    .HasForeignKey(t => t.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_AccessTokens_Users");
+            });
+
             OnModelCreatingPartial(modelBuilder);
         }
 
