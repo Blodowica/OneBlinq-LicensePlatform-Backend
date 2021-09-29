@@ -22,8 +22,19 @@ namespace net_core_backend.Models
         [JsonIgnore]
         public string Password { get; set; }
 
+        public Users()
+        {
+            Licenses = new HashSet<Licenses>();
+            AccessTokens = new HashSet<AccessTokens>();
+            RefreshTokens = new HashSet<RefreshTokens>();
+        }
+
         public Users(string email, string firstName, string lastName, string password, string gumroadID = null)
         {
+            Licenses = new HashSet<Licenses>();
+            AccessTokens = new HashSet<AccessTokens>();
+            RefreshTokens = new HashSet<RefreshTokens>();
+
             Email = email;
             FirstName = firstName;
             LastName = lastName;

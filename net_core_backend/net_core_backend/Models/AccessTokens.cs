@@ -19,11 +19,9 @@ namespace net_core_backend.Models
 
         }
 
-        public AccessTokens(string accessToken, Users createdBy)
+        public AccessTokens(string accessToken)
         {
             AccessToken = accessToken;
-            User = createdBy;
-            UserId = createdBy.Id;
         }
     }
 }
