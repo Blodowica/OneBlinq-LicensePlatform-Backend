@@ -18,10 +18,8 @@ namespace net_core_backend.Models
 
         }
 
-        public LicenseProducts(Licenses license, Products product)
+        public LicenseProducts(Products product)
         {
-            License = license;
-            LicenseId = license.Id;
             Product = product;
             ProductId = product.Id;
         }

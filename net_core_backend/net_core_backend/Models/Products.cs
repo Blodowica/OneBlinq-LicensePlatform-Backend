@@ -16,8 +16,15 @@ namespace net_core_backend.Models
 
         public virtual ICollection<LicenseProducts> LicenseProducts { get; set; }
 
+        public Products()
+        {
+            LicenseProducts = new HashSet<LicenseProducts>();
+        }
+
         public Products(string productName, int price, string currency, string recurrance, string gumroadID)
         {
+            LicenseProducts = new HashSet<LicenseProducts>();
+
             ProductName = productName;
             Price = price;
             Currency = currency;

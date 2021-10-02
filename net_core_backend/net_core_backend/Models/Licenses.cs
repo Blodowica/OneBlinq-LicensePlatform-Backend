@@ -21,13 +21,15 @@ namespace net_core_backend.Models
 
         public Licenses()
         {
-
+            ActivationLogs = new HashSet<ActivationLogs>();
+            LicenseProducts = new HashSet<LicenseProducts>();
         }
 
-        public Licenses(Users user, DateTime expiresAt, string purchaseLocation, string gumroadID, string licenseKey)
+        public Licenses(DateTime expiresAt, string purchaseLocation, string gumroadID, string licenseKey)
         {
-            User = user;
-            UserId = user.Id;
+            ActivationLogs = new HashSet<ActivationLogs>();
+            LicenseProducts = new HashSet<LicenseProducts>();
+
             ExpiresAt = expiresAt;
             PurchaseLocation = purchaseLocation;
             GumroadID = gumroadID;

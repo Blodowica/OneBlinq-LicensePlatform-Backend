@@ -19,12 +19,10 @@ namespace net_core_backend.Models
 
         }
 
-        public ActivationLogs(bool successful, Licenses license)
+        public ActivationLogs(bool successful)
         {
             CreatedAt = DateTime.UtcNow;
             Successful = successful;
-            License = license;
-            LicenseId = license.Id;
         }
     }
 }
