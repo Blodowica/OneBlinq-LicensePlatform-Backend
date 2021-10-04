@@ -63,6 +63,8 @@ namespace net_core_backend
             
             services.AddSingleton<IAccountService, AccountService>();
 
+            services.AddSingleton<IGumroadService, GumroadService>();
+
             services.AddHttpContextAccessor();
 
             services.AddHttpClient();

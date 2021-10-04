@@ -19,7 +19,6 @@ namespace net_core_backend.Models
         public virtual DbSet<Users> Users { get; set; }
         public virtual DbSet<RefreshTokens> RefreshTokens { get; set; }
         public virtual DbSet<Licenses> Licenses { get; set; }
-        public virtual DbSet<LicenseProducts> LicenseProducts { get; set; }
         public virtual DbSet<Products> Products { get; set; }
         public virtual DbSet<ActivationLogs> ActivationLogs { get; set; }
 
@@ -36,12 +35,10 @@ namespace net_core_backend.Models
                     .HasMaxLength(200);
 
                 entity.Property(e => e.FirstName)
-                    .IsRequired()
                     .HasColumnName("first_name")
                     .HasMaxLength(50);
 
                 entity.Property(e => e.LastName)
-                    .IsRequired()
                     .HasColumnName("last_name")
                     .HasMaxLength(50);
 
@@ -97,7 +94,6 @@ namespace net_core_backend.Models
                     .HasColumnName("created_at");
 
                 entity.Property(e => e.ExpiresAt)
-                    .IsRequired()
                     .HasColumnName("expires_at");
 
                 entity.Property(e => e.PurchaseLocation)
@@ -111,15 +107,35 @@ namespace net_core_backend.Models
                 entity.Property(e => e.Active)
                     .HasColumnName("active");
 
-                entity.Property(e => e.GumroadID)
-                    .HasColumnName("gumroad_id");
+                entity.Property(e => e.GumroadSaleID)
+                    .HasColumnName("gumroad_sale_id");
 
-                entity.HasOne(l => l.User)
+                entity.Property(e => e.GumroadSubscriptionID)
+                    .HasColumnName("gumroad_subscription_id");
+
+                entity.Property(e => e.Recurrence)
+                    .HasColumnName("recurrence")
+                    .HasMaxLength(20);
+
+                entity.Property(e => e.Currency)
+                    .HasColumnName("currency")
+                    .HasMaxLength(10);
+
+                entity.Property(e => e.Price)
+                    .HasColumnName("price");
+
+            entity.HasOne(l => l.User)
                     .WithMany(u => u.Licenses)
                     .HasForeignKey(l => l.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Licenses_Users");
-            });
+
+                entity.HasOne(l => l.Product)
+                    .WithMany(p => p.Licenses)
+                    .HasForeignKey(l => l.ProductId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_Licenses_Products");
+    });
 
             modelBuilder.Entity<Products>(entity =>
             {
@@ -131,42 +147,17 @@ namespace net_core_backend.Models
                     .HasColumnName("product_name")
                     .HasMaxLength(100);
 
-                entity.Property(e => e.Price)
-                    .IsRequired()
-                    .HasColumnName("price");
+                entity.Property(e => e.VariantName)
+                    .HasColumnName("variant_name");
 
-                entity.Property(e => e.Currency)
-                    .HasColumnName("currency")
-                    .HasMaxLength(10);
-
-                entity.Property(e => e.Recurrance)
-                    .HasColumnName("recurrance")
-                    .HasMaxLength(50)
-                    .IsRequired();
+                entity.Property(e => e.MaxUses)
+                    .HasColumnName("max_uses");
 
                 entity.Property(e => e.Active)
                     .HasColumnName("active");
 
                 entity.Property(e => e.GumroadID)
                     .HasColumnName("gumroad_id");
-            });
-
-            modelBuilder.Entity<LicenseProducts>(entity =>
-            {
-                entity.Property(e => e.Id)
-                    .HasColumnName("id");
-
-                entity.HasOne(lp => lp.License)
-                    .WithMany(l => l.LicenseProducts)
-                    .HasForeignKey(lp => lp.LicenseId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_LicenseProducts_Licenses");
-
-                entity.HasOne(lp => lp.Product)
-                    .WithMany(p => p.LicenseProducts)
-                    .HasForeignKey(lp => lp.ProductId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_LicenseProducts_Products");
             });
 
             modelBuilder.Entity<ActivationLogs>(entity =>

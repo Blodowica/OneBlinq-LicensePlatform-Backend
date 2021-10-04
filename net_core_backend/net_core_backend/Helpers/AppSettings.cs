@@ -8,6 +8,6 @@ namespace net_core_backend.Helpers
     public class AppSettings
     {
         public string Secret { get; set; }
-
+        public string GumroadAccessToken { get; set; }
     }
 }
