@@ -24,27 +24,75 @@ namespace net_core_backend.Controllers
         }
 
         [HttpPost("sale/{accessToken}")]
-        public async Task<IActionResult> Sale([FromRoute] string accessToken, [FromBody] GumroadSaleRequest sale)
+        public async Task<IActionResult> Sale([FromRoute] string accessToken, [FromBody] GumroadSaleRequest request)
         {
-            if (accessToken != appSettings.GumroadAccessToken)
+            var action = IsRequestValid(accessToken, request.Resource_Name, "sale");
+            if (action != null)
             {
-                return Unauthorized("Incorrect accesstoken, request denied.");
-            }
-
-            if (sale.Resource_Name != "sale")
-            {
-                return BadRequest("Incorrect resource.");
+                return action;
             }
 
             try
             {
-                await gumroadService.RegisterLicense(sale);
+                await gumroadService.RegisterLicense(request);
                 return Ok("");
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPost("deactivate/{accessToken}")]
+        public async Task<IActionResult> Deactivate([FromRoute] string accessToken, GumroadDeactivateRequest request)
+        {
+            var action = IsRequestValid(accessToken, request.Resource_Name, "subscription_ended");
+            if (action != null)
+            {
+                return action;
+            }
+            try
+            {
+                await gumroadService.DeactivateLicense(request);
+                return Ok("");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("reactivate/{accessToken}")]
+        public async Task<IActionResult> Reactivate([FromRoute] string accessToken, GumroadReactivateRequest request)
+        {
+            var action = IsRequestValid(accessToken, request.Resource_Name, "subscription_restarted");
+            if (action != null)
+            {
+                return action;
+            }
+            try
+            {
+                await gumroadService.ReactivateLicense(request);
+                return Ok("");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        private IActionResult IsRequestValid(string accessToken, string requestResourceName, string resourceName)
+        {
+            if (accessToken != appSettings.GumroadAccessToken)
+            {
+                return Unauthorized("Incorrect accesstoken, request denied.");
+            }
+
+            if (requestResourceName != resourceName)
+            {
+                return BadRequest("Incorrect resource.");
+            }
+            return null;
         }
     }
 }

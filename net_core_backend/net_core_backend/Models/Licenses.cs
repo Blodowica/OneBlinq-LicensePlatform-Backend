@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,12 +18,17 @@ namespace net_core_backend.Models
         public string Recurrence { get; set; }
         public string Currency { get; set; }
         public float Price { get; set; }
+        public string EndedReason { get; set; }
+        public DateTime? RestartedAt { get; set; }
         public int UserId { get; set; }
         public int ProductId { get; set; }
 
         public virtual Products Product { get; set; }
         public virtual Users User { get; set; }
         public virtual ICollection<ActivationLogs> ActivationLogs { get; set; }
+
+        [NotMapped]
+        public bool Expired => ExpiresAt != null && DateTime.UtcNow >= ExpiresAt;
 
         public Licenses()
         {

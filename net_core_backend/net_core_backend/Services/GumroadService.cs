@@ -22,40 +22,89 @@ namespace net_core_backend.Services
             this.appSettings = appSettings.Value;
         }
 
-        
-
-        public async Task RegisterLicense(GumroadSaleRequest sale)
+        public async Task RegisterLicense(GumroadSaleRequest request)
         {
-            var user = await RegisterBuyer(sale.Email, sale.Purchaser_Id);
+            var user = await RegisterBuyer(request.Email, request.Purchaser_Id);
 
-            if (sale.Variants == null)
+            if (request.Variants == null)
             {
-                sale.Variants = new ProductVariants(null);
+                request.Variants = new ProductVariants(null);
             }
 
-            var product = await CheckProductInDb(sale.Product_Id, sale.Variants.Tier, sale.Product_Name);
+            var product = await CheckProductInDb(request.Product_Id, request.Variants.Tier, request.Product_Name);
             
             using (var db = contextFactory.CreateDbContext())
             {
                 if (product == null)
                 {
-                    product = await db.Products.FirstOrDefaultAsync(p => p.GumroadID == sale.Product_Id && p.VariantName == sale.Variants.Tier);
+                    product = await db.Products.FirstOrDefaultAsync(p => p.GumroadID == request.Product_Id && p.VariantName == request.Variants.Tier);
                 }
 
                 var license = new Licenses
                 {
-                    PurchaseLocation = sale.Ip_Country,
-                    GumroadSubscriptionID = sale.Subscription_Id,
-                    GumroadSaleID = sale.Sale_Id,
-                    LicenseKey = sale.License_Key,
-                    Recurrence = sale.Recurrence,
-                    Currency = sale.Currency,
-                    Price = sale.Price,
+                    PurchaseLocation = request.Ip_Country,
+                    GumroadSubscriptionID = request.Subscription_Id,
+                    GumroadSaleID = request.Sale_Id,
+                    LicenseKey = request.License_Key,
+                    Recurrence = request.Recurrence,
+                    Currency = request.Currency,
+                    Price = request.Price,
                     Product = product
                 };
 
                 user.Licenses.Add(license);
                 db.Update(user);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task DeactivateLicense(GumroadDeactivateRequest request)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.Subscription_Id);
+
+                if (license == null)
+                {
+                    throw new ArgumentException("This license isn't registered in our system");
+                }
+
+                if (license.Active == false)
+                {
+                    throw new ArgumentException("This license is already inactive");
+                }
+
+                license.Active = false;
+                license.ExpiresAt = request.Ended_At;
+                license.EndedReason = request.Ended_Reason;
+
+                db.Update(license);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task ReactivateLicense(GumroadReactivateRequest request)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.Subscription_Id);
+
+                if (license == null)
+                {
+                    throw new ArgumentException("This license isn't registered in our system");
+                }
+
+                if (license.Active == true)
+                {
+                    throw new ArgumentException("This license is already active");
+                }
+
+                license.Active = true;
+                license.ExpiresAt = null;
+                license.EndedReason = "License Restarted";
+                license.RestartedAt = request.Restarted_At;
+
+                db.Update(license);
                 await db.SaveChangesAsync();
             }
         }

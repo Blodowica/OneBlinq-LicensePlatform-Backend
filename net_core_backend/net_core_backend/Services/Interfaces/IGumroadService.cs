@@ -8,6 +8,8 @@ namespace net_core_backend.Services.Interfaces
 {
     public interface IGumroadService
     {
-        Task RegisterLicense(GumroadSaleRequest sale);
+        Task RegisterLicense(GumroadSaleRequest request);
+        Task DeactivateLicense(GumroadDeactivateRequest request);
+        Task ReactivateLicense(GumroadReactivateRequest request);
     }
 }

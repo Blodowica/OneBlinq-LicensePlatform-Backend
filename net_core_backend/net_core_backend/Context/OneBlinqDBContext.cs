@@ -124,7 +124,14 @@ namespace net_core_backend.Models
                 entity.Property(e => e.Price)
                     .HasColumnName("price");
 
-            entity.HasOne(l => l.User)
+                entity.Property(e => e.EndedReason)
+                    .HasColumnName("ended_reason")
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.RestartedAt)
+                    .HasColumnName("restarted_at");
+
+                entity.HasOne(l => l.User)
                     .WithMany(u => u.Licenses)
                     .HasForeignKey(l => l.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
