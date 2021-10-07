@@ -22,6 +22,8 @@ namespace net_core_backend.Models
         public virtual DbSet<LicenseProducts> LicenseProducts { get; set; }
         public virtual DbSet<Products> Products { get; set; }
         public virtual DbSet<ActivationLogs> ActivationLogs { get; set; }
+        public virtual DbSet<AccessTokens> AccessTokens { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

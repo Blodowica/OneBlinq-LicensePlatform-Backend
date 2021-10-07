@@ -63,6 +63,10 @@ namespace net_core_backend
             
             services.AddSingleton<IAccountService, AccountService>();
 
+            services.AddSingleton<IAccessTokenService, AccessTokenService>();
+
+            services.AddSingleton<ILicenseKeyService, LicenseKeyService>();
+
             services.AddHttpContextAccessor();
 
             services.AddHttpClient();
