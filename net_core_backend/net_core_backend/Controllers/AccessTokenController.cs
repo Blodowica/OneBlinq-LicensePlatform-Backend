@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace net_core_backend.Controllers
 {
@@ -20,7 +21,7 @@ namespace net_core_backend.Controllers
         {
             this.accessTokenService = accessTokenService;
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost("create access token")]
         public async Task<IActionResult> CreateAccessToken([FromBody] CreateAccessTokenRequest model)
         {

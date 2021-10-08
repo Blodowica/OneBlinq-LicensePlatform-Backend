@@ -22,8 +22,8 @@ using net_core_backend.Services.Interfaces;
 using net_core_backend.Profiles;
 using Microsoft.OpenApi.Models;
 using net_core_backend.Helpers;
-using WebApi.Helpers;
 using AutoWrapper;
+using System.Text;
 
 namespace net_core_backend
 {
@@ -77,6 +77,28 @@ namespace net_core_backend
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
             });
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                //options.Authority = /* TODO: Insert Authority URL here */;
+
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("AppSettings").GetValue<string>("Secret"))),
+                };
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -100,11 +122,8 @@ namespace net_core_backend
 
             app.UseRouting();
 
-            //app.UseAuthentication();
-
-            //app.UseAuthorization();
-
-            app.UseMiddleware<JwtMiddleware>();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
 
             app.UseEndpoints(endpoints =>
