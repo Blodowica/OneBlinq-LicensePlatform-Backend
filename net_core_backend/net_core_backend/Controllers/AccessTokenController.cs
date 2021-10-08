@@ -22,7 +22,7 @@ namespace net_core_backend.Controllers
             this.accessTokenService = accessTokenService;
         }
         [Authorize(Roles = "Admin")]
-        [HttpPost("create access token")]
+        [HttpPost("create-access-token")]
         public async Task<IActionResult> CreateAccessToken([FromBody] CreateAccessTokenRequest model)
         {
             try
