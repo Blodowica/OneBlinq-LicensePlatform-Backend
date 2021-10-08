@@ -11,8 +11,8 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace net_core_backend.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class AccessTokenController : ControllerBase
     {
         private readonly IAccessTokenService accessTokenService;
@@ -27,7 +27,7 @@ namespace net_core_backend.Controllers
         {
             try
             {
-                var response = await accessTokenService.CreateAccessToken(model);
+                var response = await accessTokenService.CreateAccessToken();
 
                 return Ok(response);
             }

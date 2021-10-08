@@ -19,11 +19,9 @@ namespace net_core_backend.Models
 
         }
 
-        public AccessTokens(string accessToken, Users user)
+        public AccessTokens(string accessToken)
         {
             AccessToken = accessToken;
-            UserId = user.Id;
-            User = user;
             Active = true;
         }
     }
