@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class AccessTokenController : ControllerBase
     {
         private readonly IAccessTokenService accessTokenService;
@@ -20,13 +20,14 @@ namespace net_core_backend.Controllers
         {
             this.accessTokenService = accessTokenService;
         }
-
-        [HttpPost("create access token")]
-        public async Task<IActionResult> CreateAccessToken([FromBody] CreateAccessTokenRequest model)
+        
+        [Authorize]
+        [HttpPost("create-access-token")]
+        public async Task<IActionResult> CreateAccessToken()
         {
             try
             {
-                var response = await accessTokenService.CreateAccessToken(model);
+                var response = await accessTokenService.CreateAccessToken();
 
                 return Ok(response);
             }

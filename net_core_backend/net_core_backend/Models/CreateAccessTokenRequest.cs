@@ -9,6 +9,6 @@ namespace net_core_backend.Models
     public class CreateAccessTokenRequest
     {
         [Required]
-        public String Email { get; set; }
+        public int UserId { get; set; }
     }
 }

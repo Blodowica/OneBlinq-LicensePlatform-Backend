@@ -100,9 +100,9 @@ namespace net_core_backend
 
             app.UseRouting();
 
-            //app.UseAuthentication();
+            app.UseAuthentication();
 
-            //app.UseAuthorization();
+            app.UseAuthorization();
 
             app.UseMiddleware<JwtMiddleware>();
 

@@ -11,7 +11,6 @@ namespace net_core_backend.Models
     public class VerificationResponse
     {
         public int Id { get; set; }
-        public bool Admin { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
@@ -24,7 +23,6 @@ namespace net_core_backend.Models
             LastName = user.LastName;
             Email = user.Email;
             Token = token;
-            Admin = user.Admin;
         }
     }
 }

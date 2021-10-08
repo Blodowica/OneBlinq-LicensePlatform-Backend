@@ -20,12 +20,12 @@ namespace net_core_backend.Controllers
             this.licenseKeyService = licenseKeyService;
         }
 
-        [HttpPost("verify license")]
-        public async Task<IActionResult> VerifyLicense([FromBody] VerifyLicenseRequest model)
+        [HttpPost("verify-license/{accessToken}")]
+        public async Task<IActionResult> VerifyLicense([FromRoute] string accessToken, [FromBody] VerifyLicenseRequest model)
         {
             try
             {
-                var response = await licenseKeyService.VerifyLicense(model);
+                var response = await licenseKeyService.VerifyLicense(model, accessToken);
 
                 return Ok(response);
             }
