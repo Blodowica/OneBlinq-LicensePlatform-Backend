@@ -22,6 +22,8 @@ namespace net_core_backend.Models
         public virtual DbSet<LicenseProducts> LicenseProducts { get; set; }
         public virtual DbSet<Products> Products { get; set; }
         public virtual DbSet<ActivationLogs> ActivationLogs { get; set; }
+        public virtual DbSet<AccessTokens> AccessTokens { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,8 +47,8 @@ namespace net_core_backend.Models
                     .HasColumnName("last_name")
                     .HasMaxLength(50);
 
-                entity.Property(e => e.Admin)
-                    .HasColumnName("admin");
+                entity.Property(e => e.Role)
+                    .HasColumnName("role").IsRequired().HasDefaultValue("User");
 
                 entity.Property(e => e.GumroadID)
                     .HasColumnName("gumroad_id");
