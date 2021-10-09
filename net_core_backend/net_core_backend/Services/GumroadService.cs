@@ -35,11 +35,6 @@ namespace net_core_backend.Services
             
             using (var db = contextFactory.CreateDbContext())
             {
-                if (product == null)
-                {
-                    product = await db.Products.FirstOrDefaultAsync(p => p.GumroadID == request.Product_Id && p.VariantName == request.Variants.Tier);
-                }
-
                 var license = new Licenses
                 {
                     PurchaseLocation = request.Ip_Country,
@@ -109,6 +104,21 @@ namespace net_core_backend.Services
             }
         }
 
+        public async Task UpdateLicense(GumroadUpdateRequest request)
+        {
+            var product = await CheckProductInDb(request.Product_Id, request.New_Plan.Tier.Name, request.Product_Name);
+            using (var db = contextFactory.CreateDbContext())
+            {   
+                var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.Subscription_Id);
+                license.Recurrence = request.New_Plan.Recurrence;
+                license.Price = request.New_Plan.Price_Cents;
+                license.Product = product;
+
+                db.Update(license);
+                await db.SaveChangesAsync();
+            }
+        }
+
         private async Task<Users> RegisterBuyer(string email, string purchaserId)
         {
             using (var db = contextFactory.CreateDbContext())
@@ -133,7 +143,8 @@ namespace net_core_backend.Services
         {
             using (var db = contextFactory.CreateDbContext())
             {
-                if (await db.Products.FirstOrDefaultAsync(p => p.GumroadID == gumroadID && p.VariantName == variantName) == null)
+                var foundProduct = await db.Products.FirstOrDefaultAsync(p => p.GumroadID == gumroadID && p.VariantName == variantName);
+                if (foundProduct == null)
                 {
                     var product = new Products
                     {
@@ -147,8 +158,8 @@ namespace net_core_backend.Services
 
                     return product;
                 }
+                return foundProduct;
             }
-            return null;
         }
     }
 }

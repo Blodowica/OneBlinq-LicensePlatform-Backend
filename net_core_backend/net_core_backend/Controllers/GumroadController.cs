@@ -51,6 +51,7 @@ namespace net_core_backend.Controllers
             {
                 return action;
             }
+
             try
             {
                 await gumroadService.DeactivateLicense(request);
@@ -70,9 +71,30 @@ namespace net_core_backend.Controllers
             {
                 return action;
             }
+
             try
             {
                 await gumroadService.ReactivateLicense(request);
+                return Ok("");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("update/{accessToken}")]
+        public async Task<IActionResult> Updated([FromRoute] string accessToken, GumroadUpdateRequest request)
+        {
+            var action = IsRequestValid(accessToken, request.Resource_Name, "subscription_updated");
+            if (action != null)
+            {
+                return action;
+            }
+
+            try
+            {
+                await gumroadService.UpdateLicense(request);
                 return Ok("");
             }
             catch (Exception ex)
