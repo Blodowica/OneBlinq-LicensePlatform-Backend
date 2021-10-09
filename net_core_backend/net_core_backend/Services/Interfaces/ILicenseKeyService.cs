@@ -8,6 +8,6 @@ namespace net_core_backend.Services.Interfaces
 {
     public interface ILicenseKeyService
     {
-        Task<VerifyLicenseResponse> VerifyLicense(VerifyLicenseRequest model, String accessToken);
+        Task VerifyLicense(VerifyLicenseRequest model, String accessToken);
     }
 }

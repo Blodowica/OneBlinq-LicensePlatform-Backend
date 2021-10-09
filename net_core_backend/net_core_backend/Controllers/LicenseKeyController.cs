@@ -25,9 +25,9 @@ namespace net_core_backend.Controllers
         {
             try
             {
-                var response = await licenseKeyService.VerifyLicense(model, accessToken);
+                await licenseKeyService.VerifyLicense(model, accessToken);
 
-                return Ok(response);
+                return Ok();
             }
             catch (Exception ex)
             {

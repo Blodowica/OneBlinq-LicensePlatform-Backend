@@ -26,58 +26,38 @@ namespace net_core_backend.Services
             accessTokenService = new AccessTokenService(_contextFactory, appSettings, httpContext);
         }
 
-        public async Task<VerifyLicenseResponse> VerifyLicense(VerifyLicenseRequest model, String token)
+        public async Task VerifyLicense(VerifyLicenseRequest model, String token)
         {
             using (var db = contextFactory.CreateDbContext())
             {
-                try
+                
+                if (await db.AccessTokens.FirstOrDefaultAsync(at => at.AccessToken.Equals(token)) == null)
                 {
-                    if (await db.AccessTokens.FirstOrDefaultAsync(at => at.AccessToken.Equals(token)) == null)
-                    {
-                        throw new ArgumentException("Provided access token does not exist");
-                    }
-                    var user = await db.Users
-                        .Include(x => x.Licenses)
-                        .Where(x => x.Email == model.Email && x.Licenses
-                            .Any(x => x.LicenseKey == model.LicenseKey))
-                        .FirstOrDefaultAsync();
-                    //if (user == null)
-                    //{
-                    //    throw new ArgumentException("A user with these credentials does not exist");
-                    //}
-
-                    Licenses license = null;
-
-                    foreach (var someLicense in user.Licenses)
-                    {
-                        if (someLicense.LicenseKey.Equals(model.LicenseKey))
-                        {
-                            license = someLicense;
-                            break;
-                        }
-                    }
-
-                    if (license == null)
-                    {
-                        throw new ArgumentException("The user does not have this license");
-                    }
-                    if (!license.Active)
-                    {
-                        throw new Exception("This license was deactivated");
-                    }
-                    else if (license.ExpiresAt.CompareTo(DateTime.Today) < 0)
-                    {
-                        license.Active = false;
-                        db.SaveChanges();
-
-                        throw new Exception("This license has already expired");
-                    }
-
-                    return new VerifyLicenseResponse(user, license);
+                    throw new ArgumentException("Provided access token does not exist");
                 }
-                catch (ArgumentException ex)
+                var user = await db.Users
+                    .Include(x => x.Licenses)
+                    .Where(x => x.Email == model.Email && x.Licenses
+                        .Any(x => x.LicenseKey == model.LicenseKey))
+                    .FirstOrDefaultAsync();
+
+                var license = user.Licenses.Where(lk => lk.LicenseKey.Equals(model.LicenseKey)).FirstOrDefault();
+
+                if (license == null)
                 {
-                    throw new ArgumentException(ex.Message);
+                    throw new ArgumentException("The user does not have this license");
+                }
+                if (!license.Active)
+                {
+                    throw new Exception("This license was deactivated");
+                }
+                else if (license.ExpiresAt.CompareTo(DateTime.Today) < 0)
+                {
+                    license.Active = false;
+                    db.Update(license);
+                    await db.SaveChangesAsync();
+
+                    throw new Exception("This license has already expired");
                 }
             }
         }

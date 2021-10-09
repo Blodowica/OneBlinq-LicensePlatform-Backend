@@ -49,7 +49,7 @@ namespace net_core_backend.Services
                 db.Update(user);
                 await db.SaveChangesAsync();
 
-                return new CreateAccessTokenResponse(user, newAccessToken);
+                return new CreateAccessTokenResponse(newAccessToken);
             }
         }
     }
