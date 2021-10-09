@@ -26,7 +26,7 @@ namespace net_core_backend.Controllers
             {
                 var response = await accountService.Register(model);
 
-                return Ok(new { link = response });
+                return Ok(response);
             }
             catch(Exception ex)
             {

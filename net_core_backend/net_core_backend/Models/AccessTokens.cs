@@ -22,6 +22,7 @@ namespace net_core_backend.Models
         public AccessTokens(string accessToken)
         {
             AccessToken = accessToken;
+            Active = true;
         }
     }
 }

@@ -11,7 +11,7 @@ namespace net_core_backend.Models
         public string Email { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public bool Admin { get; set; } = false;
+        public string Role { get; set; }
         public virtual ICollection<Licenses> Licenses { get; set; }
         public virtual ICollection<AccessTokens> AccessTokens { get; set; }
         public virtual ICollection<RefreshTokens> RefreshTokens { get; set; }

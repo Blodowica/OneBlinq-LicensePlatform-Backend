@@ -22,8 +22,8 @@ using net_core_backend.Services.Interfaces;
 using net_core_backend.Profiles;
 using Microsoft.OpenApi.Models;
 using net_core_backend.Helpers;
-using WebApi.Helpers;
 using AutoWrapper;
+using System.Text;
 
 namespace net_core_backend
 {
@@ -65,6 +65,10 @@ namespace net_core_backend
 
             services.AddSingleton<IGumroadService, GumroadService>();
 
+            services.AddSingleton<IAccessTokenService, AccessTokenService>();
+
+            services.AddSingleton<ILicenseKeyService, LicenseKeyService>();
+
             services.AddHttpContextAccessor();
 
             services.AddHttpClient();
@@ -74,6 +78,28 @@ namespace net_core_backend
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" });
+            });
+
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                //options.Authority = /* TODO: Insert Authority URL here */;
+
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("AppSettings").GetValue<string>("Secret"))),
+                };
             });
         }
 
@@ -98,11 +124,8 @@ namespace net_core_backend
 
             app.UseRouting();
 
-            //app.UseAuthentication();
-
-            //app.UseAuthorization();
-
-            app.UseMiddleware<JwtMiddleware>();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
 
             app.UseEndpoints(endpoints =>
