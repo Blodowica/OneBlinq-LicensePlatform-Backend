@@ -51,7 +51,7 @@ namespace net_core_backend.Services
                 {
                     throw new Exception("This license was deactivated");
                 }
-                else if (license.ExpiresAt.CompareTo(DateTime.Today) < 0)
+                else if (license.ExpiresAt > DateTime.UtcNow)
                 {
                     license.Active = false;
                     db.Update(license);
