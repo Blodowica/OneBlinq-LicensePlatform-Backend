@@ -35,7 +35,7 @@ namespace net_core_backend.Controllers
             try
             {
                 await gumroadService.RegisterLicense(request);
-                return Ok("");
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -55,7 +55,7 @@ namespace net_core_backend.Controllers
             try
             {
                 await gumroadService.DeactivateLicense(request);
-                return Ok("");
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace net_core_backend.Controllers
             try
             {
                 await gumroadService.ReactivateLicense(request);
-                return Ok("");
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -95,7 +95,7 @@ namespace net_core_backend.Controllers
             try
             {
                 await gumroadService.UpdateLicense(request);
-                return Ok("");
+                return Ok();
             }
             catch (Exception ex)
             {
