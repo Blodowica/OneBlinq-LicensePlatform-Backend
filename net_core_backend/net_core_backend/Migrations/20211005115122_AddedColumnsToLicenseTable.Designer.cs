@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using net_core_backend.Models;
 
 namespace net_core_backend.Migrations
 {
     [DbContext(typeof(OneBlinqDBContext))]
-    partial class OneBlinqDBContextModelSnapshot : ModelSnapshot
+    [Migration("20211005115122_AddedColumnsToLicenseTable")]
+    partial class AddedColumnsToLicenseTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -234,6 +236,10 @@ namespace net_core_backend.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("Admin")
+                        .HasColumnName("admin")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnName("email")
@@ -258,13 +264,6 @@ namespace net_core_backend.Migrations
                         .HasColumnName("password")
                         .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("role")
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("User");
 
                     b.HasKey("Id");
 

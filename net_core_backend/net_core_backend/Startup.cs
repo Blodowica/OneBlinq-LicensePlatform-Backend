@@ -63,6 +63,8 @@ namespace net_core_backend
             
             services.AddSingleton<IAccountService, AccountService>();
 
+            services.AddSingleton<IGumroadService, GumroadService>();
+
             services.AddSingleton<IAccessTokenService, AccessTokenService>();
 
             services.AddSingleton<ILicenseKeyService, LicenseKeyService>();

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using net_core_backend.Models;
 
 namespace net_core_backend.Migrations
 {
     [DbContext(typeof(OneBlinqDBContext))]
-    partial class OneBlinqDBContextModelSnapshot : ModelSnapshot
+    [Migration("20211004124622_RemovedLicenseProductsTableAndUpdatedConnectedTables")]
+    partial class RemovedLicenseProductsTableAndUpdatedConnectedTables
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -97,11 +99,6 @@ namespace net_core_backend.Migrations
                         .HasColumnType("nvarchar(10)")
                         .HasMaxLength(10);
 
-                    b.Property<string>("EndedReason")
-                        .HasColumnName("ended_reason")
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
                     b.Property<DateTime?>("ExpiresAt")
                         .HasColumnName("expires_at")
                         .HasColumnType("datetime2");
@@ -135,10 +132,6 @@ namespace net_core_backend.Migrations
                         .HasColumnName("recurrence")
                         .HasColumnType("nvarchar(20)")
                         .HasMaxLength(20);
-
-                    b.Property<DateTime?>("RestartedAt")
-                        .HasColumnName("restarted_at")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("UserId")
                         .HasColumnType("int");
@@ -234,6 +227,10 @@ namespace net_core_backend.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("Admin")
+                        .HasColumnName("admin")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasColumnName("email")
@@ -258,13 +255,6 @@ namespace net_core_backend.Migrations
                         .HasColumnName("password")
                         .HasColumnType("nvarchar(250)")
                         .HasMaxLength(250);
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("role")
-                        .HasColumnType("nvarchar(max)")
-                        .HasDefaultValue("User");
 
                     b.HasKey("Id");
 
