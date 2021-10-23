@@ -10,34 +10,23 @@ namespace net_core_backend.Models
 {
     public class RefreshTokens
     {
-        [Key]
-        [JsonIgnore]
         public int Id { get; set; }
-
         public string Token { get; set; }
         public DateTime ExpiresAt { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        public DateTime RevokedAt { get; set; }
+        public DateTime? RevokedAt { get; set; }
         public bool Active { get; set; } = true;
         public int UserId { get; set; }
+        public string CreatedByIp { get; set; }
+        public string RevokedByIp { get; set; }
+        public string ReplacedByToken { get; set; }
 
+        [NotMapped]
+        public bool IsExpired => DateTime.UtcNow >= ExpiresAt;
+
+        [NotMapped]
+        public bool IsActive => RevokedAt == null && !IsExpired;
         public virtual Users User { get; set; }
 
-        [NotMapped]
-        public bool Expired => DateTime.UtcNow >= ExpiresAt;
-
-        [NotMapped]
-        public bool Useable => RevokedAt == null && !Expired;
-
-        public RefreshTokens()
-        {
-
-        }
-
-        public RefreshTokens(string token, DateTime expiresAt)
-        {
-            Token = token;
-            ExpiresAt = expiresAt;
-        }
     }
 }

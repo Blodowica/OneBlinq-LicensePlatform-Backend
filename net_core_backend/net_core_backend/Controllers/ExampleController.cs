@@ -48,13 +48,27 @@ namespace net_core_backend.Controllers
         }
 
         [HttpGet("testdb")]
-        public IActionResult TestDatabase()
+        public async Task<IActionResult> TestDatabase()
         {
             try
             {
-                var result = context.TestDatabase();
+                var result = await context.TestDatabase();
 
                 return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpGet("protected")]
+        public IActionResult TestProtected()
+        {
+            try
+            {
+                return Ok("This is a protected method");
             }
             catch (Exception ex)
             {

@@ -36,9 +36,17 @@ namespace net_core_backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(options => options.AddPolicy("AllowAll", p => p.AllowAnyOrigin()
-                                                            .AllowAnyMethod()
-                                                             .AllowAnyHeader()));
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.WithOrigins("http://localhost:3000/, https://localhost:3000/, https://ttlicensing.netlify.app/")
+                                .SetIsOriginAllowed((host) => true)
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .AllowCredentials();
+                });
+            });
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
             services.AddSingleton<IContextFactory>(new ContextFactory(Configuration.GetConnectionString("SQLCONNSTR_Database")));
@@ -56,8 +64,6 @@ namespace net_core_backend
             services.AddHttpContextAccessor();
 
             services.AddHttpClient();
-
-            services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
             services.AddSwaggerGen(c =>
             {
@@ -81,16 +87,20 @@ namespace net_core_backend
                     ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = true,
+                    ClockSkew = TimeSpan.Zero,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("AppSettings").GetValue<string>("Secret"))),
                 };
             });
+
+            services.AddControllers().AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.UseCors("AllowAll");
+            app.UseCors();
             app.UseSwagger();
 
             app.UseSwaggerUI(c =>
@@ -101,7 +111,6 @@ namespace net_core_backend
             if (env.IsDevelopment())
             {
             }
-
             // Move this to IsDevelopment to not see errors on production
             app.UseDeveloperExceptionPage();
 

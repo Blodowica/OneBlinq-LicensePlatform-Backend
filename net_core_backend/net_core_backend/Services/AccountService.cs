@@ -15,6 +15,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using BC = BCrypt.Net.BCrypt;
+using System.Security.Cryptography;
 
 namespace net_core_backend.Services
 {
@@ -41,63 +42,124 @@ namespace net_core_backend.Services
             }
         }
 
-        public async Task<VerificationResponse> Login(LoginRequest model)
+        public async Task<VerificationResponse> Login(LoginRequest model, string ipAddress = null)
         {
-            using(var a = contextFactory.CreateDbContext())
+            using var a = contextFactory.CreateDbContext();
+
+            var user = await a.Users.FirstOrDefaultAsync(x => x.Email == model.Email);
+
+            if (user == null)
             {
-                var user = await a.Users.FirstOrDefaultAsync(x => x.Email == model.Email);
-
-                if (user == null)
-                {
-                    throw new ArgumentException("This email isn't registered in our system");
-                }
-
-                if(!BC.Verify(model.Password, user.Password))
-                {
-                    throw new ArgumentException("Invalid password");
-                }
-
-
-                // authentication successful so generate jwt token
-                var token = generateJwtToken(user);
-
-                return new VerificationResponse(user, token);
+                throw new ArgumentException("This email isn't registered in our system");
             }
+
+            if (!BC.Verify(model.Password, user.Password))
+            {
+                throw new ArgumentException("Invalid password");
+            }
+
+
+            // authentication successful so generate jwt token
+            var token = GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken(ipAddress);
+
+            var activeRF = await a.RefreshTokens.Where(x => x.UserId == user.Id && x.RevokedAt == null).ToListAsync();
+            activeRF.ForEach(x =>
+            {
+                x.RevokedAt = DateTime.UtcNow;
+                x.RevokedByIp = ipAddress;
+                x.ReplacedByToken = refreshToken.Token;
+            });
+
+
+            user.RefreshTokens.Add(refreshToken);
+            a.Update(user);
+            await a.SaveChangesAsync();
+
+            return new VerificationResponse(user, token, refreshToken.Token);
         }
 
 
 
-        public async Task<VerificationResponse> Register(AddUserRequest requestInfo)
+        public async Task<VerificationResponse> Register(AddUserRequest requestInfo, string ipAddress = null)
         {
-            using (var a = contextFactory.CreateDbContext())
+            using var a = contextFactory.CreateDbContext();
+            // Checks for existing
+            if (await a.Users.FirstOrDefaultAsync(x => x.Email == requestInfo.Email) != null)
             {
-                // Checks for existing
-                if (await a.Users.FirstOrDefaultAsync(x => x.Email == requestInfo.Email) != null)
-                {
-                    throw new ArgumentException("There is already a user with this email in our system");
-                }
-
-                // Creates and adds a user
-                // Hashes and salts password
-                var user = new Users( 
-                    requestInfo.Email, 
-                    requestInfo.FirstName, 
-                    requestInfo.LastName,
-                    BC.HashPassword(requestInfo.Password));
-
-                // Creates a JWT Token for this user
-                var token = generateJwtToken(user);
-
-                await a.AddAsync(user);
-                await a.SaveChangesAsync();
-
-                return new VerificationResponse(user, token);
+                throw new ArgumentException("There is already a user with this email in our system");
             }
+
+            // Creates and adds a user
+            // Hashes and salts password
+            var user = new Users(
+                requestInfo.Email,
+                requestInfo.FirstName,
+                requestInfo.LastName,
+                BC.HashPassword(requestInfo.Password));
+            // Creates a JWT Token for this user
+
+            await a.AddAsync(user);
+            await a.SaveChangesAsync();
+
+            var token = GenerateJwtToken(user);
+            var refreshToken = GenerateRefreshToken(ipAddress);
+
+            user.RefreshTokens.Add(refreshToken);
+
+            a.Update(user);
+            await a.SaveChangesAsync();
+
+            return new VerificationResponse(user, token, refreshToken.Token);
         }
 
-        private string generateJwtToken(Users user)
+        public async Task<VerificationResponse> RefreshToken(string token, string ipaddress)
         {
-            // generate token that is valid for 7 days
+            using var a = contextFactory.CreateDbContext();
+
+            var rToken = await a.RefreshTokens.Include(x => x.User).FirstOrDefaultAsync(x => x.Token == token);
+            if (rToken == null || !rToken.IsActive) return null;
+
+            var newRefreshToken = GenerateRefreshToken(ipaddress);
+            rToken.RevokedAt = DateTime.UtcNow;
+            rToken.RevokedByIp = ipaddress;
+            rToken.ReplacedByToken = newRefreshToken.Token;
+
+            rToken.User.RefreshTokens.Add(newRefreshToken);
+
+            a.Update(rToken.User);
+            await a.SaveChangesAsync();
+
+
+            var jwtToken = GenerateJwtToken(rToken.User);
+
+            return new VerificationResponse(rToken.User, jwtToken, newRefreshToken.Token);
+        }
+
+        public async Task<bool> RevokeToken(string token, string ipAddress)
+        {
+            using var a = contextFactory.CreateDbContext();
+
+            var rfToken = await a.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token);
+
+            // return false if no user found with token
+            if (rfToken == null) return false;
+
+            // return false if token is not active
+            if (!rfToken.IsActive) return false;
+
+            // revoke token and save
+            rfToken.RevokedAt = DateTime.UtcNow;
+            rfToken.RevokedByIp = ipAddress;
+            a.Update(rfToken);
+            await a.SaveChangesAsync();
+
+            return true;
+        }
+
+
+        private string GenerateJwtToken(Users user)
+        {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(appSettings.Secret);
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -108,11 +170,27 @@ namespace net_core_backend.Services
                     new Claim(ClaimTypes.Role, user.Role),
 
                 }),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.AddHours(24),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                // Should add issues and audience but needs testing with production
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
+        }
+
+        private RefreshTokens GenerateRefreshToken(string ipAddress)
+        {
+            using var rngCryptoServiceProvider = new RNGCryptoServiceProvider();
+            
+            var randomBytes = new byte[64];
+            rngCryptoServiceProvider.GetBytes(randomBytes);
+            return new RefreshTokens
+            {
+                Token = Convert.ToBase64String(randomBytes),
+                ExpiresAt = DateTime.UtcNow.AddDays(7),
+                CreatedAt = DateTime.UtcNow,
+                CreatedByIp = ipAddress
+            };
         }
     }
 }
