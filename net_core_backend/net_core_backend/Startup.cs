@@ -1,5 +1,4 @@
 using System;
-using AutoMapper;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -19,10 +18,8 @@ using net_core_backend.Context;
 using net_core_backend.Models;
 using net_core_backend.Services;
 using net_core_backend.Services.Interfaces;
-using net_core_backend.Profiles;
 using Microsoft.OpenApi.Models;
 using net_core_backend.Helpers;
-using AutoWrapper;
 using System.Text;
 
 namespace net_core_backend
@@ -42,21 +39,8 @@ namespace net_core_backend
             services.AddCors(options => options.AddPolicy("AllowAll", p => p.AllowAnyOrigin()
                                                             .AllowAnyMethod()
                                                              .AllowAnyHeader()));
-            services.AddAutoMapper(c => c.AddProfile<AutoMapping>(), typeof(Startup));
-
             services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
 
-
-            services.AddDbContext<OneBlinqDBContext>(options =>
-            {
-                options.UseSqlServer(Configuration.GetConnectionString("SQLCONNSTR_Database"));
-            });
-
-
-            //Comment this when you've setup a database connection string
-            //services.AddSingleton<IContextFactory>(new ContextFactoryTesting(Configuration.GetConnectionString("Testing_SQLCONNSTR_Database")));
-            
-            //Uncomment this when you've setup a database connection string
             services.AddSingleton<IContextFactory>(new ContextFactory(Configuration.GetConnectionString("SQLCONNSTR_Database")));
 
             services.AddSingleton<IExampleService, ExampleService>();
@@ -107,7 +91,6 @@ namespace net_core_backend
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             app.UseCors("AllowAll");
-            app.UseApiResponseAndExceptionWrapper();
             app.UseSwagger();
 
             app.UseSwaggerUI(c =>
@@ -117,8 +100,10 @@ namespace net_core_backend
 
             if (env.IsDevelopment())
             {
-                app.UseDeveloperExceptionPage();
             }
+
+            // Move this to IsDevelopment to not see errors on production
+            app.UseDeveloperExceptionPage();
 
             app.UseHttpsRedirection();
 

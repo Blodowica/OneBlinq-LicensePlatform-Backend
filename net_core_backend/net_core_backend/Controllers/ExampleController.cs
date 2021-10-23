@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using net_core_backend.Services;
 using net_core_backend.ViewModel;
-using AutoMapper;
 using net_core_backend.Services.Interfaces;
 
 namespace net_core_backend.Controllers
@@ -24,29 +23,38 @@ namespace net_core_backend.Controllers
     public class ExampleController : ControllerBase
     {
         private readonly ILogger<ExampleController> _logger;
-        private readonly IMapper mapper;
         private readonly IExampleService context;
 
-        public ExampleController(ILogger<ExampleController> logger,IMapper mapper, IExampleService _context)
+        public ExampleController(ILogger<ExampleController> logger, IExampleService _context)
         {
             _logger = logger;
-            this.mapper = mapper;
             context = _context;
         }
 
 
         [HttpGet("{word}")]
-        public async Task<IActionResult> AddSomething([FromRoute] string word)
+        public IActionResult AddSomething([FromRoute] string word)
         {
             try
             {
-                await context.DoSomething();
+                var result = context.DoSomething();
 
-                var result = new DefaultModel() { Id = 5 };
+                return Ok($"{result} + {word}");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
 
-                var dto = mapper.Map<ExampleViewModel>(result);
+        [HttpGet("testdb")]
+        public IActionResult TestDatabase()
+        {
+            try
+            {
+                var result = context.TestDatabase();
 
-                return Ok("Scaffolding worked");
+                return Ok(result);
             }
             catch (Exception ex)
             {
