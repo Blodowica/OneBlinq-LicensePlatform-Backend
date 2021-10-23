@@ -103,6 +103,26 @@ namespace net_core_backend.Controllers
             }
         }
 
+        [HttpPost("cancel/{accessToken}")]
+        public async Task<IActionResult> Cancel([FromRoute] string accessToken, GumroadCancelRequest request)
+        {
+            var action = IsRequestValid(accessToken, request.Resource_Name, "cancellation");
+            if (action != null)
+            {
+                return action;
+            }
+
+            try
+            {
+                await gumroadService.CancelLicense(request);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         private IActionResult IsRequestValid(string accessToken, string requestResourceName, string resourceName)
         {
             if (accessToken != appSettings.GumroadAccessToken)
