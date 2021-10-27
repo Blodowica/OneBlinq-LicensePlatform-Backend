@@ -47,7 +47,7 @@ namespace net_core_backend
                                 .AllowCredentials();
                 });
             });
-            services.Configure<AppSettings>(Configuration.GetSection("AppSettings"));
+            services.Configure<AppSettings>(Configuration);
 
             services.AddSingleton<IContextFactory>(new ContextFactory(Configuration.GetConnectionString("SQLCONNSTR_Database")));
 
@@ -89,7 +89,7 @@ namespace net_core_backend
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero,
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetSection("AppSettings").GetValue<string>("Secret"))),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration.GetValue<string>("Secret"))),
                 };
             });
 
@@ -126,6 +126,8 @@ namespace net_core_backend
             {
                 endpoints.MapControllers();
             });
+
+            PrepDb.PrepMigration(app);
         }
     }
 }
