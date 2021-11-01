@@ -43,7 +43,7 @@ namespace net_core_backend.Services
 
         public async Task<VerificationResponse> Login(LoginRequest model)
         {
-            using(var a = contextFactory.CreateDbContext())
+            using (var a = contextFactory.CreateDbContext())
             {
                 var user = await a.Users.FirstOrDefaultAsync(x => x.Email == model.Email);
 
@@ -52,7 +52,7 @@ namespace net_core_backend.Services
                     throw new ArgumentException("This email isn't registered in our system");
                 }
 
-                if(!BC.Verify(model.Password, user.Password))
+                if (!BC.Verify(model.Password, user.Password))
                 {
                     throw new ArgumentException("Invalid password");
                 }
@@ -69,32 +69,56 @@ namespace net_core_backend.Services
 
         public async Task<VerificationResponse> Register(AddUserRequest requestInfo)
         {
-            using (var a = contextFactory.CreateDbContext())
+            using (var db = contextFactory.CreateDbContext())
             {
-                // Checks for existing
-                if (await a.Users.FirstOrDefaultAsync(x => x.Email == requestInfo.Email) != null)
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Email == requestInfo.Email);
+
+                if (user != null)
                 {
-                    throw new ArgumentException("There is already a user with this email in our system");
+                    user.FirstName = requestInfo.FirstName;
+                    user.LastName = requestInfo.LastName;
+                    user.Password = BC.HashPassword(requestInfo.Password);
+                    var token = generateJwtToken(user);
+
+                    db.Update(user);
+
+                    await db.SaveChangesAsync();
+
+                    return new VerificationResponse(user, token);
                 }
 
-                // Creates and adds a user
-                // Hashes and salts password
-                var user = new Users( 
-                    requestInfo.Email, 
-                    requestInfo.FirstName, 
-                    requestInfo.LastName,
-                    BC.HashPassword(requestInfo.Password));
+                throw new ArgumentException("No user found");
 
-                // Creates a JWT Token for this user
-                var token = generateJwtToken(user);
-
-                await a.AddAsync(user);
-                await a.SaveChangesAsync();
-
-                return new VerificationResponse(user, token);
             }
         }
 
+        public async Task CreateAdmin(AddUserRequest requestInfo)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+
+                if (await db.Users.FirstOrDefaultAsync(u => u.Email == requestInfo.Email) == null)
+                {
+                    var user = new Users
+                    {
+                        FirstName = requestInfo.FirstName,
+                        LastName = requestInfo.LastName,
+                        Email = requestInfo.Email,
+                        Password = BC.HashPassword(requestInfo.Password),
+                        Role = "Admin"
+
+                    };
+
+                    await db.AddAsync(user);
+                    await db.SaveChangesAsync();
+                    return;
+                    
+                }
+                throw new ArgumentException("Email already used");
+           
+            }
+
+        }
         private string generateJwtToken(Users user)
         {
             // generate token that is valid for 7 days
@@ -114,5 +138,7 @@ namespace net_core_backend.Services
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
         }
+
+
     }
 }

@@ -8,5 +8,6 @@ namespace net_core_backend.Services.Interfaces
         Task<Users> GetUserDetailsJWT(int id);
         Task<VerificationResponse> Login(LoginRequest model);
         Task<VerificationResponse> Register(AddUserRequest requestInfo);
+        Task CreateAdmin(AddUserRequest requestInfo);
     }
 }
