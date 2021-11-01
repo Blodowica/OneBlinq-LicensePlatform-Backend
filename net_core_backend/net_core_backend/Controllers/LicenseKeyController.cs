@@ -23,6 +23,10 @@ namespace net_core_backend.Controllers
         [HttpPost("verify-license/{accessToken}")]
         public async Task<IActionResult> VerifyLicense([FromRoute] string accessToken, [FromBody] VerifyLicenseRequest model)
         {
+            // testing getting Mac address
+
+            Console.WriteLine("My Mac Address: " + licenseKeyService.GetMacAddress());
+
             try
             {
                 await licenseKeyService.VerifyLicense(model, accessToken);

@@ -8,6 +8,7 @@ using net_core_backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
 namespace net_core_backend.Services
@@ -60,6 +61,18 @@ namespace net_core_backend.Services
                     throw new Exception("This license has already expired");
                 }
             }
+        }
+
+        // test code for getting MacAddress
+        public String GetMacAddress()
+        {
+            String firstMacAddress = NetworkInterface
+                .GetAllNetworkInterfaces()
+                .Where(nic => nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
+                .Select(nic => nic.GetPhysicalAddress().ToString())
+                .FirstOrDefault();
+
+            return firstMacAddress;
         }
     }
 }
