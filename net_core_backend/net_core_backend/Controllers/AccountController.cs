@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Controllers
 {
+
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
@@ -126,6 +127,22 @@ namespace net_core_backend.Controllers
                 return Request.Headers["X-Forwarded-For"];
             else
                 return HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+        }
+        
+        [Authorize(Roles ="Admin")]
+        [HttpPost("create-admin")]
+        public async Task<IActionResult> CreateAdmin([FromBody] AddUserRequest model)
+        {
+            try
+            {
+                 await accountService.CreateAdmin(model);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }
