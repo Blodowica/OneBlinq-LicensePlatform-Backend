@@ -13,6 +13,8 @@
     <Compile Remove="Migrations\20211102133405_AddedMessageForLogs.Designer.cs" />
     <Compile Remove="Migrations\20211102133633_test.cs" />
     <Compile Remove="Migrations\20211102133633_test.Designer.cs" />
+    <Compile Remove="Migrations\20211102133755_test.cs" />
+    <Compile Remove="Migrations\20211102133755_test.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

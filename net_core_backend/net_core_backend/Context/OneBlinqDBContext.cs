@@ -57,33 +57,13 @@ namespace net_core_backend.Models
 
             modelBuilder.Entity<RefreshTokens>(entity =>
             {
-                entity.Property(e => e.Id)
-                    .HasColumnName("id");
+                entity.HasKey(e => new { e.UserId, e.Id });
 
-                entity.Property(e => e.Token)
-                    .IsRequired()
-                    .HasColumnName("token");
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
-                entity.Property(e => e.ExpiresAt)
-                    .IsRequired()
-                    .HasColumnName("expires_at");
-
-                entity.Property(e => e.CreatedAt)
-                    .IsRequired()
-                    .HasColumnName("created_at");
-
-                entity.Property(e => e.RevokedAt)
-                    .IsRequired()
-                    .HasColumnName("revoked_at");
-
-                entity.Property(e => e.Active)
-                    .HasColumnName("active");
-
-                entity.HasOne(t => t.User)
-                    .WithMany(u => u.RefreshTokens)
-                    .HasForeignKey(t => t.UserId)
-                    .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_RefreshTokens_Users");
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.RefreshTokens)
+                    .HasForeignKey(d => d.UserId);
             });
 
             modelBuilder.Entity<Licenses>(entity =>
