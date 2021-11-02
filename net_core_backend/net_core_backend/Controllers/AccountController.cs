@@ -12,7 +12,6 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Controllers
 {
-
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [Route("api/[controller]")]
@@ -66,23 +65,7 @@ namespace net_core_backend.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-        
-        [Authorize(Roles ="Admin")]
-        [HttpPost("create-admin")]
-        public async Task<IActionResult> CreateAdmin([FromBody] AddUserRequest model)
-        {
-            try
-            {
-                 await accountService.CreateAdmin(model);
 
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-        
         [AllowAnonymous]
         [HttpPost("refresh-token")]
         public async Task<IActionResult> RefreshToken()
