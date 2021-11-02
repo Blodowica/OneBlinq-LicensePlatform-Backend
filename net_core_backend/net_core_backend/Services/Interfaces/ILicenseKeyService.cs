@@ -9,7 +9,5 @@ namespace net_core_backend.Services.Interfaces
     public interface ILicenseKeyService
     {
         Task VerifyLicense(VerifyLicenseRequest model, String accessToken);
-
-        String GetMacAddress();
     }
 }

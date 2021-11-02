@@ -11,7 +11,6 @@ namespace net_core_backend.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? ExpiresAt { get; set; }
         public string PurchaseLocation { get; set; }
-        public bool Active { get; set; } = true;
         public string GumroadSaleID { get; set; }
         public string GumroadSubscriptionID { get; set; }
         public string LicenseKey { get; set; }
@@ -22,13 +21,12 @@ namespace net_core_backend.Models
         public DateTime? RestartedAt { get; set; }
         public int UserId { get; set; }
         public int ProductId { get; set; }
-
         public virtual Products Product { get; set; }
         public virtual Users User { get; set; }
         public virtual ICollection<ActivationLogs> ActivationLogs { get; set; }
 
         [NotMapped]
-        public bool Expired => ExpiresAt != null && DateTime.UtcNow >= ExpiresAt;
+        public bool Active => (ExpiresAt == null && ExpiresAt >= DateTime.UtcNow) ? true : false;
 
         public Licenses()
         {

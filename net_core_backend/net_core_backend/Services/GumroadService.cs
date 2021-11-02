@@ -69,7 +69,6 @@ namespace net_core_backend.Services
                     throw new ArgumentException("This license is already inactive");
                 }
 
-                license.Active = false;
                 license.ExpiresAt = request.Ended_At;
                 license.EndedReason = request.Ended_Reason;
 
@@ -94,7 +93,6 @@ namespace net_core_backend.Services
                     throw new ArgumentException("This license is already active");
                 }
 
-                license.Active = true;
                 license.ExpiresAt = null;
                 license.EndedReason = "License Restarted";
                 license.RestartedAt = request.Restarted_At;

@@ -14,10 +14,12 @@ namespace net_core_backend.Controllers
     public class LicenseKeyController : ControllerBase
     {
         private readonly ILicenseKeyService licenseKeyService;
+        private readonly ILoggingService loggingService;
 
-        public LicenseKeyController(ILicenseKeyService licenseKeyService)
+        public LicenseKeyController(ILicenseKeyService licenseKeyService, ILoggingService loggingService)
         {
             this.licenseKeyService = licenseKeyService;
+            this.loggingService = loggingService;
         }
 
         [HttpPost("verify-license/{accessToken}")]
@@ -25,16 +27,18 @@ namespace net_core_backend.Controllers
         {
             // testing getting Mac address
 
-            Console.WriteLine("My Mac Address: " + licenseKeyService.GetMacAddress());
+            //Console.WriteLine("My Mac Address: " + licenseKeyService.GetMacAddress());
 
             try
             {
                 await licenseKeyService.VerifyLicense(model, accessToken);
-
+                await loggingService.AddActivationLog(model.LicenseKey, true, model.FigmaUserId, "User with Figma Id: <FigmaId> at <time> successfully verified license with License Key: <LicenseKey>");
                 return Ok();
             }
             catch (Exception ex)
             {
+                var msg = $"User with Figma Id: <FigmaId> at <time> did not successfully verified license with License Key: <LicenseKey> because of the problem: \"{ex.Message}\"";
+                await loggingService.AddActivationLog(model.LicenseKey, false, model.FigmaUserId, msg);
                 return BadRequest(new { message = ex.Message });
             }
         }

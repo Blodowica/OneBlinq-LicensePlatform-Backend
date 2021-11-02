@@ -26,12 +26,14 @@ namespace net_core_backend.Controllers
         private readonly ILogger<ExampleController> _logger;
         private readonly IMapper mapper;
         private readonly IExampleService context;
+        private readonly ILoggingService loggingService;
 
-        public ExampleController(ILogger<ExampleController> logger,IMapper mapper, IExampleService _context)
+        public ExampleController(ILogger<ExampleController> logger,IMapper mapper, IExampleService _context, ILoggingService loggingService)
         {
             _logger = logger;
             this.mapper = mapper;
             context = _context;
+            this.loggingService = loggingService;
         }
 
 

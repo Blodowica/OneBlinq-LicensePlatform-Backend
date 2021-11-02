@@ -69,6 +69,8 @@ namespace net_core_backend
 
             services.AddSingleton<ILicenseKeyService, LicenseKeyService>();
 
+            services.AddSingleton<ILoggingService, LoggingService>();
+
             services.AddHttpContextAccessor();
 
             services.AddHttpClient();
@@ -120,7 +122,6 @@ namespace net_core_backend
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
 
             app.UseRouting();
 

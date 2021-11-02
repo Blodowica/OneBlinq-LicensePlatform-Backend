@@ -76,6 +76,29 @@ namespace net_core_backend.Migrations
                     b.ToTable("ActivationLogs");
                 });
 
+            modelBuilder.Entity("net_core_backend.Models.LicenseProducts", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnName("id")
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<int>("LicenseId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LicenseId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("LicenseProducts");
+                });
+
             modelBuilder.Entity("net_core_backend.Models.Licenses", b =>
                 {
                     b.Property<int>("Id")
@@ -92,26 +115,12 @@ namespace net_core_backend.Migrations
                         .HasColumnName("created_at")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Currency")
-                        .HasColumnName("currency")
-                        .HasColumnType("nvarchar(10)")
-                        .HasMaxLength(10);
-
-                    b.Property<string>("EndedReason")
-                        .HasColumnName("ended_reason")
-                        .HasColumnType("nvarchar(100)")
-                        .HasMaxLength(100);
-
-                    b.Property<DateTime?>("ExpiresAt")
+                    b.Property<DateTime>("ExpiresAt")
                         .HasColumnName("expires_at")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("GumroadSaleID")
-                        .HasColumnName("gumroad_sale_id")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("GumroadSubscriptionID")
-                        .HasColumnName("gumroad_subscription_id")
+                    b.Property<string>("GumroadID")
+                        .HasColumnName("gumroad_id")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LicenseKey")
@@ -119,33 +128,15 @@ namespace net_core_backend.Migrations
                         .HasColumnName("license_key")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<float>("Price")
-                        .HasColumnName("price")
-                        .HasColumnType("real");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
                     b.Property<string>("PurchaseLocation")
                         .HasColumnName("purchase_location")
                         .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
-                    b.Property<string>("Recurrence")
-                        .HasColumnName("recurrence")
-                        .HasColumnType("nvarchar(20)")
-                        .HasMaxLength(20);
-
-                    b.Property<DateTime?>("RestartedAt")
-                        .HasColumnName("restarted_at")
-                        .HasColumnType("datetime2");
-
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
 
                     b.HasIndex("UserId");
 
@@ -164,12 +155,17 @@ namespace net_core_backend.Migrations
                         .HasColumnName("active")
                         .HasColumnType("bit");
 
+                    b.Property<string>("Currency")
+                        .HasColumnName("currency")
+                        .HasColumnType("nvarchar(10)")
+                        .HasMaxLength(10);
+
                     b.Property<string>("GumroadID")
                         .HasColumnName("gumroad_id")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("MaxUses")
-                        .HasColumnName("max_uses")
+                    b.Property<int>("Price")
+                        .HasColumnName("price")
                         .HasColumnType("int");
 
                     b.Property<string>("ProductName")
@@ -178,9 +174,11 @@ namespace net_core_backend.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasMaxLength(100);
 
-                    b.Property<string>("VariantName")
-                        .HasColumnName("variant_name")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("Recurrance")
+                        .IsRequired()
+                        .HasColumnName("recurrance")
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
 
                     b.HasKey("Id");
 
@@ -241,6 +239,7 @@ namespace net_core_backend.Migrations
                         .HasMaxLength(200);
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasColumnName("first_name")
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
@@ -250,6 +249,7 @@ namespace net_core_backend.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
                         .HasColumnName("last_name")
                         .HasColumnType("nvarchar(50)")
                         .HasMaxLength(50);
@@ -289,14 +289,23 @@ namespace net_core_backend.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("net_core_backend.Models.Licenses", b =>
+            modelBuilder.Entity("net_core_backend.Models.LicenseProducts", b =>
                 {
-                    b.HasOne("net_core_backend.Models.Products", "Product")
-                        .WithMany("Licenses")
-                        .HasForeignKey("ProductId")
-                        .HasConstraintName("FK_Licenses_Products")
+                    b.HasOne("net_core_backend.Models.Licenses", "License")
+                        .WithMany("LicenseProducts")
+                        .HasForeignKey("LicenseId")
+                        .HasConstraintName("FK_LicenseProducts_Licenses")
                         .IsRequired();
 
+                    b.HasOne("net_core_backend.Models.Products", "Product")
+                        .WithMany("LicenseProducts")
+                        .HasForeignKey("ProductId")
+                        .HasConstraintName("FK_LicenseProducts_Products")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("net_core_backend.Models.Licenses", b =>
+                {
                     b.HasOne("net_core_backend.Models.Users", "User")
                         .WithMany("Licenses")
                         .HasForeignKey("UserId")

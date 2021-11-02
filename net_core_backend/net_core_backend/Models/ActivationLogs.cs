@@ -13,6 +13,14 @@ namespace net_core_backend.Models
 
         public int LicenseId { get; set; }
         //ADD user logging data here (e.g. IPadress, MacAdress, etc.)
+        public string FigmaUserId { get; set; }
+
+        public String Message { get; set; }
+
+        // In case we want only the owner to be able use their licenses,
+        // Then we have to keep track of the user id/email as well
+
+        // Do we need access tokens in there?
 
         public ActivationLogs()
         {

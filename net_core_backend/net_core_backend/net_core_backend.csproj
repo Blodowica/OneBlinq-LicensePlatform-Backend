@@ -7,6 +7,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20211102115418_RemovedActiveFromLicenses.cs" />
+    <Compile Remove="Migrations\20211102115418_RemovedActiveFromLicenses.Designer.cs" />
+    <Compile Remove="Migrations\20211102133405_AddedMessageForLogs.cs" />
+    <Compile Remove="Migrations\20211102133405_AddedMessageForLogs.Designer.cs" />
+    <Compile Remove="Migrations\20211102133633_test.cs" />
+    <Compile Remove="Migrations\20211102133633_test.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
     <PackageReference Include="AutoWrapper.Core" Version="4.5.0" />
