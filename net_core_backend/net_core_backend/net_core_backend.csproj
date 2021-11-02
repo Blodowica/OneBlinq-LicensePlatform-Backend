@@ -15,6 +15,8 @@
     <Compile Remove="Migrations\20211102133633_test.Designer.cs" />
     <Compile Remove="Migrations\20211102133755_test.cs" />
     <Compile Remove="Migrations\20211102133755_test.Designer.cs" />
+    <Compile Remove="Migrations\20211102210142_AddingMessageAndFigmaIdToActivationLog.cs" />
+    <Compile Remove="Migrations\20211102210142_AddingMessageAndFigmaIdToActivationLog.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

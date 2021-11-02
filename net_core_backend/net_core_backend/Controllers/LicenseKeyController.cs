@@ -32,12 +32,12 @@ namespace net_core_backend.Controllers
             try
             {
                 await licenseKeyService.VerifyLicense(model, accessToken);
-                await loggingService.AddActivationLog(model.LicenseKey, true, model.FigmaUserId, "User with Figma Id: <FigmaId> at <time> successfully verified license with License Key: <LicenseKey>");
+                await loggingService.AddActivationLog(model.LicenseKey, true, model.FigmaUserId, "User with Figma Id: \"<FigmaId>\" at <time> successfully verified license with License Key: \"<LicenseKey>\"");
                 return Ok();
             }
             catch (Exception ex)
             {
-                var msg = $"User with Figma Id: <FigmaId> at <time> did not successfully verified license with License Key: <LicenseKey> because of the problem: \"{ex.Message}\"";
+                var msg = $"User with Figma Id: \"<FigmaId>\" at <time> did not successfully verify license with License Key: \"<LicenseKey>\" because of the problem: \"{ex.Message}\"";
                 await loggingService.AddActivationLog(model.LicenseKey, false, model.FigmaUserId, msg);
                 return BadRequest(new { message = ex.Message });
             }
