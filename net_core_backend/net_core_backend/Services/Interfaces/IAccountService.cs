@@ -10,5 +10,6 @@ namespace net_core_backend.Services.Interfaces
         Task<VerificationResponse> RefreshToken(string token, string ipaddress);
         Task<VerificationResponse> Register(AddUserRequest requestInfo, string ipAddress = null);
         Task<bool> RevokeToken(string token, string ipAddress);
+        Task CreateAdmin(AddUserRequest requestInfo);
     }
 }

@@ -12,5 +12,6 @@ namespace net_core_backend.Services.Interfaces
         Task DeactivateLicense(GumroadDeactivateRequest request);
         Task ReactivateLicense(GumroadReactivateRequest request);
         Task UpdateLicense(GumroadUpdateRequest request);
+        Task CancelLicense(GumroadCancelRequest request);
     }
 }
