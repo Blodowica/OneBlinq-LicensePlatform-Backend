@@ -44,11 +44,13 @@ namespace net_core_backend.Services
 
         public async Task<VerificationResponse> Login(LoginRequest model, string ipAddress = null)
         {
+
             using var a = contextFactory.CreateDbContext();
 
             var user = await a.Users.FirstOrDefaultAsync(x => x.Email == model.Email);
 
             if (user == null)
+
             {
                 throw new ArgumentException("This email isn't registered in our system");
             }
@@ -57,7 +59,6 @@ namespace net_core_backend.Services
             {
                 throw new ArgumentException("Invalid password");
             }
-
 
             // authentication successful so generate jwt token
             var token = GenerateJwtToken(user);
@@ -82,6 +83,59 @@ namespace net_core_backend.Services
 
 
         public async Task<VerificationResponse> Register(AddUserRequest requestInfo, string ipAddress = null)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Email == requestInfo.Email);
+
+                if (user != null)
+                {
+                    user.FirstName = requestInfo.FirstName;
+                    user.LastName = requestInfo.LastName;
+                    user.Password = BC.HashPassword(requestInfo.Password);
+                    var token = generateJwtToken(user);
+
+                    db.Update(user);
+
+                    await db.SaveChangesAsync();
+
+                    return new VerificationResponse(user, token);
+                }
+
+                throw new ArgumentException("No user found");
+
+            }
+        }
+
+        public async Task CreateAdmin(AddUserRequest requestInfo)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+
+                if (await db.Users.FirstOrDefaultAsync(u => u.Email == requestInfo.Email) == null)
+                {
+                    var user = new Users
+                    {
+                        FirstName = requestInfo.FirstName,
+                        LastName = requestInfo.LastName,
+                        Email = requestInfo.Email,
+                        Password = BC.HashPassword(requestInfo.Password),
+                        Role = "Admin"
+
+                    };
+
+                    await db.AddAsync(user);
+                    await db.SaveChangesAsync();
+                    return;
+                    
+                }
+                throw new ArgumentException("Email already used");
+           
+            }
+
+        }
+        
+        private string generateJwtToken(Users user)
         {
             using var a = contextFactory.CreateDbContext();
             // Checks for existing
@@ -156,7 +210,6 @@ namespace net_core_backend.Services
 
             return true;
         }
-
 
         private string GenerateJwtToken(Users user)
         {
