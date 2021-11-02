@@ -93,7 +93,7 @@ namespace net_core_backend.Services
                     db.Update(user);
                     await db.SaveChangesAsync();
                     
-                    var token = generateJwtToken(user);
+                    var token = GenerateJwtToken(user);
                     var refreshToken = GenerateRefreshToken(ipAddress);
 
                     user.RefreshTokens.Add(refreshToken);
