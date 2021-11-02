@@ -119,41 +119,6 @@ namespace net_core_backend.Services
             }
         }
 
-        public async Task CancelLicense(GumroadCancelRequest request)
-        {
-            using (var db = contextFactory.CreateDbContext())
-            {
-                var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.Subscription_Id);
-                
-                DateTime expiresAt = license.CreatedAt;
-                int recurrenceMonths = 1;
-
-                switch (license.Recurrence)
-                {
-                    case "yearly":
-                        recurrenceMonths = 12;
-                        break;
-
-                    case "quarterly":
-                        recurrenceMonths = 4;
-                        break;
-
-                    default:
-                        break;
-                }
-                while (expiresAt < DateTime.UtcNow)
-                {
-                    expiresAt = expiresAt.AddMonths(recurrenceMonths);
-                }
-
-                license.ExpiresAt = expiresAt;
-                license.EndedReason = GetCancelReason(request);
-
-                db.Update(license);
-                await db.SaveChangesAsync();
-            }
-        }
-
         private async Task<Users> RegisterBuyer(string email, string purchaserId)
         {
             using (var db = contextFactory.CreateDbContext())
@@ -195,31 +160,6 @@ namespace net_core_backend.Services
                 }
                 return foundProduct;
             }
-        }
-
-        private string GetCancelReason(GumroadCancelRequest request)
-        {
-            if (request.cancelled_by_admin)
-            {
-                return "Cancled by admin";
-            }
-
-            if (request.cancelled_by_seller)
-            {
-                return "Cancled by admin";
-            }
-
-            if (request.cancelled_by_buyer)
-            {
-                return "Canceled by user";
-            }
-
-            if (request.cancelled_due_to_payment_failures)
-            {
-                return "Failed payment";
-            }
-
-            return "Canceled";
         }
     }
 }
