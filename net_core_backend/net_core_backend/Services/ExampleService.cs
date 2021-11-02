@@ -23,11 +23,17 @@ namespace net_core_backend.Services
             httpContext = httpContextAccessor;
         }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
-        public async Task DoSomething()
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+        public string DoSomething()
         {
-            // Do something
+            return "TestingString";
+        }
+
+        public async Task<Users> TestDatabase()
+        {
+            using var a = contextFactory.CreateDbContext();
+
+            var user = await a.Users.FirstOrDefaultAsync();
+            return user;
         }
     }
 }

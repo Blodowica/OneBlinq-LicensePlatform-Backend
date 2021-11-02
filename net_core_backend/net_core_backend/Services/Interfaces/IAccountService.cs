@@ -6,7 +6,9 @@ namespace net_core_backend.Services.Interfaces
     public interface IAccountService
     {
         Task<Users> GetUserDetailsJWT(int id);
-        Task<VerificationResponse> Login(LoginRequest model);
-        Task<VerificationResponse> Register(AddUserRequest requestInfo);
+        Task<VerificationResponse> Login(LoginRequest model, string ipAddress = null);
+        Task<VerificationResponse> RefreshToken(string token, string ipaddress);
+        Task<VerificationResponse> Register(AddUserRequest requestInfo, string ipAddress = null);
+        Task<bool> RevokeToken(string token, string ipAddress);
     }
 }
