@@ -17,11 +17,6 @@ namespace net_core_backend.Models
 
         public String Message { get; set; }
 
-        // In case we want only the owner to be able use their licenses,
-        // Then we have to keep track of the user id/email as well
-
-        // Do we need access tokens in there?
-
         public ActivationLogs()
         {
 

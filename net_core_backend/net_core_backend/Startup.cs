@@ -116,6 +116,7 @@ namespace net_core_backend
             // Move this to IsDevelopment to not see errors on production
             app.UseDeveloperExceptionPage();
 
+            app.UseHttpsRedirection();
 
             app.UseRouting();
 

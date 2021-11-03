@@ -29,10 +29,6 @@ namespace net_core_backend.Services
         {
             using var db = contextFactory.CreateDbContext();
 
-            message = message.Replace("<FigmaId>", figmaUserId);
-            message = message.Replace("<time>", DateTime.Now.ToString());
-            message = message.Replace("<LicenseKey>", licenseKey);
-
             Licenses license = db.Licenses.Where(l => l.LicenseKey == licenseKey).FirstOrDefault();
             ActivationLogs activationLog = new ActivationLogs(successful)
             {

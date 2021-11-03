@@ -25,19 +25,15 @@ namespace net_core_backend.Controllers
         [HttpPost("verify-license/{accessToken}")]
         public async Task<IActionResult> VerifyLicense([FromRoute] string accessToken, [FromBody] VerifyLicenseRequest model)
         {
-            // testing getting Mac address
-
-            //Console.WriteLine("My Mac Address: " + licenseKeyService.GetMacAddress());
-
             try
             {
                 await licenseKeyService.VerifyLicense(model, accessToken);
-                await loggingService.AddActivationLog(model.LicenseKey, true, model.FigmaUserId, "User with Figma Id: \"<FigmaId>\" at <time> successfully verified license with License Key: \"<LicenseKey>\"");
+                await loggingService.AddActivationLog(model.LicenseKey, true, model.FigmaUserId, $"User with Figma Id: \"{model.FigmaUserId}\" at {DateTime.UtcNow} successfully verified license with License Key: \"{model.LicenseKey}\"");
                 return Ok();
             }
             catch (Exception ex)
             {
-                var msg = $"User with Figma Id: \"<FigmaId>\" at <time> did not successfully verify license with License Key: \"<LicenseKey>\" because of the problem: \"{ex.Message}\"";
+                var msg = $"User with Figma Id: \"{model.FigmaUserId}\" at {DateTime.UtcNow} did not successfully verify license with License Key: \"{model.LicenseKey}\" because of the problem: \"{ex.Message}\"";
                 await loggingService.AddActivationLog(model.LicenseKey, false, model.FigmaUserId, msg);
                 return BadRequest(new { message = ex.Message });
             }
