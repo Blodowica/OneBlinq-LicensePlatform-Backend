@@ -11,15 +11,30 @@ namespace net_core_backend.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class LicenseKeyController : ControllerBase
+    public class LicenseController : ControllerBase
     {
         private readonly ILicenseKeyService licenseKeyService;
         private readonly ILoggingService loggingService;
 
-        public LicenseKeyController(ILicenseKeyService licenseKeyService, ILoggingService loggingService)
+        public LicenseController(ILicenseKeyService licenseKeyService, ILoggingService loggingService)
         {
             this.licenseKeyService = licenseKeyService;
             this.loggingService = loggingService;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllLicenses()
+        {
+            try
+            {
+                var licenses = await licenseKeyService.GetAllLicenses();
+                
+                return Ok(licenses);
+            }
+            catch(Exception ex)
+            {
+               return  BadRequest(new { message = ex.Message });
+            }
         }
 
         [HttpPost("verify-license/{accessToken}")]

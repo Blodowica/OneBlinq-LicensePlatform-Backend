@@ -13,18 +13,53 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Services
 {
-    public class LicenseKeyService : DataService<DefaultModel>, ILicenseKeyService
+    public class LicensesService : DataService<DefaultModel>, ILicenseKeyService
     {
         private readonly IContextFactory contextFactory;
         private readonly IHttpContextAccessor httpContext;
         private readonly AppSettings appSettings;
         private AccessTokenService accessTokenService;
-        public LicenseKeyService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, IHttpContextAccessor httpContext) : base(_contextFactory)
+        public LicensesService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, IHttpContextAccessor httpContext) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             this.httpContext = httpContext;
             this.appSettings = appSettings.Value;
             accessTokenService = new AccessTokenService(_contextFactory, appSettings, httpContext);
+        }
+
+        public async Task<GetAllLicensesResponse[]> GetAllLicenses()
+        {
+            using var db = contextFactory.CreateDbContext();
+
+            var licenses = await db.Licenses
+                .Include(x => x.Product)
+                .Include(x => x.User)
+                .Select(x => new
+                {
+                    x.LicenseKey,
+                    x.Id,
+                    x.User.Email,
+                    x.Product.MaxUses,
+                    Activations = x.ActivationLogs.Count(),
+                    x.Active
+                })
+                .ToArrayAsync();
+
+            List<GetAllLicensesResponse> response = new List<GetAllLicensesResponse>();
+            foreach(var l in licenses)
+            {
+                response.Add(new GetAllLicensesResponse()
+                {
+                    Activations = l.Activations,
+                    Email = l.Email,
+                    LicenseId = l.Id,
+                    LicenseKey = l.LicenseKey,
+                    MaxUses = l.MaxUses,
+                    Active = l.Active,
+                });
+            }
+
+            return response.ToArray();
         }
 
         public async Task VerifyLicense(VerifyLicenseRequest model, String token)
