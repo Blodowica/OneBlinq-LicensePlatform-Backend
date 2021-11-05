@@ -16,14 +16,9 @@ namespace net_core_backend.Services
     public class LoggingService : DataService<DefaultModel>, ILoggingService
     {
         private readonly IContextFactory contextFactory;
-        private readonly IHttpContextAccessor httpContext;
-        private readonly AppSettings appSettings;
-        public LoggingService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, IHttpContextAccessor httpContext) : base(_contextFactory)
+        public LoggingService(IContextFactory _contextFactory) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
-            this.httpContext = httpContext;
-            this.appSettings = appSettings.Value;
-            //accessTokenService = new AccessTokenService(_contextFactory, appSettings, httpContext);
         }
         public async Task AddActivationLog(string licenseKey, bool successful, String figmaUserId, string message)
         {
