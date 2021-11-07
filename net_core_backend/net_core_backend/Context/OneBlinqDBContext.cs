@@ -86,9 +86,6 @@ namespace net_core_backend.Models
                     .HasColumnName("license_key")
                     .IsRequired();
 
-                entity.Property(e => e.Active)
-                    .HasColumnName("active");
-
                 entity.Property(e => e.GumroadSaleID)
                     .HasColumnName("gumroad_sale_id");
 
@@ -160,7 +157,15 @@ namespace net_core_backend.Models
 
                 entity.Property(e => e.Successful)
                     .IsRequired()
-                    .HasColumnName("successfull");
+                    .HasColumnName("successful");
+
+                entity.Property(e => e.FigmaUserId)
+                    .IsRequired()
+                    .HasColumnName("figma_user_id");
+
+                entity.Property(e => e.Message)
+                    .IsRequired()
+                    .HasColumnName("message");
 
                 entity.HasOne(al => al.License)
                     .WithMany(l => l.ActivationLogs)

@@ -7,6 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Migrations\20211102115418_RemovedActiveFromLicenses.cs" />
+    <Compile Remove="Migrations\20211102115418_RemovedActiveFromLicenses.Designer.cs" />
+    <Compile Remove="Migrations\20211102133405_AddedMessageForLogs.cs" />
+    <Compile Remove="Migrations\20211102133405_AddedMessageForLogs.Designer.cs" />
+    <Compile Remove="Migrations\20211102133633_test.cs" />
+    <Compile Remove="Migrations\20211102133633_test.Designer.cs" />
+    <Compile Remove="Migrations\20211102133755_test.cs" />
+    <Compile Remove="Migrations\20211102133755_test.Designer.cs" />
+    <Compile Remove="Migrations\20211102210142_AddingMessageAndFigmaIdToActivationLog.cs" />
+    <Compile Remove="Migrations\20211102210142_AddingMessageAndFigmaIdToActivationLog.Designer.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="3.1.8" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.8" />
