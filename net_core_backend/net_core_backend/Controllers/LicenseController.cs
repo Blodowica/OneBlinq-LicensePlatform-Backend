@@ -37,6 +37,24 @@ namespace net_core_backend.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetAllLicenses([FromRoute] int id)
+        {
+            try
+            {
+                var license = await licenseKeyService.GetLicenseDetails(id);
+
+                if (license == null)
+                    return BadRequest($"License with ID: {id} not found");
+
+                return Ok(license);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPost("verify-license/{accessToken}")]
         public async Task<IActionResult> VerifyLicense([FromRoute] string accessToken, [FromBody] VerifyLicenseRequest model)
         {

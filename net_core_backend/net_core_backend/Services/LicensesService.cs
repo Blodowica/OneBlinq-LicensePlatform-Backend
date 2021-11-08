@@ -27,7 +27,7 @@ namespace net_core_backend.Services
             accessTokenService = new AccessTokenService(_contextFactory, appSettings, httpContext);
         }
 
-        public async Task<GetAllLicensesResponse[]> GetAllLicenses()
+        public async Task<GetLicenseResponse[]> GetAllLicenses()
         {
             using var db = contextFactory.CreateDbContext();
 
@@ -45,10 +45,10 @@ namespace net_core_backend.Services
                 })
                 .ToArrayAsync();
 
-            List<GetAllLicensesResponse> response = new List<GetAllLicensesResponse>();
+            List<GetLicenseResponse> response = new List<GetLicenseResponse>();
             foreach(var l in licenses)
             {
-                response.Add(new GetAllLicensesResponse()
+                response.Add(new GetLicenseResponse()
                 {
                     Activations = l.Activations,
                     Email = l.Email,
@@ -60,6 +60,60 @@ namespace net_core_backend.Services
             }
 
             return response.ToArray();
+        }
+
+        public async Task<GetLicenseResponse> GetLicenseDetails(int licenseId)
+        {
+            using var db = contextFactory.CreateDbContext();
+
+            var l = await db.Licenses
+                .Include(x => x.Product)
+                .Include(x => x.User)
+                .Where(x => x.Id == licenseId)
+                .Select(x => new
+                {
+                    ActivationLogs = x.ActivationLogs.Select(x => new 
+                    {
+                        x.Id,
+                        x.Message,
+                        x.Successful
+                    }).ToList(),
+                    x.LicenseKey,
+                    x.Id,
+                    x.User.Email,
+                    x.Product.MaxUses,
+                    x.Product.ProductName,
+                    x.Recurrence,
+                    x.PurchaseLocation,
+                    x.EndedReason,
+                    x.ExpiresAt,
+                    Activations = x.ActivationLogs.Count(),
+                    x.Active
+                })
+                .FirstOrDefaultAsync();
+
+            if (l == null) return null;
+
+            return new GetLicenseResponse()
+            {
+                Activations = l.Activations,
+                Email = l.Email,
+                LicenseId = l.Id,
+                LicenseKey = l.LicenseKey,
+                MaxUses = l.MaxUses,
+                Active = l.Active,
+                EndedReason = l.EndedReason,
+                ExpiresAt = DateTime.Now,
+                ProductName = l.ProductName,
+                PurchaseLocation = l.PurchaseLocation,
+                Recurrence = l.Recurrence,
+                ActivationLogs = l.ActivationLogs.Select(x => new GetLicenseResponse.ACLogs()
+                {
+                    Id = x.Id,
+                    Message = x.Message,
+                    Successful = x.Successful,
+                }).ToList(),
+            };
         }
 
         public async Task VerifyLicense(VerifyLicenseRequest model, String token)
