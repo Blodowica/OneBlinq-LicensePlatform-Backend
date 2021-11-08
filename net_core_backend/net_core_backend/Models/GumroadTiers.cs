@@ -7,7 +7,7 @@ namespace net_core_backend.Models
 {
     public class GumroadTiers
     {
-        public string Id { get; set; }
-        public string Name { get; set; }
+        public string id { get; set; }
+        public string name { get; set; }
     }
 }

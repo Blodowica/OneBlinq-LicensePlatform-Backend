@@ -24,26 +24,26 @@ namespace net_core_backend.Services
 
         public async Task RegisterLicense(GumroadSaleRequest request)
         {
-            var user = await RegisterBuyer(request.Email, request.Purchaser_Id);
+            var user = await RegisterBuyer(request.email, request.purchaser_id);
 
-            if (request.Variants == null)
+            if (request.variants == null)
             {
-                request.Variants = new ProductVariants(null);
+                request.variants = "Product";
             }
 
-            var product = await CheckProductInDb(request.Product_Id, request.Variants.Tier, request.Product_Name);
+            var product = await CheckProductInDb(request.product_id, request.variants, request.product_name);
             
             using (var db = contextFactory.CreateDbContext())
             {
                 var license = new Licenses
                 {
-                    PurchaseLocation = request.Ip_Country,
-                    GumroadSubscriptionID = request.Subscription_Id,
-                    GumroadSaleID = request.Sale_Id,
-                    LicenseKey = request.License_Key,
-                    Recurrence = request.Recurrence,
-                    Currency = request.Currency,
-                    Price = request.Price,
+                    PurchaseLocation = request.ip_country,
+                    GumroadSubscriptionID = request.subscription_id,
+                    GumroadSaleID = request.sale_id,
+                    LicenseKey = request.license_key,
+                    Recurrence = request.recurrence,
+                    Currency = request.currency,
+                    Price = float.Parse(request.price),
                     Product = product
                 };
 
@@ -57,7 +57,7 @@ namespace net_core_backend.Services
         {
             using (var db = contextFactory.CreateDbContext())
             {
-                var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.Subscription_Id);
+                var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.subscription_id);
 
                 if (license == null)
                 {
@@ -69,8 +69,8 @@ namespace net_core_backend.Services
                     throw new ArgumentException("This license is already inactive");
                 }
 
-                license.ExpiresAt = request.Ended_At;
-                license.EndedReason = request.Ended_Reason;
+                license.ExpiresAt = DateTime.Parse(request.ended_at);
+                license.EndedReason = request.ended_reason;
 
                 db.Update(license);
                 await db.SaveChangesAsync();
@@ -81,7 +81,7 @@ namespace net_core_backend.Services
         {
             using (var db = contextFactory.CreateDbContext())
             {
-                var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.Subscription_Id);
+                var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.subscription_id);
 
                 if (license == null)
                 {
@@ -95,7 +95,7 @@ namespace net_core_backend.Services
 
                 license.ExpiresAt = null;
                 license.EndedReason = "License Restarted";
-                license.RestartedAt = request.Restarted_At;
+                license.RestartedAt = DateTime.Parse(request.restarted_at);
 
                 db.Update(license);
                 await db.SaveChangesAsync();
@@ -104,12 +104,12 @@ namespace net_core_backend.Services
 
         public async Task UpdateLicense(GumroadUpdateRequest request)
         {
-            var product = await CheckProductInDb(request.Product_Id, request.New_Plan.Tier.Name, request.Product_Name);
+            var product = await CheckProductInDb(request.product_id, request.new_plan.tier.name, request.product_id);
             using (var db = contextFactory.CreateDbContext())
             {   
-                var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.Subscription_Id);
-                license.Recurrence = request.New_Plan.Recurrence;
-                license.Price = request.New_Plan.Price_Cents;
+                var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.subscription_id);
+                license.Recurrence = request.new_plan.recurrence;
+                license.Price = request.new_plan.price_cents;
                 license.Product = product;
 
                 db.Update(license);
@@ -121,7 +121,7 @@ namespace net_core_backend.Services
         {
             using (var db = contextFactory.CreateDbContext())
             {
-                var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.Subscription_Id);
+                var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.subscription_id);
                 
                 DateTime expiresAt = license.CreatedAt;
                 int recurrenceMonths = 1;
@@ -197,22 +197,22 @@ namespace net_core_backend.Services
 
         private string GetCancelReason(GumroadCancelRequest request)
         {
-            if (request.cancelled_by_admin)
+            if (request.GetType().GetProperty("cancelled_by_admin") != null)
             {
                 return "Cancled by admin";
             }
 
-            if (request.cancelled_by_seller)
+            if (request.GetType().GetProperty("cancelled_by_seller") != null)
             {
                 return "Cancled by admin";
             }
 
-            if (request.cancelled_by_buyer)
+            if (request.GetType().GetProperty("cancelled_by_buyer") != null)
             {
                 return "Canceled by user";
             }
 
-            if (request.cancelled_due_to_payment_failures)
+            if (request.GetType().GetProperty("cancelled_due_to_payment_failures") != null)
             {
                 return "Failed payment";
             }
