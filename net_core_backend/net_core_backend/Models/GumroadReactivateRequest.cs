@@ -7,15 +7,15 @@ namespace net_core_backend.Models
 {
     public class GumroadReactivateRequest
     {
-        public string Subscription_Id { get; set; }
-        public string Product_Id { get; set; }
-        public string Product_Name { get; set; }
-        public string User_Id { get; set; }
-        public string User_Email { get; set; }
-        public DateTime Created_At { get; set; }
-        public string Charge_Occurence_Count { get; set; }
-        public string Recurrence { get; set; }
-        public string Resource_Name { get; set; }
-        public DateTime Restarted_At { get; set; }
+        public string subscription_id { get; set; }
+        public string product_id { get; set; }
+        public string product_name { get; set; }
+        public string user_id { get; set; }
+        public string user_email { get; set; }
+        public string created_at { get; set; }
+        public string charge_occurence_count { get; set; }
+        public string recurrence { get; set; }
+        public string resource_Name { get; set; }
+        public string restarted_at { get; set; }
     }
 }

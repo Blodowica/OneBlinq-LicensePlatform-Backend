@@ -24,9 +24,10 @@ namespace net_core_backend.Controllers
         }
 
         [HttpPost("sale/{accessToken}")]
-        public async Task<IActionResult> Sale([FromRoute] string accessToken, [FromBody] GumroadSaleRequest request)
+        public async Task<IActionResult> Sale([FromRoute] string accessToken, [FromForm] GumroadSaleRequest request)
         {
-            var action = IsRequestValid(accessToken, request.Resource_Name, "sale");
+            request.variants = HttpContext.Request.Form["variants[Tier]"];
+            var action = IsRequestValid(accessToken, request.resource_name, "sale");
             if (action != null)
             {
                 return action;
@@ -44,9 +45,9 @@ namespace net_core_backend.Controllers
         }
 
         [HttpPost("deactivate/{accessToken}")]
-        public async Task<IActionResult> Deactivate([FromRoute] string accessToken, GumroadDeactivateRequest request)
+        public async Task<IActionResult> Deactivate([FromRoute] string accessToken, [FromForm] GumroadDeactivateRequest request)
         {
-            var action = IsRequestValid(accessToken, request.Resource_Name, "subscription_ended");
+            var action = IsRequestValid(accessToken, request.resource_name, "subscription_ended");
             if (action != null)
             {
                 return action;
@@ -64,9 +65,9 @@ namespace net_core_backend.Controllers
         }
 
         [HttpPost("reactivate/{accessToken}")]
-        public async Task<IActionResult> Reactivate([FromRoute] string accessToken, GumroadReactivateRequest request)
+        public async Task<IActionResult> Reactivate([FromRoute] string accessToken, [FromForm] GumroadReactivateRequest request)
         {
-            var action = IsRequestValid(accessToken, request.Resource_Name, "subscription_restarted");
+            var action = IsRequestValid(accessToken, request.resource_Name, "subscription_restarted");
             if (action != null)
             {
                 return action;
@@ -84,9 +85,9 @@ namespace net_core_backend.Controllers
         }
 
         [HttpPost("update/{accessToken}")]
-        public async Task<IActionResult> Updated([FromRoute] string accessToken, GumroadUpdateRequest request)
+        public async Task<IActionResult> Updated([FromRoute] string accessToken, [FromForm] GumroadUpdateRequest request)
         {
-            var action = IsRequestValid(accessToken, request.Resource_Name, "subscription_updated");
+            var action = IsRequestValid(accessToken, request.resource_name, "subscription_updated");
             if (action != null)
             {
                 return action;
@@ -104,9 +105,9 @@ namespace net_core_backend.Controllers
         }
 
         [HttpPost("cancel/{accessToken}")]
-        public async Task<IActionResult> Cancel([FromRoute] string accessToken, GumroadCancelRequest request)
+        public async Task<IActionResult> Cancel([FromRoute] string accessToken, [FromForm] GumroadCancelRequest request)
         {
-            var action = IsRequestValid(accessToken, request.Resource_Name, "cancellation");
+            var action = IsRequestValid(accessToken, request.resource_name, "cancellation");
             if (action != null)
             {
                 return action;
