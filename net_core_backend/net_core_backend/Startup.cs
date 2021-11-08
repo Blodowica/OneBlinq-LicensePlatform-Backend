@@ -40,11 +40,11 @@ namespace net_core_backend
             {
                 options.AddDefaultPolicy(builder =>
                 {
-                    builder.WithOrigins("http://localhost:3000/, https://localhost:3000/, https://ttlicensing.netlify.app/")
-                                .SetIsOriginAllowed((host) => true)
-                                .AllowAnyHeader()
-                                .AllowAnyMethod()
-                                .AllowCredentials();
+                    builder
+                        .SetIsOriginAllowed((host) => true)
+                        .AllowAnyHeader()
+                        .AllowAnyMethod()
+                        .AllowCredentials();
                 });
             });
             services.Configure<AppSettings>(Configuration);
