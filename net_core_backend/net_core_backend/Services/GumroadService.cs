@@ -197,26 +197,6 @@ namespace net_core_backend.Services
 
         private string GetCancelReason(GumroadCancelRequest request)
         {
-            if (request.GetType().GetProperty("cancelled_by_admin") != null)
-            {
-                return "Cancled by admin";
-            }
-
-            if (request.GetType().GetProperty("cancelled_by_seller") != null)
-            {
-                return "Cancled by admin";
-            }
-
-            if (request.GetType().GetProperty("cancelled_by_buyer") != null)
-            {
-                return "Canceled by user";
-            }
-
-            if (request.GetType().GetProperty("cancelled_due_to_payment_failures") != null)
-            {
-                return "Failed payment";
-            }
-
             return "Canceled";
         }
     }

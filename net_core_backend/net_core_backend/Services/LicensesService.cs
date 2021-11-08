@@ -103,7 +103,7 @@ namespace net_core_backend.Services
                 MaxUses = l.MaxUses,
                 Active = l.Active,
                 EndedReason = l.EndedReason,
-                ExpiresAt = DateTime.Now,
+                ExpiresAt = l.ExpiresAt,
                 ProductName = l.ProductName,
                 PurchaseLocation = l.PurchaseLocation,
                 Recurrence = l.Recurrence,
