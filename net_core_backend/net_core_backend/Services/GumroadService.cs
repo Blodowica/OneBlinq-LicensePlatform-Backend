@@ -4,10 +4,13 @@ using Microsoft.Extensions.Options;
 using net_core_backend.Context;
 using net_core_backend.Helpers;
 using net_core_backend.Models;
+using net_core_backend.Models.GumroadRequests;
 using net_core_backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace net_core_backend.Services
@@ -16,14 +19,18 @@ namespace net_core_backend.Services
     {
         private readonly IContextFactory contextFactory;
         private readonly AppSettings appSettings;
-        public GumroadService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings) : base(_contextFactory)
+        private readonly HttpClient httpClient;
+        public GumroadService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, HttpClient httpClient) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             this.appSettings = appSettings.Value;
+            this.httpClient = httpClient;
         }
 
-        public async Task RegisterLicense(GumroadSaleRequest request)
+        public async Task RegisterLicense(string accessToken, GumroadSaleRequest request)
         {
+            await IsRequestValid(accessToken);
+            //check if the buyer's email is already in our system if no create it
             var user = await RegisterBuyer(request.email, request.purchaser_id);
 
             if (request.variants == null)
@@ -31,6 +38,7 @@ namespace net_core_backend.Services
                 request.variants = "Product";
             }
 
+            //check if the product connected to the license already exists in our system if no create it
             var product = await CheckProductInDb(request.product_id, request.variants, request.product_name);
             
             using (var db = contextFactory.CreateDbContext())
@@ -53,8 +61,9 @@ namespace net_core_backend.Services
             }
         }
 
-        public async Task DeactivateLicense(GumroadDeactivateRequest request)
+        public async Task DeactivateLicense(string accessToken, GumroadDeactivateRequest request)
         {
+            await IsRequestValid(accessToken);
             using (var db = contextFactory.CreateDbContext())
             {
                 var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.subscription_id);
@@ -77,8 +86,9 @@ namespace net_core_backend.Services
             }
         }
 
-        public async Task ReactivateLicense(GumroadReactivateRequest request)
+        public async Task ReactivateLicense(string accessToken, GumroadReactivateRequest request)
         {
+            await IsRequestValid(accessToken);
             using (var db = contextFactory.CreateDbContext())
             {
                 var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.subscription_id);
@@ -102,8 +112,9 @@ namespace net_core_backend.Services
             }
         }
 
-        public async Task UpdateLicense(GumroadUpdateRequest request)
+        public async Task UpdateLicense(string accessToken, GumroadUpdateRequest request)
         {
+            await IsRequestValid(accessToken);
             var product = await CheckProductInDb(request.product_id, request.new_plan.tier.name, request.product_id);
             using (var db = contextFactory.CreateDbContext())
             {   
@@ -117,8 +128,9 @@ namespace net_core_backend.Services
             }
         }
 
-        public async Task CancelLicense(GumroadCancelRequest request)
+        public async Task CancelLicense(string accessToken, GumroadCancelRequest request)
         {
+            await IsRequestValid(accessToken);
             using (var db = contextFactory.CreateDbContext())
             {
                 var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.subscription_id);
@@ -126,6 +138,7 @@ namespace net_core_backend.Services
                 DateTime expiresAt = license.CreatedAt;
                 int recurrenceMonths = 1;
 
+                //find out what the recurrence in months is
                 switch (license.Recurrence)
                 {
                     case "yearly":
@@ -139,6 +152,7 @@ namespace net_core_backend.Services
                     default:
                         break;
                 }
+                //go through the months untill you reach the end of the currently payed for month
                 while (expiresAt < DateTime.UtcNow)
                 {
                     expiresAt = expiresAt.AddMonths(recurrenceMonths);
@@ -149,6 +163,19 @@ namespace net_core_backend.Services
 
                 db.Update(license);
                 await db.SaveChangesAsync();
+            }
+        }
+
+        private async Task IsRequestValid(string accessToken)
+        {
+            //check if the accesstoken given is in our accesstokens database
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var Token = await db.AccessTokens.FirstOrDefaultAsync(a => a.AccessToken == accessToken);
+                if (Token == null)
+                {
+                    throw new ArgumentException("Incorrect accesstoken, request denied.");
+                }
             }
         }
 
@@ -185,6 +212,28 @@ namespace net_core_backend.Services
                         VariantName = variantName,
                         GumroadID = gumroadID
                     };
+
+                    //add what plugins should be activate through the tags
+                    using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, "https://api.gumroad.com/v2/products/" + gumroadID))
+                    {
+                        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", appSettings.GumroadAccessToken);
+
+                        var response = await httpClient.SendAsync(requestMessage);
+
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            throw new ArgumentException("Failed to fetch data from Gumroad");
+                        }
+                        var result = await response.Content.ReadAsAsync<GumroadProductRequest>();
+                        foreach (var activateablePlugin in result.product.tags)
+                        {
+                            var activateablePluginToAdd = new ActivateablePlugins
+                            {
+                                Plugin = activateablePlugin
+                            };
+                            product.ActivateablePlugins.Add(activateablePluginToAdd);
+                        }
+                    }
 
                     await db.AddAsync(product);
                     await db.SaveChangesAsync();
