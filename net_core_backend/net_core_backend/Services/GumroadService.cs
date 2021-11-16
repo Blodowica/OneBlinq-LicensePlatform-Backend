@@ -27,9 +27,8 @@ namespace net_core_backend.Services
             this.httpClient = httpClient;
         }
 
-        public async Task RegisterLicense(string accessToken, GumroadSaleRequest request)
+        public async Task RegisterLicense(GumroadSaleRequest request)
         {
-            await IsRequestValid(accessToken);
             //check if the buyer's email is already in our system if no create it
             var user = await RegisterBuyer(request.email, request.purchaser_id);
 
@@ -61,9 +60,8 @@ namespace net_core_backend.Services
             }
         }
 
-        public async Task DeactivateLicense(string accessToken, GumroadDeactivateRequest request)
+        public async Task DeactivateLicense(GumroadDeactivateRequest request)
         {
-            await IsRequestValid(accessToken);
             using (var db = contextFactory.CreateDbContext())
             {
                 var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.subscription_id);
@@ -86,9 +84,8 @@ namespace net_core_backend.Services
             }
         }
 
-        public async Task ReactivateLicense(string accessToken, GumroadReactivateRequest request)
+        public async Task ReactivateLicense(GumroadReactivateRequest request)
         {
-            await IsRequestValid(accessToken);
             using (var db = contextFactory.CreateDbContext())
             {
                 var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.subscription_id);
@@ -112,9 +109,8 @@ namespace net_core_backend.Services
             }
         }
 
-        public async Task UpdateLicense(string accessToken, GumroadUpdateRequest request)
+        public async Task UpdateLicense(GumroadUpdateRequest request)
         {
-            await IsRequestValid(accessToken);
             var product = await CheckProductInDb(request.product_id, request.new_plan.tier.name, request.product_id);
             using (var db = contextFactory.CreateDbContext())
             {   
@@ -128,9 +124,8 @@ namespace net_core_backend.Services
             }
         }
 
-        public async Task CancelLicense(string accessToken, GumroadCancelRequest request)
+        public async Task CancelLicense(GumroadCancelRequest request)
         {
-            await IsRequestValid(accessToken);
             using (var db = contextFactory.CreateDbContext())
             {
                 var license = await db.Licenses.FirstOrDefaultAsync(l => l.GumroadSubscriptionID == request.subscription_id);
@@ -163,19 +158,6 @@ namespace net_core_backend.Services
 
                 db.Update(license);
                 await db.SaveChangesAsync();
-            }
-        }
-
-        private async Task IsRequestValid(string accessToken)
-        {
-            //check if the accesstoken given is in our accesstokens database
-            using (var db = contextFactory.CreateDbContext())
-            {
-                var Token = await db.AccessTokens.FirstOrDefaultAsync(a => a.AccessToken == accessToken);
-                if (Token == null)
-                {
-                    throw new ArgumentException("Incorrect accesstoken, request denied.");
-                }
             }
         }
 

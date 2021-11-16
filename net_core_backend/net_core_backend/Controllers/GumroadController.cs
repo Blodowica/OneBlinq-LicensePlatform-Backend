@@ -18,19 +18,22 @@ namespace net_core_backend.Controllers
     public class GumroadController : ControllerBase
     {
         private readonly IGumroadService gumroadService;
+        private readonly IAccessTokenService accessTokenService;
 
-        public GumroadController(IGumroadService gumroadService)
+        public GumroadController(IGumroadService gumroadService, IAccessTokenService accessTokenService)
         {
             this.gumroadService = gumroadService;
+            this.accessTokenService = accessTokenService;
         }
 
         [HttpPost("sale/{accessToken}")]
         public async Task<IActionResult> Sale([FromRoute] string accessToken, [FromForm] GumroadSaleRequest request)
         {
-            request.variants = HttpContext.Request.Form["variants[Tier]"];
             try
             {
-                await gumroadService.RegisterLicense(accessToken, request);
+                await accessTokenService.CheckAccessToken(accessToken);
+                request.variants = HttpContext.Request.Form["variants[Tier]"];
+                await gumroadService.RegisterLicense(request);
                 return Ok();
             }
             catch (Exception ex)
@@ -44,7 +47,8 @@ namespace net_core_backend.Controllers
         {
             try
             {
-                await gumroadService.DeactivateLicense(accessToken, request);
+                await accessTokenService.CheckAccessToken(accessToken);
+                await gumroadService.DeactivateLicense(request);
                 return Ok();
             }
             catch (Exception ex)
@@ -58,7 +62,8 @@ namespace net_core_backend.Controllers
         {
             try
             {
-                await gumroadService.ReactivateLicense(accessToken, request);
+                await accessTokenService.CheckAccessToken(accessToken);
+                await gumroadService.ReactivateLicense(request);
                 return Ok();
             }
             catch (Exception ex)
@@ -72,7 +77,8 @@ namespace net_core_backend.Controllers
         {
             try
             {
-                await gumroadService.UpdateLicense(accessToken, request);
+                await accessTokenService.CheckAccessToken(accessToken);
+                await gumroadService.UpdateLicense(request);
                 return Ok();
             }
             catch (Exception ex)
@@ -86,7 +92,8 @@ namespace net_core_backend.Controllers
         {
             try
             {
-                await gumroadService.CancelLicense(accessToken, request);
+                await accessTokenService.CheckAccessToken(accessToken);
+                await gumroadService.CancelLicense(request);
                 return Ok();
             }
             catch (Exception ex)
