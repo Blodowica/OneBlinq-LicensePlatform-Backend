@@ -126,34 +126,46 @@ namespace net_core_backend.Services
                     throw new ArgumentException("Provided access token does not exist");
                 }
                 var license = await db.Licenses.Include(x => x.User).Where(x => x.LicenseKey == model.LicenseKey).FirstOrDefaultAsync();
-                //var user = await db.Users
-                //    .Include(x => x.Licenses)
-                //    .Where(x => x.Email == model.Email && x.Licenses
-                //        .Any(x => x.LicenseKey == model.LicenseKey))
-                //    .FirstOrDefaultAsync();
 
-                //var license = user.Licenses.Where(lk => lk.LicenseKey.Equals(model.LicenseKey)).FirstOrDefault();
+                // checking/giving free trial for a plugin
+                // (!) check with PO how long a free trial should be
 
                 if (license == null)
                 {
+                    var freeTrial = await db.FreeTrials.Where(ft => ft.FigmaUserId == model.FigmaUserId && ft.PluginName == ft.PluginName).FirstOrDefaultAsync();
+                    
+                    if (freeTrial == null)
+                    {
+                        var ft = new FreeTrials(1);
+                        ft.PluginName = model.PluginName;
+                        ft.FigmaUserId = model.FigmaUserId;
+                        await db.AddAsync(ft);
+                        await db.SaveChangesAsync();
+                    }
+
+                    else
+                    {
+                        if (freeTrial.Active && freeTrial.EndDate.CompareTo(DateTime.Today) < 0)
+                        {
+                            freeTrial.Active = false;
+                            await db.AddAsync(freeTrial);
+                            await db.SaveChangesAsync();
+                        }
+
+                        if (!freeTrial.Active)
+                        {
+                            throw new ArgumentException("Free trial has expired");
+                        }
+                        
+                    }
+                    // should I need this exception any more, as I am going to have free trials instead?
                     throw new ArgumentException("The provided license key does not exist");
                 }
                 if (!license.Active)
                 {
                     throw new Exception("This license is not active");
                 }
-                //else if (license.ExpiresAt > DateTime.UtcNow)
-                //{
-                //    //license.Active = false;
-                //    db.Update(license);
-                //    await db.SaveChangesAsync();
-
-                //    throw new Exception("This license has already expired");
-                //}
             }
-        }
-
-        // test code for getting MacAddress
-        
+        }        
     }
 }

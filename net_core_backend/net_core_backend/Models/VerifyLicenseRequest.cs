@@ -12,6 +12,9 @@ namespace net_core_backend.Models
         public String FigmaUserId { get; set; } 
 
         [Required]
+        public String PluginName { get; set; }
+
+        [Required]
         public String LicenseKey { get; set; }
     }
 }
