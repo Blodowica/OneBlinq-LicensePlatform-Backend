@@ -16,15 +16,9 @@ namespace net_core_backend.Services
     public class LicensesService : DataService<DefaultModel>, ILicenseKeyService
     {
         private readonly IContextFactory contextFactory;
-        private readonly IHttpContextAccessor httpContext;
-        private readonly AppSettings appSettings;
-        private AccessTokenService accessTokenService;
-        public LicensesService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, IHttpContextAccessor httpContext) : base(_contextFactory)
+        public LicensesService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
-            this.httpContext = httpContext;
-            this.appSettings = appSettings.Value;
-            accessTokenService = new AccessTokenService(_contextFactory, appSettings, httpContext);
         }
 
         public async Task<GetLicenseResponse[]> GetAllLicenses()
@@ -116,15 +110,10 @@ namespace net_core_backend.Services
             };
         }
 
-        public async Task VerifyLicense(VerifyLicenseRequest model, String token)
+        public async Task VerifyLicense(VerifyLicenseRequest model)
         {
             using (var db = contextFactory.CreateDbContext())
             {
-                
-                if (await db.AccessTokens.FirstOrDefaultAsync(at => at.AccessToken.Equals(token)) == null)
-                {
-                    throw new ArgumentException("Provided access token does not exist");
-                }
                 var license = await db.Licenses.Include(x => x.User).Where(x => x.LicenseKey == model.LicenseKey).FirstOrDefaultAsync();
 
                 // checking/giving free trial for a plugin

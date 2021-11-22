@@ -23,6 +23,7 @@ namespace net_core_backend.Models
         public virtual DbSet<ActivationLogs> ActivationLogs { get; set; }
         public virtual DbSet<AccessTokens> AccessTokens { get; set; }
         public virtual DbSet<FreeTrials> FreeTrials { get; set; }
+        public virtual DbSet<ActivateablePlugins> ActivateablePlugins { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -221,7 +222,23 @@ namespace net_core_backend.Models
 
                 entity.Property(e => e.Active)
                 .IsRequired()
-                .HasColumnName("active"); 
+                .HasColumnName("active");
+            });
+
+            modelBuilder.Entity<ActivateablePlugins>(entity =>
+            {
+                entity.Property(ap => ap.Id)
+                    .HasColumnName("id");
+
+                entity.Property(ap => ap.Plugin)
+                    .IsRequired()
+                    .HasColumnName("plugin");
+
+                entity.HasOne(ap => ap.Product)
+                    .WithMany(p => p.ActivateablePlugins)
+                    .HasForeignKey(p => p.ProductId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ActivateablePlugins_Products");
             });
 
             OnModelCreatingPartial(modelBuilder);

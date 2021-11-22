@@ -83,6 +83,10 @@ namespace net_core_backend.Services
             using (var db = contextFactory.CreateDbContext())
             {
                 var user = await db.Users.FirstOrDefaultAsync(u => u.Email == requestInfo.Email);
+                if (user.Password != null)
+                {
+                    throw new ArgumentException("Given email is already in use");
+                }
 
                 if (user != null)
                 {
