@@ -14,10 +14,12 @@ namespace net_core_backend.Models
         public int MaxUses { get; set; }
 
         public virtual ICollection<Licenses> Licenses { get; set; }
+        public virtual ICollection<ActivateablePlugins> ActivateablePlugins { get; set; }
 
         public Products()
         {
             Licenses = new HashSet<Licenses>();
+            ActivateablePlugins = new HashSet<ActivateablePlugins>();
         }
     }
 }

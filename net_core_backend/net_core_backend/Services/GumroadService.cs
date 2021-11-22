@@ -4,10 +4,13 @@ using Microsoft.Extensions.Options;
 using net_core_backend.Context;
 using net_core_backend.Helpers;
 using net_core_backend.Models;
+using net_core_backend.Models.GumroadRequests;
 using net_core_backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace net_core_backend.Services
@@ -16,14 +19,17 @@ namespace net_core_backend.Services
     {
         private readonly IContextFactory contextFactory;
         private readonly AppSettings appSettings;
-        public GumroadService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings) : base(_contextFactory)
+        private readonly HttpClient httpClient;
+        public GumroadService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, HttpClient httpClient) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             this.appSettings = appSettings.Value;
+            this.httpClient = httpClient;
         }
 
         public async Task RegisterLicense(GumroadSaleRequest request)
         {
+            //check if the buyer's email is already in our system if no create it
             var user = await RegisterBuyer(request.email, request.purchaser_id);
 
             if (request.variants == null)
@@ -31,6 +37,7 @@ namespace net_core_backend.Services
                 request.variants = "Product";
             }
 
+            //check if the product connected to the license already exists in our system if no create it
             var product = await CheckProductInDb(request.product_id, request.variants, request.product_name);
             
             using (var db = contextFactory.CreateDbContext())
@@ -126,6 +133,7 @@ namespace net_core_backend.Services
                 DateTime expiresAt = license.CreatedAt;
                 int recurrenceMonths = 1;
 
+                //find out what the recurrence in months is
                 switch (license.Recurrence)
                 {
                     case "yearly":
@@ -139,6 +147,7 @@ namespace net_core_backend.Services
                     default:
                         break;
                 }
+                //go through the months untill you reach the end of the currently payed for month
                 while (expiresAt < DateTime.UtcNow)
                 {
                     expiresAt = expiresAt.AddMonths(recurrenceMonths);
@@ -185,6 +194,28 @@ namespace net_core_backend.Services
                         VariantName = variantName,
                         GumroadID = gumroadID
                     };
+
+                    //add what plugins should be activate through the tags
+                    using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, "https://api.gumroad.com/v2/products/" + gumroadID))
+                    {
+                        requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", appSettings.GumroadAccessToken);
+
+                        var response = await httpClient.SendAsync(requestMessage);
+
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            throw new ArgumentException("Failed to fetch data from Gumroad");
+                        }
+                        var result = await response.Content.ReadAsAsync<GumroadProductRequest>();
+                        foreach (var activateablePlugin in result.product.tags)
+                        {
+                            var activateablePluginToAdd = new ActivateablePlugins
+                            {
+                                Plugin = activateablePlugin
+                            };
+                            product.ActivateablePlugins.Add(activateablePluginToAdd);
+                        }
+                    }
 
                     await db.AddAsync(product);
                     await db.SaveChangesAsync();

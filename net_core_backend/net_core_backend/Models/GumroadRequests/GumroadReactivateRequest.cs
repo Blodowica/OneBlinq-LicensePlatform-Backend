@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace net_core_backend.Models
+namespace net_core_backend.Models.GumroadRequests
 {
-    public class GumroadUpdateRequest
+    public class GumroadReactivateRequest
     {
         public string subscription_id { get; set; }
         public string product_id { get; set; }
@@ -15,9 +15,7 @@ namespace net_core_backend.Models
         public string created_at { get; set; }
         public string charge_occurence_count { get; set; }
         public string recurrence { get; set; }
-        public string type { get; set; }
-        public string effective_as_of { get; set; }
-        public GumroadPlans new_plan { get; set; }
-        public string resource_name { get; set; }
+        public string resource_Name { get; set; }
+        public string restarted_at { get; set; }
     }
 }

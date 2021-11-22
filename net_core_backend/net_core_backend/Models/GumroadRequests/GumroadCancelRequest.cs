@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace net_core_backend.Models
+namespace net_core_backend.Models.GumroadRequests
 {
     public class GumroadCancelRequest
     {

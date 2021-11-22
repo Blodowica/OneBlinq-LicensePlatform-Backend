@@ -17,12 +17,10 @@ namespace net_core_backend.Services
     {
         private readonly IContextFactory contextFactory;
         private readonly IHttpContextAccessor httpContext;
-        private readonly AppSettings appSettings;
-        public AccessTokenService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, IHttpContextAccessor httpContext) : base(_contextFactory)
+        public AccessTokenService(IContextFactory _contextFactory, IHttpContextAccessor httpContext) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             this.httpContext = httpContext;
-            this.appSettings = appSettings.Value;
         }
 
         public async Task<CreateAccessTokenResponse> CreateAccessToken()
@@ -50,6 +48,19 @@ namespace net_core_backend.Services
                 await db.SaveChangesAsync();
 
                 return new CreateAccessTokenResponse(newAccessToken);
+            }
+        }
+
+        public async Task CheckAccessToken(string accessToken)
+        {
+            //check if the accesstoken given is in our accesstokens database, if not throw exception
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var Token = await db.AccessTokens.FirstOrDefaultAsync(a => a.AccessToken == accessToken);
+                if (Token == null || Token.Active == false)
+                {
+                    throw new ArgumentException("Incorrect accesstoken, request denied.");
+                }
             }
         }
     }
