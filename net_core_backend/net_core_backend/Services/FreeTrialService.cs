@@ -46,7 +46,7 @@ namespace net_core_backend.Services
             var freeTrialState = await CheckFreeTrial(model.PluginName, model.FigmaUserId);
             if (freeTrialState == FreeTrialStates.EXPIRED)
             {
-                throw new ArgumentException("The free trial as already expired");
+                throw new ArgumentException("The free trial has already expired");
             }
             else if (freeTrialState == FreeTrialStates.DO_NOT_EXIST)
             {
@@ -63,10 +63,10 @@ namespace net_core_backend.Services
             {
                 if (freeTrial.Active) 
                 {
-                    if (freeTrial.EndDate.CompareTo(DateTime.Today) < 0)
+                    if (freeTrial.EndDate.CompareTo(DateTime.Now) < 0)
                     {
                         freeTrial.Active = false;
-                        await db.AddAsync(freeTrial);
+                        db.Update(freeTrial);
                         await db.SaveChangesAsync();
                     }
                     else

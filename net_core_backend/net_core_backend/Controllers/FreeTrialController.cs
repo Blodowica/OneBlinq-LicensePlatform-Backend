@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class FreeTrialController : ControllerBase
