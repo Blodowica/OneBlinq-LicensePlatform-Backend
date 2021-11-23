@@ -30,7 +30,7 @@ namespace net_core_backend.Services
 
             using var db = contextFactory.CreateDbContext();
             var currentTime = DateTime.UtcNow;
-            var licenses = await db.Licenses
+            var filterQuery = db.Licenses
                 .Include(x => x.Product)
                 .Include(x => x.User)
                 .Include(x => x.ActivationLogs)
@@ -50,7 +50,10 @@ namespace net_core_backend.Services
                 //Expiration filtering to check if license is active or inactive
                 .Where(x => x.ExpiresAt <= currentTime || request.FilterActive == true || request.FilterActive == null)
                 .Where(x => x.ExpiresAt > currentTime || x.ExpiresAt == null || request.FilterActive == false || request.FilterActive == null)
-                //Pagination
+                .AsQueryable();
+
+            //Pagination
+            var licenses = await filterQuery
                 .Skip((request.PageNumber - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .Select(x => new PaginationLicenseItem {
@@ -64,9 +67,11 @@ namespace net_core_backend.Services
                 })
                 .ToListAsync();
 
+            int maxPages = (int)Math.Ceiling(filterQuery.Count() / (double)request.PageSize);
+
             PaginationLicenseResponse response = new PaginationLicenseResponse
             {
-                MaxPages = 500,
+                MaxPages = maxPages,
                 Licenses = licenses
             };
 

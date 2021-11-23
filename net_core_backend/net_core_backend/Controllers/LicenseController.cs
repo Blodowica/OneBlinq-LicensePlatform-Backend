@@ -27,16 +27,12 @@ namespace net_core_backend.Controllers
             this.paginationService = PaginationService;
         }
         
-
-        [HttpPost]
-        public async Task<IActionResult> GetAllLicenses([FromBody] PaginationLicenseRequest pagingParameters)
+        [HttpPost("get-page")]
+        public async Task<IActionResult> GetPaginatedLicenses([FromBody] PaginationLicenseRequest pagingParameters)
         {
             try
             {
-       
                 var pagination = await paginationService.GetLicenses(pagingParameters);
-
-
 
                 return Ok(pagination);
             }
