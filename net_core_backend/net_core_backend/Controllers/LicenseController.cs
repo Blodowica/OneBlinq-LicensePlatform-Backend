@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Controllers
 {
-    [Authorize]
+   /* [Authorize]*/
     [Route("api/[controller]")]
     [ApiController]
     public class LicenseController : ControllerBase
@@ -17,26 +17,28 @@ namespace net_core_backend.Controllers
         private readonly ILicenseKeyService licenseKeyService;
         private readonly ILoggingService loggingService;
         private readonly IAccessTokenService accessTokenService;
+        private readonly IPaginationService paginationService;
 
-        public LicenseController(ILicenseKeyService licenseKeyService, ILoggingService loggingService, IAccessTokenService accessTokenService)
+        public LicenseController(ILicenseKeyService licenseKeyService, ILoggingService loggingService, IAccessTokenService accessTokenService, IPaginationService PaginationService)
         {
             this.licenseKeyService = licenseKeyService;
             this.loggingService = loggingService;
             this.accessTokenService = accessTokenService;
+            this.paginationService = PaginationService;
         }
         
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllLicenses([FromQuery] PaginationParameters pagingParameters)
+        [HttpPost]
+        public async Task<IActionResult> GetAllLicenses([FromBody] PaginationLicenseRequest pagingParameters)
         {
             try
             {
-                /*var licenses = await licenseKeyService.GetAllLicenses();*/
-                var licenses = await _licenseRepository.GetLicenses(pagingParameters);
-              
-                
-                
-                return Ok(licenses);
+       
+                var pagination = await paginationService.GetLicenses(pagingParameters);
+
+
+
+                return Ok(pagination);
             }
             catch(Exception ex)
             {

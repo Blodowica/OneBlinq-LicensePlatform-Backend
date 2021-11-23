@@ -14,7 +14,7 @@ namespace net_core_backend.Repository
 
         }
 
-        public Task<PaginatioPagedList<Licenses>> GetLicenses(PaginationParameters pagingParameters)
+        public Task<PaginatioPagedList<Licenses>> GetLicenses(PaginationLicenseRequest pagingParameters)
         {
             return Task.FromResult(
                 PaginatioPagedList<Licenses>.GetPagedList(FindAll()

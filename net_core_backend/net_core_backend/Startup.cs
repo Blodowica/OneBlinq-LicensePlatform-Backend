@@ -66,7 +66,7 @@ namespace net_core_backend
             services.AddSingleton<IProductService, ProductService>();
 
             services.AddSingleton<HttpClient>();
-
+            services.AddSingleton<IPaginationService, PaginationService>();
 
 
             // Causes error when running, don't exactly know why (for pagination)

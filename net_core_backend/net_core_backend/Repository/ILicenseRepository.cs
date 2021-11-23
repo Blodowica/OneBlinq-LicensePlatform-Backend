@@ -9,7 +9,7 @@ namespace net_core_backend.Repository
     public interface ILicenseRepository:IRepositoryBase<Licenses>
     {
 
-        Task<PaginatioPagedList<Licenses>> GetLicenses(PaginationParameters pagingParameters);
+        Task<PaginatioPagedList<Licenses>> GetLicenses(PaginationLicenseRequest pagingParameters);
 
     }
 }
