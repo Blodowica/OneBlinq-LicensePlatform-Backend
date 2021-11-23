@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Services.Interfaces
 {
-    public interface IAccessTokenService
+    public interface IProductService
     {
-        Task<CreateAccessTokenResponse> CreateAccessToken();
-        Task CheckAccessToken(string accessToken);
+        Task RefreshProduct(int productId);
     }
 }

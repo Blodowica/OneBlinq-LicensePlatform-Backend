@@ -21,7 +21,7 @@ using net_core_backend.Services.Interfaces;
 using Microsoft.OpenApi.Models;
 using net_core_backend.Helpers;
 using System.Text;
-using net_core_backend.Repository;
+using System.Net.Http;
 
 namespace net_core_backend
 {
@@ -63,6 +63,9 @@ namespace net_core_backend
             services.AddSingleton<ILicenseKeyService, LicensesService>();
 
             services.AddSingleton<ILoggingService, LoggingService>();
+            services.AddSingleton<IProductService, ProductService>();
+
+            services.AddSingleton<HttpClient>();
 
 
 

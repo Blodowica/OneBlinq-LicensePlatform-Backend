@@ -1,29 +1,28 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using net_core_backend.Models;
 using net_core_backend.Repository;
 using net_core_backend.Services.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 
 namespace net_core_backend.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class LicenseController : ControllerBase
     {
         private readonly ILicenseKeyService licenseKeyService;
         private readonly ILoggingService loggingService;
-        private ILicenseRepository _licenseRepository;
+        private readonly IAccessTokenService accessTokenService;
 
-        public LicenseController(ILicenseKeyService licenseKeyService, ILoggingService loggingService, ILicenseRepository licenseRepository)
+        public LicenseController(ILicenseKeyService licenseKeyService, ILoggingService loggingService, IAccessTokenService accessTokenService)
         {
             this.licenseKeyService = licenseKeyService;
             this.loggingService = loggingService;
-            this._licenseRepository = licenseRepository;
+            this.accessTokenService = accessTokenService;
         }
         
 
@@ -63,12 +62,14 @@ namespace net_core_backend.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("verify-license/{accessToken}")]
         public async Task<IActionResult> VerifyLicense([FromRoute] string accessToken, [FromBody] VerifyLicenseRequest model)
         {
             try
             {
-                await licenseKeyService.VerifyLicense(model, accessToken);
+                await accessTokenService.CheckAccessToken(accessToken);
+                await licenseKeyService.VerifyLicense(model);
                 await loggingService.AddActivationLog(model.LicenseKey, true, model.FigmaUserId, $"User with Figma Id: \"{model.FigmaUserId}\" at {DateTime.UtcNow} successfully verified license with License Key: \"{model.LicenseKey}\"");
                 return Ok();
             }
