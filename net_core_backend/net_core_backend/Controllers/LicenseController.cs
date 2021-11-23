@@ -69,7 +69,7 @@ namespace net_core_backend.Controllers
             }
             catch (Exception ex)
             {
-                var msg = $"User with Figma Id: \"{model.FigmaUserId}\" at {DateTime.UtcNow} did not successfully verify license with License Key: \"{model.LicenseKey}\" because of the problem: \"{ex.Message}\"";
+                var msg = $"User with Figma Id: \"{model.FigmaUserId}\" at {DateTime.UtcNow} did not verify license with License Key: \"{model.LicenseKey}\" successfully because of the problem: \"{ex.Message}\"";
                 await loggingService.AddActivationLog(model.LicenseKey, false, model.FigmaUserId, msg);
                 return BadRequest(new { message = ex.Message });
             }
