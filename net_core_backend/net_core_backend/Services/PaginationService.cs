@@ -34,8 +34,8 @@ namespace net_core_backend.Services
                 .Where(x => x.ActivationLogs.Count() == pagination.FilterActivation || pagination.FilterActivation == null)
                 .Where(x => x.Product.ProductName == pagination.FilterProductName || pagination.FilterProductName == null)
                 //Active filtering to check if license is active or inactive
-                .Where(x => (x.ExpiresAt <= currentTime && pagination.FilterActive == false) || pagination.FilterActive == null)
-                .Where(x => (x.ExpiresAt > currentTime && pagination.FilterActive == true) || pagination.FilterActive == null)
+                .Where(x => x.ExpiresAt <= currentTime || pagination.FilterActive == true || pagination.FilterActive == null)
+                .Where(x => x.ExpiresAt > currentTime || x.ExpiresAt == null || pagination.FilterActive == false || pagination.FilterActive == null)
 
                 .Skip((pagination.PageNumber - 1) * pagination.PageSize)
                 .Take(pagination.PageSize)
