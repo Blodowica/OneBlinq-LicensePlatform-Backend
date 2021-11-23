@@ -21,6 +21,7 @@ using net_core_backend.Services.Interfaces;
 using Microsoft.OpenApi.Models;
 using net_core_backend.Helpers;
 using System.Text;
+using net_core_backend.Repository;
 
 namespace net_core_backend
 {
@@ -62,6 +63,11 @@ namespace net_core_backend
             services.AddSingleton<ILicenseKeyService, LicensesService>();
 
             services.AddSingleton<ILoggingService, LoggingService>();
+
+
+
+            // Causes error when running, don't exactly know why (for pagination)
+           /* services.AddScoped<ILicenseRepository, LicenseRepository>();*/
 
             services.AddHttpContextAccessor();
 

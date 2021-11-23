@@ -44,6 +44,14 @@ namespace net_core_backend.Services
                     x.Active
                 })
                 .ToArrayAsync();
+            /*                .OrderBy(x => x.Id)
+                            .Skip((license.PageNumber - 1) * license.PageSize)
+                            .Take(license.PageSize)
+                           */
+
+            //trying to put this in the response header
+            /*var paginationMetadata = new PaginatioPagedList(licenses.Count(), license.PageNumber, license.PageSize);*/
+
 
             List<GetLicenseResponse> response = new List<GetLicenseResponse>();
             foreach(var l in licenses)

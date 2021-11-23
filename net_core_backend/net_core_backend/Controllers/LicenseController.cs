@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using net_core_backend.Models;
+using net_core_backend.Repository;
 using net_core_backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+
 
 namespace net_core_backend.Controllers
 {
@@ -15,19 +17,25 @@ namespace net_core_backend.Controllers
     {
         private readonly ILicenseKeyService licenseKeyService;
         private readonly ILoggingService loggingService;
+        private ILicenseRepository _licenseRepository;
 
-        public LicenseController(ILicenseKeyService licenseKeyService, ILoggingService loggingService)
+        public LicenseController(ILicenseKeyService licenseKeyService, ILoggingService loggingService, ILicenseRepository licenseRepository)
         {
             this.licenseKeyService = licenseKeyService;
             this.loggingService = loggingService;
+            this._licenseRepository = licenseRepository;
         }
+        
 
         [HttpGet]
-        public async Task<IActionResult> GetAllLicenses()
+        public async Task<IActionResult> GetAllLicenses([FromQuery] PaginationParameters pagingParameters)
         {
             try
             {
-                var licenses = await licenseKeyService.GetAllLicenses();
+                /*var licenses = await licenseKeyService.GetAllLicenses();*/
+                var licenses = await _licenseRepository.GetLicenses(pagingParameters);
+              
+                
                 
                 return Ok(licenses);
             }
