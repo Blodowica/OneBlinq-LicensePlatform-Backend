@@ -16,7 +16,7 @@ namespace net_core_backend.Models
         public int? FilterId { get; set; }
         public string FilterProductName { get; set; }
         public string FilterVariantName { get; set; }
-        public bool FilterActive { get; set; }
+        public bool? FilterActive { get; set; }
         public int? FilterLicenseCount { get; set; }
         public int? FilterMaxUses { get; set; }
 

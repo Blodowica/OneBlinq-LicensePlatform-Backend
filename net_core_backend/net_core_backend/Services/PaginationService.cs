@@ -85,7 +85,7 @@ namespace net_core_backend.Services
             if (request.GlobalFilter != null)
             {
                 //convert active and inactive to status + * (this is to prevent overlap of having the word active in inactive)
-                globalSearchString = request.GlobalFilter.ToLower().Replace("inactive", "statusfalse").Replace("active", "statustrue");
+                globalSearchString = request.GlobalFilter.ToLower();
             }
 
             using var db = contextFactory.CreateDbContext();
@@ -96,9 +96,7 @@ namespace net_core_backend.Services
                 .Include(x => x.ActivationLogs)
                 .OrderBy(x => x.Id)
                 //Global filtering
-                .Where(x => (Convert.ToString(x.Id + x.User.FirstName + x.User.LastName + x.User.Email + x.User.Licenses.Count() + "/"  + "statusfalse").ToLower()
-                    .Contains(globalSearchString)) ||
-                    (Convert.ToString(x.Id + x.User.FirstName + x.User.LastName + x.User.Email + x.User.Licenses.Count() + "/"  + "statustrue").ToLower()
+                .Where(x => (Convert.ToString(x.Id + x.User.FirstName + x.User.LastName + x.User.Email + x.User.Licenses.Count()).ToLower()
                     .Contains(globalSearchString))
                     || globalSearchString == "")
                 //Column filtering
@@ -153,47 +151,49 @@ namespace net_core_backend.Services
                 .Include(x => x.ActivationLogs)
                 .OrderBy(x => x.Id)
                 //Global filtering
-                .Where(x => (Convert.ToString(x.Id + x.Product.ProductName + x.Product.VariantName + x.Product.Active + x.Product.MaxUses  + x.Product.Licenses.Count() + "/" + "statusfalse").ToLower()
+                .Where(x => (x.Active == false) && (Convert.ToString(x.Id + x.Product.ProductName + x.Product.VariantName + x.Product.Active + x.Product.MaxUses  + x.Product.Licenses.Count() + "/" + "statusfalse").ToLower()
                     .Contains(globalSearchString)) ||
-                    (Convert.ToString(x.Id + x.Product.ProductName + x.Product.VariantName + x.Product.Active + x.Product.MaxUses + x.Product.Licenses.Count() + "/" + "statustrue").ToLower()
+                    (x.Active == true) && (Convert.ToString(x.Id + x.Product.ProductName + x.Product.VariantName + x.Product.Active + x.Product.MaxUses + x.Product.Licenses.Count() + "/" + "statustrue").ToLower()
                     .Contains(globalSearchString))
                     || globalSearchString == "")
                 //Column filtering
                 .Where(x => x.Id == request.FilterId || request.FilterId == null)
-                .Where(x => x.User.FirstName == request.FilterFirstName || request.FilterFirstName == null)
-                .Where(x => x.User.Email == request.FilterEmail || request.FilterEmail == null)
-                .Where(x => x.User.Licenses.Count() == request.FilterLicenseCount || request.FilterLicenseCount == null)
-                .Where(x => x.User.LastName == request.FilterLastName || request.FilterLastName == null)
+                .Where(x => x.Product.ProductName == request.FilterProductName || request.FilterProductName == null)
+                .Where(x => x.Product.ProductName == request.FilterVariantName|| request.FilterVariantName == null)
+                .Where(x => x.Product.Licenses.Count() == request.FilterLicenseCount || request.FilterLicenseCount == null)
+                .Where(x => x.Product.MaxUses == request.FilterMaxUses|| request.FilterMaxUses == null)
+                .Where(x => x.Product.Active == request.FilterActive || request.FilterActive == null)
                 .AsQueryable();
 
             //Pagination
-            var users = await filterQuery
+            var products = await filterQuery
                 .Skip((request.PageNumber - 1) * request.PageSize)
                 .Take(request.PageSize)
-                .Select(x => new PaginationUserItem
+                .Select(x => new PaginationProductItem
                 {
                     LicenseCount = x.User.Licenses.Count(),
-                    FirstName = x.User.FirstName,
-                    Email = x.User.Email,
+                    ProductName = x.Product.ProductName,
+                    VariantName = x.Product.VariantName,
                     Id = x.Id,
-                    LastName = x.User.LastName,
+                    Active = x.Product.Active,
+                    MaxUses = x.Product.MaxUses
 
                 })
                 .ToListAsync();
 
             int maxPages = (int)Math.Ceiling(filterQuery.Count() / (double)request.PageSize);
 
-            PaginationUserResponse response = new PaginationUserResponse
+            PaginationProductResponse response = new PaginationProductResponse
             {
                 MaxPages = maxPages,
-                Users = users
+                Products = products
             };
 
             return response;
 
         }
 
-        public async Task<PaginationUserResponse> GetAccesTokens(PaginationUserRequest request)
+        public async Task<PaginationAccessTokenResponse> GetAccesTokens(PaginationAccessTokenRequest request)
         {
             var globalSearchString = "";
             if (request.GlobalFilter != null)
@@ -204,46 +204,44 @@ namespace net_core_backend.Services
 
             using var db = contextFactory.CreateDbContext();
 
-            var filterQuery = db.Licenses
-                .Include(x => x.Product)
+            var filterQuery = db.AccessTokens
                 .Include(x => x.User)
-                .Include(x => x.ActivationLogs)
                 .OrderBy(x => x.Id)
                 //Global filtering
-                .Where(x => (Convert.ToString(x.Id + x.User.FirstName + x.User.LastName + x.User.Email + x.User.Licenses.Count() + "/" + "statusfalse").ToLower()
+                .Where(x => (x.Active == false) && (Convert.ToString(x.Id + x.AccessToken + x.User.Email + x.Active + x.CreatedAt + "statusfalse").ToLower()
                     .Contains(globalSearchString)) ||
-                    (Convert.ToString(x.Id + x.User.FirstName + x.User.LastName + x.User.Email + x.User.Licenses.Count() + "/" + "statustrue").ToLower()
+                    (x.Active == true) && (Convert.ToString(x.Id + x.AccessToken + x.User.Email + x.Active + x.CreatedAt + "statustrue").ToLower()
                     .Contains(globalSearchString))
                     || globalSearchString == "")
                 //Column filtering
                 .Where(x => x.Id == request.FilterId || request.FilterId == null)
-                .Where(x => x.User.FirstName == request.FilterFirstName || request.FilterFirstName == null)
+                .Where(x => x.AccessToken == request.FilterAccessToken || request.FilterAccessToken == null)
                 .Where(x => x.User.Email == request.FilterEmail || request.FilterEmail == null)
-                .Where(x => x.User.Licenses.Count() == request.FilterLicenseCount || request.FilterLicenseCount == null)
-                .Where(x => x.User.LastName == request.FilterLastName || request.FilterLastName == null)
+                .Where(x => x.Active == request.FilterActive || request.FilterActive == null)
+                .Where(x => x.CreatedAt == request.FilterCreatedAt || request.FilterCreatedAt == null)
                 .AsQueryable();
 
             //Pagination
-            var users = await filterQuery
+            var AccessTokens = await filterQuery
                 .Skip((request.PageNumber - 1) * request.PageSize)
                 .Take(request.PageSize)
-                .Select(x => new PaginationUserItem
+                .Select(x => new PaginationAccessTokenItem
                 {
-                    LicenseCount = x.User.Licenses.Count(),
-                    FirstName = x.User.FirstName,
+                    AccessToken = x.AccessToken,
+                    Active = x.Active,
                     Email = x.User.Email,
                     Id = x.Id,
-                    LastName = x.User.LastName,
+                    CreatedAt = x.CreatedAt,
 
                 })
                 .ToListAsync();
 
             int maxPages = (int)Math.Ceiling(filterQuery.Count() / (double)request.PageSize);
 
-            PaginationUserResponse response = new PaginationUserResponse
+            PaginationAccessTokenResponse response = new PaginationAccessTokenResponse
             {
                 MaxPages = maxPages,
-                Users = users
+                AccessTokens = AccessTokens
             };
 
             return response;

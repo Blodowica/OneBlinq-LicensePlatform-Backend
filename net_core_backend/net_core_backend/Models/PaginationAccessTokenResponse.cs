@@ -7,5 +7,10 @@ namespace net_core_backend.Models
 {
     public class PaginationAccessTokenResponse
     {
+        public List<PaginationAccessTokenItem> AccessTokens { get; set; }
+
+        public int MaxPages { get; set; }
+
+
     }
 }

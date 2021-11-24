@@ -8,6 +8,9 @@ namespace net_core_backend.Services.Interfaces
 {
     public interface IPaginationService
     {
-        Task<PaginationLicenseResponse> GetLicenses(PaginationLicenseRequest pagination);
+        Task<PaginationLicenseResponse> GetLicenses(PaginationLicenseRequest request);
+        Task<PaginationUserResponse> GetUsers(PaginationUserRequest request);
+        Task<PaginationProductResponse> GetProducts(PaginationProductRequest request);
+        Task<PaginationAccessTokenResponse> GetAccesTokens(PaginationAccessTokenRequest request);
     }
 }

@@ -16,10 +16,12 @@ namespace net_core_backend.Controllers
     public class AccessTokenController : ControllerBase
     {
         private readonly IAccessTokenService accessTokenService;
+        private readonly IPaginationService paginationService;
 
-        public AccessTokenController(IAccessTokenService accessTokenService)
+        public AccessTokenController(IAccessTokenService accessTokenService, IPaginationService PaginationService)
         {
             this.accessTokenService = accessTokenService;
+            this.paginationService = PaginationService;
         }
 
         [Authorize(Roles = "Admin")]
