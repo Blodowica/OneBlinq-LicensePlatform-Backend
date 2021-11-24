@@ -77,34 +77,63 @@ namespace net_core_backend.Services
 
             return response;
 
-
-
-            /*                .OrderBy(x => x.Id)
-                            .Skip((license.PageNumber - 1) * license.PageSize)
-                            .Take(license.PageSize)
-                           */
-
-            //trying to put this in the response header
-            /*var paginationMetadata = new PaginatioPagedList(licenses.Count(), license.PageNumber, license.PageSize);*/
-
-
-            /*            List<GetLicenseResponse> response = new List<GetLicenseResponse>();
-                        foreach (var l in licenses)
-                        {
-                            response.Add(new GetLicenseResponse()
-                            {
-                                Activations = l.Activations,
-                                Email = l.Email,
-                                LicenseId = l.Id,
-                                LicenseKey = l.LicenseKey,
-                                MaxUses = l.MaxUses,
-                                Active = l.Active,
-                            });
-                        }
-
-                        return response.ToArray();*/
         }
 
+        public async Task<PaginationUserResponse> GetUssers(PaginationUserRequest request)
+        {
+            var globalSearchString = "";
+            if (request.GlobalFilter != null)
+            {
+                //convert active and inactive to status + * (this is to prevent overlap of having the word active in inactive)
+                globalSearchString = request.GlobalFilter.ToLower().Replace("inactive", "statusfalse").Replace("active", "statustrue");
+            }
 
+            using var db = contextFactory.CreateDbContext();
+           
+            var filterQuery = db.Licenses
+                .Include(x => x.Product)
+                .Include(x => x.User)
+                .Include(x => x.ActivationLogs)
+                .OrderBy(x => x.Id)
+                //Global filtering
+                .Where(x => (Convert.ToString(x.Id + x.User.FirstName + x.User.LastName + x.User.Email + x.User.Licenses.Count() + "/"  + "statusfalse").ToLower()
+                    .Contains(globalSearchString)) ||
+                    (Convert.ToString(x.Id + x.User.FirstName + x.User.LastName + x.User.Email + x.User.Licenses.Count() + "/"  + "statustrue").ToLower()
+                    .Contains(globalSearchString))
+                    || globalSearchString == "")
+                //Column filtering
+                .Where(x => x.Id == request.FilterId || request.FilterId == null)
+                .Where(x => x.User.FirstName == request.FilterFirstName || request.FilterFirstName == null)
+                .Where(x => x.User.Email == request.FilterEmail || request.FilterEmail == null)
+                .Where(x => x.User.Licenses.Count() == request.FilterLicenseCount || request.FilterLicenseCount == null)
+                .Where(x => x.User.LastName == request.FilterLastName || request.FilterLastName == null)
+                .AsQueryable();
+
+            //Pagination
+            var users = await filterQuery
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(x => new PaginationUserItem
+                {
+                    LicenseCount = x.User.Licenses.Count(),
+                    FirstName = x.User.FirstName,
+                    Email = x.User.Email,
+                    Id = x.Id,
+                    LastName = x.User.LastName,
+
+                })
+                .ToListAsync();
+
+            int maxPages = (int)Math.Ceiling(filterQuery.Count() / (double)request.PageSize);
+
+            PaginationUserResponse response = new PaginationUserResponse
+            {
+                MaxPages = maxPages,
+                Users = users
+            };
+
+            return response;
+
+        }
     }
 }
