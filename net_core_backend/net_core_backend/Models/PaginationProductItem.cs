@@ -5,15 +5,15 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Models
 {
-    public class PaginationUserItem
+    public class PaginationProductItem
     {
 
         public int Id { get; set; }
-        public string FirstName { get; set; }
-        public string LastName { get; set; }
-        public string Email { get; set; }
+        public string ProductName { get; set; }
+        public string VariantName { get; set; }
+        public bool Active { get; set; } = true;
         public int LicenseCount { get; set; }
-
+        public int? MaxUses { get; set; }
 
     }
 }

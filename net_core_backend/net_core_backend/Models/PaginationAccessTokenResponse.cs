@@ -5,12 +5,7 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Models
 {
-    public class PaginationUserResponse
+    public class PaginationAccessTokenResponse
     {
-
-        public List<PaginationUserItem> Users { get; set; }
-
-        public int MaxPages { get; set; }
-
     }
 }
