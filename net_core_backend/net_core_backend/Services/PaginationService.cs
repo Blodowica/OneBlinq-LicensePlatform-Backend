@@ -94,21 +94,19 @@ namespace net_core_backend.Services
 
             using var db = contextFactory.CreateDbContext();
            
-            var filterQuery = db.Licenses
-                .Include(x => x.Product)
-                .Include(x => x.User)
-                .Include(x => x.ActivationLogs)
+            var filterQuery = db.Users
+                .Include(u => u.Licenses)
                 .OrderBy(x => x.Id)
                 //Global filtering
-                .Where(x => (Convert.ToString(x.Id + x.User.FirstName + x.User.LastName + x.User.Email + x.User.Licenses.Count()).ToLower()
+                .Where(x => (Convert.ToString(x.Id + x.FirstName + x.LastName + x.Email + x.Licenses.Count()).ToLower()
                     .Contains(globalSearchString))
                     || globalSearchString == "")
                 //Column filtering
                 .Where(x => x.Id == request.FilterId || request.FilterId == null)
-                .Where(x => x.User.FirstName.Contains(request.FilterFirstName) || request.FilterFirstName == "")
-                .Where(x => x.User.Email.Contains(request.FilterEmail) || request.FilterEmail == "")
-                .Where(x => x.User.Licenses.Count() == request.FilterLicenseCount || request.FilterLicenseCount == null)
-                .Where(x => x.User.LastName.Contains(request.FilterLastName) || request.FilterLastName == "")
+                .Where(x => x.FirstName.Contains(request.FilterFirstName) || request.FilterFirstName == "")
+                .Where(x => x.Email.Contains(request.FilterEmail) || request.FilterEmail == "")
+                .Where(x => x.Licenses.Count() == request.FilterLicenseCount || request.FilterLicenseCount == null)
+                .Where(x => x.LastName.Contains(request.FilterLastName) || request.FilterLastName == "")
                 .AsQueryable();
 
             //Pagination
@@ -117,12 +115,11 @@ namespace net_core_backend.Services
                 .Take(request.PageSize)
                 .Select(x => new PaginationUserItem
                 {
-                    LicenseCount = x.User.Licenses.Count(),
-                    FirstName = x.User.FirstName,
-                    Email = x.User.Email,
+                    LicenseCount = x.Licenses.Count(),
+                    FirstName = x.FirstName,
+                    Email = x.Email,
                     Id = x.Id,
-                    LastName = x.User.LastName,
-
+                    LastName = x.LastName,
                 })
                 .ToListAsync();
 
@@ -153,24 +150,22 @@ namespace net_core_backend.Services
 
             using var db = contextFactory.CreateDbContext();
 
-            var filterQuery = db.Licenses
-                .Include(x => x.Product)
-                .Include(x => x.User)
-                .Include(x => x.ActivationLogs)
+            var filterQuery = db.Products
+                .Include(p => p.Licenses)
                 .OrderBy(x => x.Id)
                 //Global filtering
-                .Where(x => (x.Active == false) && (Convert.ToString(x.Id + x.Product.ProductName + x.Product.VariantName + x.Product.Active + x.Product.MaxUses + x.Product.Licenses.Count() + "statusfalse").ToLower()
+                .Where(x => (x.Active == false) && (Convert.ToString(x.Id + x.ProductName + x.VariantName + x.Active + x.MaxUses + x.Licenses.Count() + "statusfalse").ToLower()
                     .Contains(globalSearchString)) ||
-                    (x.Active == true) && (Convert.ToString(x.Id + x.Product.ProductName + x.Product.VariantName + x.Product.Active + x.Product.MaxUses + x.Product.Licenses.Count() + "statustrue").ToLower()
+                    (x.Active == true) && (Convert.ToString(x.Id + x.ProductName + x.VariantName + x.Active + x.MaxUses + x.Licenses.Count() + "statustrue").ToLower()
                     .Contains(globalSearchString))
                     || globalSearchString == "")
                 //Column filtering
                 .Where(x => x.Id == request.FilterId || request.FilterId == null)
-                .Where(x => x.Product.ProductName.Contains(request.FilterProductName) || request.FilterProductName == "")
-                .Where(x => x.Product.VariantName.Contains(request.FilterVariantName) || request.FilterVariantName == "")
-                .Where(x => x.Product.Licenses.Count() == request.FilterLicenseCount || request.FilterLicenseCount == null)
-                .Where(x => x.Product.MaxUses == request.FilterMaxUses|| request.FilterMaxUses == null)
-                .Where(x => x.Product.Active == request.FilterActive || request.FilterActive == null)
+                .Where(x => x.ProductName.Contains(request.FilterProductName) || request.FilterProductName == "")
+                .Where(x => x.VariantName.Contains(request.FilterVariantName) || request.FilterVariantName == "")
+                .Where(x => x.Licenses.Count() == request.FilterLicenseCount || request.FilterLicenseCount == null)
+                .Where(x => x.MaxUses == request.FilterMaxUses|| request.FilterMaxUses == null)
+                .Where(x => x.Active == request.FilterActive || request.FilterActive == null)
                 .AsQueryable();
 
             //Pagination
@@ -179,12 +174,12 @@ namespace net_core_backend.Services
                 .Take(request.PageSize)
                 .Select(x => new PaginationProductItem
                 {
-                    LicenseCount = x.User.Licenses.Count(),
-                    ProductName = x.Product.ProductName,
-                    VariantName = x.Product.VariantName,
+                    LicenseCount = x.Licenses.Count(),
+                    ProductName = x.ProductName,
+                    VariantName = x.VariantName,
                     Id = x.Id,
-                    Active = x.Product.Active,
-                    MaxUses = x.Product.MaxUses
+                    Active = x.Active,
+                    MaxUses = x.MaxUses
 
                 })
                 .ToListAsync();
