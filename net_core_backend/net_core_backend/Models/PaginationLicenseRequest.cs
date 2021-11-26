@@ -16,7 +16,7 @@ namespace net_core_backend.Models
         public string FilterLicenseKey { get; set; }
         public string FilterEmail { get; set; }
         public int? FilterActivation { get; set; }
-        public bool? FilterActive { get; set; }
+        public string FilterActive { get; set; }
         public string FilterProductName { get; set;}
 
         //Pagination

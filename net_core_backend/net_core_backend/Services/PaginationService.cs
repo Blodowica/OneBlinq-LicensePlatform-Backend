@@ -43,13 +43,13 @@ namespace net_core_backend.Services
                     || globalSearchString == "")
                 //Column filtering
                 .Where(x => x.Id == request.FilterId || request.FilterId == null)
-                .Where(x => x.LicenseKey == request.FilterLicenseKey || request.FilterLicenseKey == null)
-                .Where(x => x.User.Email == request.FilterEmail || request.FilterEmail == null)
+                .Where(x => x.LicenseKey.Contains(request.FilterLicenseKey) || request.FilterLicenseKey == "")
+                .Where(x => x.User.Email.Contains(request.FilterEmail) || request.FilterEmail == "")
                 .Where(x => x.ActivationLogs.Count() == request.FilterActivation || request.FilterActivation == null)
-                .Where(x => x.Product.ProductName == request.FilterProductName || request.FilterProductName == null)
+                .Where(x => x.Product.ProductName.Contains(request.FilterProductName) || request.FilterProductName == "")
                 //Expiration filtering to check if license is active or inactive
-                .Where(x => x.ExpiresAt <= currentTime || request.FilterActive == true || request.FilterActive == null)
-                .Where(x => x.ExpiresAt > currentTime || x.ExpiresAt == null || request.FilterActive == false || request.FilterActive == null)
+                .Where(x => x.ExpiresAt <= currentTime || request.FilterActive == "active" || request.FilterActive == "")
+                .Where(x => x.ExpiresAt > currentTime || x.ExpiresAt == null || request.FilterActive == "inactive" || request.FilterActive == "")
                 .AsQueryable();
 
             //Pagination
@@ -68,7 +68,11 @@ namespace net_core_backend.Services
                 .ToListAsync();
 
             int maxPages = (int)Math.Ceiling(filterQuery.Count() / (double)request.PageSize);
-
+            if (maxPages < 1)
+            {
+                maxPages = 1;
+            }
+                
             PaginationLicenseResponse response = new PaginationLicenseResponse
             {
                 MaxPages = maxPages,
@@ -101,10 +105,10 @@ namespace net_core_backend.Services
                     || globalSearchString == "")
                 //Column filtering
                 .Where(x => x.Id == request.FilterId || request.FilterId == null)
-                .Where(x => x.User.FirstName == request.FilterFirstName || request.FilterFirstName == null)
-                .Where(x => x.User.Email == request.FilterEmail || request.FilterEmail == null)
+                .Where(x => x.User.FirstName.Contains(request.FilterFirstName) || request.FilterFirstName == "")
+                .Where(x => x.User.Email.Contains(request.FilterEmail) || request.FilterEmail == "")
                 .Where(x => x.User.Licenses.Count() == request.FilterLicenseCount || request.FilterLicenseCount == null)
-                .Where(x => x.User.LastName == request.FilterLastName || request.FilterLastName == null)
+                .Where(x => x.User.LastName.Contains(request.FilterLastName) || request.FilterLastName == "")
                 .AsQueryable();
 
             //Pagination
@@ -123,6 +127,10 @@ namespace net_core_backend.Services
                 .ToListAsync();
 
             int maxPages = (int)Math.Ceiling(filterQuery.Count() / (double)request.PageSize);
+            if (maxPages < 1)
+            {
+                maxPages = 1;
+            }
 
             PaginationUserResponse response = new PaginationUserResponse
             {
@@ -151,15 +159,15 @@ namespace net_core_backend.Services
                 .Include(x => x.ActivationLogs)
                 .OrderBy(x => x.Id)
                 //Global filtering
-                .Where(x => (x.Active == false) && (Convert.ToString(x.Id + x.Product.ProductName + x.Product.VariantName + x.Product.Active + x.Product.MaxUses  + x.Product.Licenses.Count() + "/" + "statusfalse").ToLower()
+                .Where(x => (x.Active == false) && (Convert.ToString(x.Id + x.Product.ProductName + x.Product.VariantName + x.Product.Active + x.Product.MaxUses + x.Product.Licenses.Count() + "statusfalse").ToLower()
                     .Contains(globalSearchString)) ||
-                    (x.Active == true) && (Convert.ToString(x.Id + x.Product.ProductName + x.Product.VariantName + x.Product.Active + x.Product.MaxUses + x.Product.Licenses.Count() + "/" + "statustrue").ToLower()
+                    (x.Active == true) && (Convert.ToString(x.Id + x.Product.ProductName + x.Product.VariantName + x.Product.Active + x.Product.MaxUses + x.Product.Licenses.Count() + "statustrue").ToLower()
                     .Contains(globalSearchString))
                     || globalSearchString == "")
                 //Column filtering
                 .Where(x => x.Id == request.FilterId || request.FilterId == null)
-                .Where(x => x.Product.ProductName == request.FilterProductName || request.FilterProductName == null)
-                .Where(x => x.Product.ProductName == request.FilterVariantName|| request.FilterVariantName == null)
+                .Where(x => x.Product.ProductName.Contains(request.FilterProductName) || request.FilterProductName == "")
+                .Where(x => x.Product.VariantName.Contains(request.FilterVariantName) || request.FilterVariantName == "")
                 .Where(x => x.Product.Licenses.Count() == request.FilterLicenseCount || request.FilterLicenseCount == null)
                 .Where(x => x.Product.MaxUses == request.FilterMaxUses|| request.FilterMaxUses == null)
                 .Where(x => x.Product.Active == request.FilterActive || request.FilterActive == null)
@@ -182,6 +190,10 @@ namespace net_core_backend.Services
                 .ToListAsync();
 
             int maxPages = (int)Math.Ceiling(filterQuery.Count() / (double)request.PageSize);
+            if (maxPages < 1)
+            {
+                maxPages = 1;
+            }
 
             PaginationProductResponse response = new PaginationProductResponse
             {
@@ -215,8 +227,8 @@ namespace net_core_backend.Services
                     || globalSearchString == "")
                 //Column filtering
                 .Where(x => x.Id == request.FilterId || request.FilterId == null)
-                .Where(x => x.AccessToken == request.FilterAccessToken || request.FilterAccessToken == null)
-                .Where(x => x.User.Email == request.FilterEmail || request.FilterEmail == null)
+                .Where(x => x.AccessToken.Contains(request.FilterAccessToken) || request.FilterAccessToken == "")
+                .Where(x => x.User.Email.Contains(request.FilterEmail) || request.FilterEmail == "")
                 .Where(x => x.Active == request.FilterActive || request.FilterActive == null)
                 .Where(x => x.CreatedAt == request.FilterCreatedAt || request.FilterCreatedAt == null)
                 .AsQueryable();
@@ -237,6 +249,10 @@ namespace net_core_backend.Services
                 .ToListAsync();
 
             int maxPages = (int)Math.Ceiling(filterQuery.Count() / (double)request.PageSize);
+            if (maxPages < 1)
+            {
+                maxPages = 1;
+            }
 
             PaginationAccessTokenResponse response = new PaginationAccessTokenResponse
             {
