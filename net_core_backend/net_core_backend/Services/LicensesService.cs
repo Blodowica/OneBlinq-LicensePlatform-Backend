@@ -114,7 +114,12 @@ namespace net_core_backend.Services
         {
             using (var db = contextFactory.CreateDbContext())
             {
-                var license = await db.Licenses.Include(x => x.User).Where(x => x.LicenseKey == model.LicenseKey).FirstOrDefaultAsync();
+                var license = await db.Licenses.Include(x => x.User)
+                    .Include(l => l.Product)
+                    .ThenInclude(p => p.ActivateablePlugins)
+                    //.Where(ap => ap.Plugin == model.PluginName)
+                    .Where(x => x.LicenseKey == model.LicenseKey)
+                    .FirstOrDefaultAsync();
 
                 if (license == null)
                 {
@@ -127,8 +132,10 @@ namespace net_core_backend.Services
                 }
 
                 // chcecking if the license is opened for the same plugin it was bought for
+
                 bool correctLicense = false;
-                foreach (ActivateablePlugins ap in license.Product.ActivateablePlugins)
+
+                foreach(var ap in license.Product.ActivateablePlugins)
                 {
                     if (ap.Plugin == model.PluginName)
                     {

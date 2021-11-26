@@ -63,7 +63,7 @@ namespace net_core_backend.Services
             {
                 if (freeTrial.Active) 
                 {
-                    if (freeTrial.EndDate.CompareTo(DateTime.Now) < 0)
+                    if (freeTrial.EndDate.CompareTo(DateTime.UtcNow) < 0)
                     {
                         freeTrial.Active = false;
                         db.Update(freeTrial);

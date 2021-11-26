@@ -20,7 +20,7 @@ namespace net_core_backend.Models
         public FreeTrials(int days)
         {
             Active = true;
-            StartDate = DateTime.Now;
+            StartDate = DateTime.UtcNow;
             EndDate = StartDate.AddDays(days);
         }
     }
