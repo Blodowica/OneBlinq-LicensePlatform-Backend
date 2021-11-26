@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace net_core_backend.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class AccessTokenController : ControllerBase
@@ -24,9 +25,8 @@ namespace net_core_backend.Controllers
             this.paginationService = PaginationService;
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost("create-access-token")]
-        public async Task<IActionResult> CreateAccessToken([FromBody] CreateAccessTokenRequest model)
+        public async Task<IActionResult> CreateAccessToken()
         {
             try
             {

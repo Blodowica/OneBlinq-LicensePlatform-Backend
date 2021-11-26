@@ -108,7 +108,6 @@ namespace net_core_backend.Services
                 .Where(x => x.Licenses.Count() == request.FilterLicenseCount || request.FilterLicenseCount == null)
                 .Where(x => x.LastName.Contains(request.FilterLastName) || request.FilterLastName == "")
                 .AsQueryable();
-
             //Pagination
             var users = await filterQuery
                 .Skip((request.PageNumber - 1) * request.PageSize)
@@ -215,9 +214,9 @@ namespace net_core_backend.Services
                 .Include(x => x.User)
                 .OrderBy(x => x.Id)
                 //Global filtering
-                .Where(x => (x.Active == false) && (Convert.ToString(x.Id + x.AccessToken + x.User.Email + x.Active + x.CreatedAt + "statusfalse").ToLower()
+                .Where(x => (x.Active == false) && (Convert.ToString(x.Id + x.AccessToken + x.User.Email + x.Active + x.CreatedAt.Day + "-" + x.CreatedAt.Month + "-" + x.CreatedAt.Year + "statusfalse").ToLower()
                     .Contains(globalSearchString)) ||
-                    (x.Active == true) && (Convert.ToString(x.Id + x.AccessToken + x.User.Email + x.Active + x.CreatedAt + "statustrue").ToLower()
+                    (x.Active == true) && (Convert.ToString(x.Id + x.AccessToken + x.User.Email + x.Active + x.CreatedAt.Day + "-" + x.CreatedAt.Month + "-" + x.CreatedAt.Year + "statustrue").ToLower()
                     .Contains(globalSearchString))
                     || globalSearchString == "")
                 //Column filtering
@@ -225,7 +224,7 @@ namespace net_core_backend.Services
                 .Where(x => x.AccessToken.Contains(request.FilterAccessToken) || request.FilterAccessToken == "")
                 .Where(x => x.User.Email.Contains(request.FilterEmail) || request.FilterEmail == "")
                 .Where(x => x.Active == request.FilterActive || request.FilterActive == null)
-                .Where(x => x.CreatedAt == request.FilterCreatedAt || request.FilterCreatedAt == null)
+                .Where(x => request.FilterCreatedAt == null || x.CreatedAt.Date == request.FilterCreatedAt.Value.Date.AddDays(1))
                 .AsQueryable();
 
             //Pagination

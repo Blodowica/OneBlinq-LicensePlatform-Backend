@@ -43,7 +43,7 @@ namespace net_core_backend.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAllLicenses([FromRoute] int id)
+        public async Task<IActionResult> GetLicense([FromRoute] int id)
         {
             try
             {
