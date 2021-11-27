@@ -206,7 +206,7 @@ namespace net_core_backend.Services
                         {
                             throw new ArgumentException("Failed to fetch data from Gumroad");
                         }
-                        var result = await response.Content.ReadAsAsync<GumroadProductRequest>();
+                        var result = await response.Content.ReadAsAsync<GumroadProductRequest.GumroadSingleProductRequest>();
                         foreach (var activateablePlugin in result.product.tags)
                         {
                             var activateablePluginToAdd = new ActivateablePlugins

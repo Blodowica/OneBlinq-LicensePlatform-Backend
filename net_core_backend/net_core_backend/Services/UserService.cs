@@ -17,6 +17,25 @@ namespace net_core_backend.Services
             contextFactory = _contextFactory;
         }
 
+        public async Task EditUser(EditUserRequest request, int userId)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var user = await db.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null)
+                {
+                    throw new ArgumentException("No user found with given id");
+                }
+                user.FirstName = request.FirstName;
+                user.LastName = request.LastName;
+                user.Email = request.Email;
+                user.Role = request.Role;
+
+                db.Update(user);
+                await db.SaveChangesAsync();
+            }
+        }
+
         public async Task<GetUserResponse> GetUserDetails(int userId)
         {
             using (var db = contextFactory.CreateDbContext())

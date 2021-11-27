@@ -39,5 +39,20 @@ namespace net_core_backend.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPost("toggle-access-token/{accessTokenId}")]
+        public async Task<IActionResult> ToggleAccessToken([FromRoute] string accessTokenId)
+        {
+            try
+            {
+                await accessTokenService.ToggleAccessToken(Convert.ToInt32(accessTokenId));
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

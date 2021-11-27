@@ -18,7 +18,7 @@ namespace net_core_backend.Models
         public string FilterLastName { get; set; }
         public string FilterEmail { get; set; }
         public int? FilterLicenseCount  { get; set; }
- 
+        public string FilterRole { get; set; }
 
         //Pagination
         public int PageNumber { get; set; } = 1;

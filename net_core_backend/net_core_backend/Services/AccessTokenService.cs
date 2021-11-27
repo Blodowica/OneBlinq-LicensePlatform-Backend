@@ -63,5 +63,20 @@ namespace net_core_backend.Services
                 }
             }
         }
+
+        public async Task ToggleAccessToken(int accessTokenId)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var token = await db.AccessTokens.FirstOrDefaultAsync(a => a.Id == accessTokenId);
+                if (token == null)
+                {
+                    throw new ArgumentException("no accessToken found with given id");
+                }
+                token.Active = !token.Active;
+                db.Update(token);
+                await db.SaveChangesAsync();
+            }
+        }
     }
 }

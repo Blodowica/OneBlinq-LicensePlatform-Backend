@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Controllers
 {
-   /* [Authorize]*/
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class LicenseController : ControllerBase
@@ -53,6 +53,22 @@ namespace net_core_backend.Controllers
                     return BadRequest($"License with ID: {id} not found");
 
                 return Ok(license);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("toggle-license/{licenseId}")]
+        public async Task<IActionResult> ToggleLicenseState([FromRoute] string licenseId)
+        {
+            try
+            {
+                await licenseKeyService.toggleLicenseState(Convert.ToInt32(licenseId));
+
+                return Ok();
             }
             catch (Exception ex)
             {

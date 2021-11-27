@@ -11,5 +11,6 @@ namespace net_core_backend.Services.Interfaces
         Task<GetLicenseResponse[]> GetAllLicenses();
         Task<GetLicenseResponse> GetLicenseDetails(int licenseId);
         Task VerifyLicense(VerifyLicenseRequest model);
+        Task toggleLicenseState(int licenseId);
     }
 }

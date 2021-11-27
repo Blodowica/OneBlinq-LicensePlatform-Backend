@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class ProductController : ControllerBase
@@ -22,16 +22,15 @@ namespace net_core_backend.Controllers
             this.productService = productService;
             this.paginationService = PaginationService;
         }
-
-
-        [HttpPost("get-page")]
-        public async Task<IActionResult> GetPaginatedProducts([FromBody] PaginationProductRequest pagingParameters)
+        
+        [HttpPost("toggle-product/{productId}")]
+        public async Task<IActionResult> ToggleProduct([FromRoute] string productId)
         {
             try
             {
-                var pagination = await paginationService.GetProducts(pagingParameters);
+                await productService.ToggleProduct(Convert.ToInt32(productId));
 
-                return Ok(pagination);
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -39,14 +38,28 @@ namespace net_core_backend.Controllers
             }
         }
 
-
-        //will fetch product data from gumroad and update it with the newest data
-        [HttpPost("refresh-product/{productId}")]
-        public async Task<IActionResult> RefreshProduct([FromRoute] int productId)
+        [HttpPost("{productId}/{maxUses}")]
+        public async Task<IActionResult> EditMaxUses([FromRoute] string productId, string maxUses)
         {
             try
             {
-                await productService.RefreshProduct(productId);
+                await productService.EditMaxUses(Convert.ToInt32(productId), Convert.ToInt32(maxUses));
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        //will fetch product data from gumroad and update it with the newest data
+        [HttpPost("refresh-products")]
+        public async Task<IActionResult> RefreshProduct()
+        {
+            try
+            {
+                await productService.RefreshProduct();
                 return Ok();
             }
             catch (Exception ex)

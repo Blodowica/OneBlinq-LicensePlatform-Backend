@@ -39,5 +39,20 @@ namespace net_core_backend.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPost("edit-user/{userId}")]
+        public async Task<IActionResult> EditUser([FromRoute]string userId, [FromBody] EditUserRequest model)
+        {
+            try
+            {
+                await userService.EditUser(model, Convert.ToInt32(userId));
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }

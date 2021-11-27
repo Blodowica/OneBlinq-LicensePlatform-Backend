@@ -98,7 +98,7 @@ namespace net_core_backend.Services
                 .Include(u => u.Licenses)
                 .OrderBy(x => x.Id)
                 //Global filtering
-                .Where(x => (Convert.ToString(x.Id + x.FirstName + x.LastName + x.Email + x.Licenses.Count()).ToLower()
+                .Where(x => (Convert.ToString(x.Id + x.FirstName + x.LastName + x.Email + x.Licenses.Count() + x.Role).ToLower()
                     .Contains(globalSearchString))
                     || globalSearchString == "")
                 //Column filtering
@@ -107,6 +107,7 @@ namespace net_core_backend.Services
                 .Where(x => x.Email.Contains(request.FilterEmail) || request.FilterEmail == "")
                 .Where(x => x.Licenses.Count() == request.FilterLicenseCount || request.FilterLicenseCount == null)
                 .Where(x => x.LastName.Contains(request.FilterLastName) || request.FilterLastName == "")
+                .Where(x => x.Role.Contains(request.FilterRole) || request.FilterRole == "")
                 .AsQueryable();
             //Pagination
             var users = await filterQuery
@@ -119,6 +120,7 @@ namespace net_core_backend.Services
                     Email = x.Email,
                     Id = x.Id,
                     LastName = x.LastName,
+                    Role = x.Role
                 })
                 .ToListAsync();
 
@@ -179,9 +181,31 @@ namespace net_core_backend.Services
                     Id = x.Id,
                     Active = x.Active,
                     MaxUses = x.MaxUses
-
                 })
+                .OrderBy(p => p.ProductName)
                 .ToListAsync();
+
+            //Method of getting more generalProductInformation for perhaps a more userfriendly overview
+            //List<PaginationGeneralProductItem> generalProductsResponse = new List<PaginationGeneralProductItem>();
+            //foreach (var groupedProduct in products.GroupBy(p => p.ProductName))
+            //{
+            //    int totalLicenses = 0;
+            //    List<int> ids = new List<int>();
+            //    foreach (var individualProduct in groupedProduct)
+            //    {
+            //        totalLicenses += individualProduct.LicenseCount;
+            //        ids.Add(individualProduct.Id);
+            //    }
+
+            //    generalProductsResponse.Add(new PaginationGeneralProductItem
+            //    {
+            //        Variants = groupedProduct.Count(),
+            //        Ids = ids,
+            //        Licenses = totalLicenses,
+            //        Product = groupedProduct.FirstOrDefault().ProductName
+            //    });
+            //}
+
 
             int maxPages = (int)Math.Ceiling(filterQuery.Count() / (double)request.PageSize);
             if (maxPages < 1)
