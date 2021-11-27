@@ -6,15 +6,11 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Models
 {
-    public class VerifyLicenseRequest
+    public class FreeTrialRequest
     {
         [Required]
-        public String FigmaUserId { get; set; } 
-
+        public String PluginName { set; get; }
         [Required]
-        public String PluginName { get; set; }
-
-        [Required]
-        public String LicenseKey { get; set; }
+        public  String FigmaUserId { set; get; }
     }
 }
