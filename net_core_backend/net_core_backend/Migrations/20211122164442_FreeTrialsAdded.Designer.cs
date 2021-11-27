@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using net_core_backend.Models;
 
 namespace net_core_backend.Migrations
 {
     [DbContext(typeof(OneBlinqDBContext))]
-    partial class OneBlinqDBContextModelSnapshot : ModelSnapshot
+    [Migration("20211122164442_FreeTrialsAdded")]
+    partial class FreeTrialsAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -90,7 +92,7 @@ namespace net_core_backend.Migrations
                         .HasColumnName("figma_user_id")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("LicenseId")
+                    b.Property<int>("LicenseId")
                         .HasColumnType("int");
 
                     b.Property<string>("Message")
@@ -358,7 +360,8 @@ namespace net_core_backend.Migrations
                     b.HasOne("net_core_backend.Models.Licenses", "License")
                         .WithMany("ActivationLogs")
                         .HasForeignKey("LicenseId")
-                        .HasConstraintName("FK_ActivationLogs_Licenses");
+                        .HasConstraintName("FK_ActivationLogs_Licenses")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("net_core_backend.Models.Licenses", b =>

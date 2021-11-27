@@ -25,6 +25,7 @@ namespace net_core_backend.Services
             using var db = contextFactory.CreateDbContext();
 
             Licenses license = db.Licenses.Where(l => l.LicenseKey == licenseKey).FirstOrDefault();
+
             ActivationLogs activationLog = new ActivationLogs(successful)
             {
                 License = license,
