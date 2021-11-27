@@ -65,7 +65,10 @@ namespace net_core_backend
             services.AddSingleton<ILicenseKeyService, LicensesService>();
 
             services.AddSingleton<ILoggingService, LoggingService>();
+
             services.AddSingleton<IProductService, ProductService>();
+
+            services.AddSingleton<IFreeTrialService, FreeTrialService>();
 
             services.AddSingleton<HttpClient>();
 
