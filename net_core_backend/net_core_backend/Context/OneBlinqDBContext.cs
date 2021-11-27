@@ -22,6 +22,7 @@ namespace net_core_backend.Models
         public virtual DbSet<Products> Products { get; set; }
         public virtual DbSet<ActivationLogs> ActivationLogs { get; set; }
         public virtual DbSet<AccessTokens> AccessTokens { get; set; }
+        public virtual DbSet<FreeTrials> FreeTrials { get; set; }
         public virtual DbSet<ActivateablePlugins> ActivateablePlugins { get; set; }
 
 
@@ -121,8 +122,8 @@ namespace net_core_backend.Models
                     .WithMany(p => p.Licenses)
                     .HasForeignKey(l => l.ProductId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
-                    .HasConstraintName("FK_Licenses_Products");
-    });
+                    .HasConstraintName("FK_Licenses_Products");                    
+            });
 
             modelBuilder.Entity<Products>(entity =>
             {
@@ -196,6 +197,32 @@ namespace net_core_backend.Models
                     .HasForeignKey(t => t.UserId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_AccessTokens_Users");
+            });
+
+            modelBuilder.Entity<FreeTrials>(entity =>
+            {
+                entity.Property(e => e.Id)
+                .HasColumnName("id");
+
+                entity.Property(e => e.PluginName)
+                .IsRequired()
+                .HasColumnName("plugin_name");
+
+                entity.Property(e => e.FigmaUserId)
+                .IsRequired()
+                .HasColumnName("figma_user_id");
+
+                entity.Property(e => e.StartDate)
+                .IsRequired()
+                .HasColumnName("start_date");
+
+                entity.Property(e => e.EndDate)
+                .IsRequired()
+                .HasColumnName("end_date");
+
+                entity.Property(e => e.Active)
+                .IsRequired()
+                .HasColumnName("active");
             });
 
             modelBuilder.Entity<ActivateablePlugins>(entity =>

@@ -110,40 +110,7 @@ namespace net_core_backend.Services
                 }).ToList(),
             };
         }
-
-        public async Task VerifyLicense(VerifyLicenseRequest model)
-        {
-            using (var db = contextFactory.CreateDbContext())
-            {
-                var license = await db.Licenses.Include(x => x.User).Where(x => x.LicenseKey == model.LicenseKey).FirstOrDefaultAsync();
-                //var user = await db.Users
-                //    .Include(x => x.Licenses)
-                //    .Where(x => x.Email == model.Email && x.Licenses
-                //        .Any(x => x.LicenseKey == model.LicenseKey))
-                //    .FirstOrDefaultAsync();
-
-                //var license = user.Licenses.Where(lk => lk.LicenseKey.Equals(model.LicenseKey)).FirstOrDefault();
-
-                if (license == null)
-                {
-                    throw new ArgumentException("The provided license key does not exist");
-                }
-                if (!license.Active)
-                {
-                    throw new Exception("This license is not active");
-                }
-                //else if (license.ExpiresAt > DateTime.UtcNow)
-                //{
-                //    //license.Active = false;
-                //    db.Update(license);
-                //    await db.SaveChangesAsync();
-
-                //    throw new Exception("This license has already expired");
-                //}
-            }
-        }
-
-        // test code for getting MacAddress
+        
         public async Task<List<GetUserLicenseResponse>> GetAllUserLicenses(int userId)
         {
             using var db = contextFactory.CreateDbContext();
@@ -165,6 +132,46 @@ namespace net_core_backend.Services
                })
                 .ToListAsync();
             return licenses;
+        }
+
+        public async Task VerifyLicense(VerifyLicenseRequest model)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var license = await db.Licenses.Include(x => x.User)
+                    .Include(l => l.Product)
+                    .ThenInclude(p => p.ActivateablePlugins)
+                    //.Where(ap => ap.Plugin == model.PluginName)
+                    .Where(x => x.LicenseKey == model.LicenseKey)
+                    .FirstOrDefaultAsync();
+
+                if (license == null)
+                {
+                    throw new ArgumentException("Provided license key does not exist");
+                }
+
+                if (!license.Active)
+                {
+                    throw new Exception("This license is not active");
+                }
+                // chcecking if the license is opened for the same plugin it was bought for
+
+                bool correctLicense = false;
+
+                foreach(var ap in license.Product.ActivateablePlugins)
+                {
+                    if (ap.Plugin == model.PluginName)
+                    {
+                        correctLicense = true;
+                        break;
+                    }
+                }
+
+                if (!correctLicense)
+                {
+                    throw new ArgumentException($"This license can not be used to access plugin \"{model.PluginName}\"");
+                }
+            }
         }
     }
 }
