@@ -5,6 +5,7 @@ using net_core_backend.Services.Interfaces;
 using System;
 using System.Threading.Tasks;
 
+
 namespace net_core_backend.Controllers
 {
     [Authorize]
@@ -16,25 +17,31 @@ namespace net_core_backend.Controllers
         private readonly ILoggingService loggingService;
         private readonly IAccessTokenService accessTokenService;
 
+
         public LicenseController(ILicenseKeyService licenseKeyService, ILoggingService loggingService, IAccessTokenService accessTokenService)
         {
             this.licenseKeyService = licenseKeyService;
             this.loggingService = loggingService;
             this.accessTokenService = accessTokenService;
+       
         }
+        
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllLicenses()
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetLicense([FromRoute] int id)
         {
             try
             {
-                var licenses = await licenseKeyService.GetAllLicenses();
-                
-                return Ok(licenses);
+                var license = await licenseKeyService.GetLicenseDetails(id);
+
+                if (license == null)
+                    return BadRequest($"License with ID: {id} not found");
+
+                return Ok(license);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-               return  BadRequest(new { message = ex.Message });
+                return BadRequest(new { message = ex.Message });
             }
         }
         [HttpGet("user-license/{userId}")]
@@ -52,17 +59,15 @@ namespace net_core_backend.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetAllLicenses([FromRoute] int id)
+        [Authorize(Roles = "Admin")]
+        [HttpPost("toggle-license/{licenseId}")]
+        public async Task<IActionResult> ToggleLicenseState([FromRoute] string licenseId)
         {
             try
             {
-                var license = await licenseKeyService.GetLicenseDetails(id);
+                await licenseKeyService.toggleLicenseState(Convert.ToInt32(licenseId));
 
-                if (license == null)
-                    return BadRequest($"License with ID: {id} not found");
-
-                return Ok(license);
+                return Ok();
             }
             catch (Exception ex)
             {

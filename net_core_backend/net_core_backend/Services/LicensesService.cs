@@ -134,6 +134,37 @@ namespace net_core_backend.Services
             return licenses;
         }
 
+        public async Task toggleLicenseState(int licenseId)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var license = await db.Licenses.FirstOrDefaultAsync(l => l.Id == licenseId);
+                if (license == null)
+                {
+                    throw new ArgumentException("No license found with given id");
+                }
+                if (license.Active)
+                {
+                    license.ExpiresAt = DateTime.UtcNow.AddSeconds(-1);
+                    license.EndedReason = "Canceled by admin";
+                    license.RestartedAt = null;
+
+                    //logic here to send disable license to gumroad
+                }
+                else
+                {
+                    license.ExpiresAt = null;
+                    license.EndedReason = null;
+                    license.RestartedAt = DateTime.UtcNow;
+
+                    //logic here to send enable license to gumroad
+                }
+
+                db.Update(license);
+                await db.SaveChangesAsync();
+            }
+        }
+
         public async Task VerifyLicense(VerifyLicenseRequest model)
         {
             using (var db = contextFactory.CreateDbContext())

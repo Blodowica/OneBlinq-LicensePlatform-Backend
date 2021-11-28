@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Services.Interfaces
 {
-    public interface IProductService
+    public interface IUserService
     {
-        Task RefreshProduct();
-        Task ToggleProduct(int productId);
-        Task EditMaxUses(int productId, int maxUses);
+        Task<GetUserResponse> GetUserDetails(int userId);
+        Task EditUser(EditUserRequest request, int userId);
     }
 }

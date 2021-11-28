@@ -184,7 +184,7 @@ namespace net_core_backend.Services
             }
 
         }
-        
+
         private string GenerateJwtToken(Users user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
