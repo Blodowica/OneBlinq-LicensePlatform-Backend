@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Controllers
 {
-    /* [Authorize]*/
+    [Authorize(Roles = "Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class PaginationController : ControllerBase
@@ -39,7 +39,6 @@ namespace net_core_backend.Controllers
             }
         }
 
-       /* [Authorize(Roles = "Admin")]*/
         [HttpPost("get-AccessTokens")]
         public async Task<IActionResult> GetPaginatedAccessTokens([FromBody] PaginationAccessTokenRequest pagingParameters)
         {
