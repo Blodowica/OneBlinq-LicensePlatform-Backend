@@ -47,7 +47,7 @@ namespace net_core_backend.Services
             var subject = "OneBlinq license account created.";
             var content = $"You recently bought a license for one of OneBlinqs plugins. " +
                 $"We have created an account for you on our website so you can monitor your usage.\n" +
-                $"Visit: {appSettings.ProductionFrontendUrl} and register your password.";
+                $"Visit: {appSettings.ProductionFrontendUrl}/login?email={toEmail} and register your password.";
             
             SendBasicEmail(subject, content, toEmail);
         }
