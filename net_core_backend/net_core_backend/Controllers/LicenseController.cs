@@ -37,6 +37,20 @@ namespace net_core_backend.Controllers
                return  BadRequest(new { message = ex.Message });
             }
         }
+        [HttpGet("user-license/{userId}")]
+        public async Task<IActionResult> GetUserLicenses([FromRoute] string userId)
+        {
+            try
+            {
+                var licenses = await licenseKeyService.GetAllUserLicenses(Convert.ToInt32(userId));
+
+                return Ok(licenses);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAllLicenses([FromRoute] int id)

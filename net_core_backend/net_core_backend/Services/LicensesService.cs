@@ -39,8 +39,9 @@ namespace net_core_backend.Services
                 })
                 .ToArrayAsync();
 
+
             List<GetLicenseResponse> response = new List<GetLicenseResponse>();
-            foreach(var l in licenses)
+            foreach (var l in licenses)
             {
                 response.Add(new GetLicenseResponse()
                 {
@@ -66,7 +67,7 @@ namespace net_core_backend.Services
                 .Where(x => x.Id == licenseId)
                 .Select(x => new
                 {
-                    ActivationLogs = x.ActivationLogs.Select(x => new 
+                    ActivationLogs = x.ActivationLogs.Select(x => new
                     {
                         x.Id,
                         x.Message,
@@ -109,6 +110,29 @@ namespace net_core_backend.Services
                 }).ToList(),
             };
         }
+        
+        public async Task<List<GetUserLicenseResponse>> GetAllUserLicenses(int userId)
+        {
+            using var db = contextFactory.CreateDbContext();
+
+            var licenses = await db.Licenses.
+                Where(l => l.UserId ==  userId)
+                .Include(x => x.Product)
+                .Include(al => al.ActivationLogs)
+               .Select(l => new GetUserLicenseResponse
+               {
+                   id = l.Id,
+                   ProductName = l.Product.ProductName,
+                   MaxUses = l.Product.MaxUses,
+                   Activation = l.ActivationLogs.Count,
+                   ExpirationDate = l.ExpiresAt,
+                   Reaccurence = l.Recurrence,
+                   Tier = l.Product.VariantName
+                
+               })
+                .ToListAsync();
+            return licenses;
+        }
 
         public async Task VerifyLicense(VerifyLicenseRequest model)
         {
@@ -130,7 +154,6 @@ namespace net_core_backend.Services
                 {
                     throw new Exception("This license is not active");
                 }
-
                 // chcecking if the license is opened for the same plugin it was bought for
 
                 bool correctLicense = false;
@@ -149,6 +172,7 @@ namespace net_core_backend.Services
                     throw new ArgumentException($"This license can not be used to access plugin \"{model.PluginName}\"");
                 }
             }
-        }        
+        }
     }
 }
+
