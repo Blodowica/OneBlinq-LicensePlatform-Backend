@@ -17,12 +17,12 @@ namespace net_core_backend.Controllers
     public class AccessTokenController : ControllerBase
     {
         private readonly IAccessTokenService accessTokenService;
-        private readonly IPaginationService paginationService;
 
-        public AccessTokenController(IAccessTokenService accessTokenService, IPaginationService PaginationService)
+
+        public AccessTokenController(IAccessTokenService accessTokenService)
         {
             this.accessTokenService = accessTokenService;
-            this.paginationService = PaginationService;
+
         }
 
         [HttpPost("create-access-token")]

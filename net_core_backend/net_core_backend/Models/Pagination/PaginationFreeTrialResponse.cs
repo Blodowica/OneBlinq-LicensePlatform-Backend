@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace net_core_backend.Models
+namespace net_core_backend.Models.Pagination
 {
-    public class PaginationProductResponse
+    public class PaginationFreeTrialResponse
     {
 
-        public List<PaginationProductItem> Products { get; set; }
+        public List<PaginationFreeTrialsItem> FreeTrials { get; set; }
 
         public int MaxPages { get; set; }
 

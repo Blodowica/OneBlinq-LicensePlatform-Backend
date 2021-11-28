@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace net_core_backend.Models
+namespace net_core_backend.Models.Pagination
 {
-    public class PaginationProductRequest
+    public class PaginationUserRequest
     {
 
         //Filters
@@ -14,12 +14,11 @@ namespace net_core_backend.Models
 
         //per column
         public int? FilterId { get; set; }
-        public string FilterProductName { get; set; }
-        public string FilterVariantName { get; set; }
-        public bool? FilterActive { get; set; }
-        public int? FilterLicenseCount { get; set; }
-        public int? FilterMaxUses { get; set; }
-
+        public string FilterFirstName { get; set; }
+        public string FilterLastName { get; set; }
+        public string FilterEmail { get; set; }
+        public int? FilterLicenseCount  { get; set; }
+        public string FilterRole { get; set; }
 
         //Pagination
         public int PageNumber { get; set; } = 1;

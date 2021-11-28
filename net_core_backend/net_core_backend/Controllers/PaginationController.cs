@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using net_core_backend.Models;
+using net_core_backend.Models.Pagination;
 using net_core_backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -75,6 +76,21 @@ namespace net_core_backend.Controllers
             try
             {
                 var pagination = await paginationService.GetUsers(pagingParameters);
+
+                return Ok(pagination);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("get-FreeTrials")]
+        public async Task<IActionResult> GetPaginatedFreeTrials([FromBody] PaginationFreeTrialRequest pagingParameters)
+        {
+            try
+            {
+                var pagination = await paginationService.GetFreeTrails(pagingParameters);
 
                 return Ok(pagination);
             }

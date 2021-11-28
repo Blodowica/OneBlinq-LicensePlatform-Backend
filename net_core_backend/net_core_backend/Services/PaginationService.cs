@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using net_core_backend.Context;
 using net_core_backend.Helpers;
 using net_core_backend.Models;
+using net_core_backend.Models.Pagination;
 using net_core_backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -14,11 +15,20 @@ namespace net_core_backend.Services
     public class PaginationService : DataService<DefaultModel>, IPaginationService
     {
         private readonly IContextFactory contextFactory;
+        
         public PaginationService(IContextFactory _contextFactory) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
         }
 
+        private int SetPageNumber(int number)
+        {
+            if (number <= 0)
+            {
+                number = 1;
+            }
+            return number;
+        }
         public async Task<PaginationLicenseResponse> GetLicenses(PaginationLicenseRequest request)
         {
             var globalSearchString = "";
@@ -185,27 +195,6 @@ namespace net_core_backend.Services
                 .OrderBy(p => p.ProductName)
                 .ToListAsync();
 
-            //Method of getting more generalProductInformation for perhaps a more userfriendly overview
-            //List<PaginationGeneralProductItem> generalProductsResponse = new List<PaginationGeneralProductItem>();
-            //foreach (var groupedProduct in products.GroupBy(p => p.ProductName))
-            //{
-            //    int totalLicenses = 0;
-            //    List<int> ids = new List<int>();
-            //    foreach (var individualProduct in groupedProduct)
-            //    {
-            //        totalLicenses += individualProduct.LicenseCount;
-            //        ids.Add(individualProduct.Id);
-            //    }
-
-            //    generalProductsResponse.Add(new PaginationGeneralProductItem
-            //    {
-            //        Variants = groupedProduct.Count(),
-            //        Ids = ids,
-            //        Licenses = totalLicenses,
-            //        Product = groupedProduct.FirstOrDefault().ProductName
-            //    });
-            //}
-
 
             int maxPages = (int)Math.Ceiling(filterQuery.Count() / (double)request.PageSize);
             if (maxPages < 1)
@@ -281,5 +270,71 @@ namespace net_core_backend.Services
             return response;
 
         }
+
+
+        public async Task<PaginationFreeTrialResponse> GetFreeTrails(PaginationFreeTrialRequest request)
+        {
+            var globalSearchString = "";
+            if (request.GlobalFilter != null)
+            {
+                //convert active and inactive to status + * (this is to prevent overlap of having the word active in inactive)
+                globalSearchString = request.GlobalFilter.ToLower().Replace("inactive", "statusfalse").Replace("active", "statustrue");
+            }
+
+            using var db = contextFactory.CreateDbContext();
+
+            var filterQuery = db.FreeTrials
+                .OrderBy(x => x.Id)
+                //Global filtering
+                .Where(x => (x.Active == false) && (Convert.ToString(x.Id + x.FigmaUserId + x.PluginName + x.Active + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year +
+                         x.EndDate.Day + "-" + x.EndDate.Month + "-" + x.EndDate.Year + "statusfalse").ToLower()
+                .Contains(globalSearchString)) ||
+                    (x.Active == true) && (Convert.ToString(x.Id + x.FigmaUserId + x.PluginName + x.Active + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year +
+                      x.EndDate.Day + "-" + x.EndDate.Month + "-" + x.EndDate.Year + "statustrue").ToLower()
+                .Contains(globalSearchString))
+                    || globalSearchString == "")
+                //Column filtering
+                .Where(x => x.Id == request.FilterId || request.FilterId == null)
+                .Where(x => x.FigmaUserId.Contains(request.FilterFigmaId) || request.FilterFigmaId == "")
+                .Where(x => x.PluginName.Contains(request.FilterPluginName) || request.FilterPluginName == "")
+                .Where(x => x.Active == request.FilterActive || request.FilterActive == null)
+                .Where(x => request.FilterStartDate == null || x.StartDate.Date == request.FilterStartDate.Value.Date.AddDays(1))
+                .Where(x => request.FilterEndDate == null || x.EndDate.Date == request.FilterEndDate.Value.Date.AddDays(1))
+                .AsQueryable();
+
+            //Pagination
+            var FreeTrial = await filterQuery
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .Select(x => new PaginationFreeTrialsItem
+                {
+                    FigmaUserId = x.FigmaUserId,
+                    Active = x.Active,
+                    PluginName = x.PluginName,
+                    Id = x.Id,
+                    StartDate = x.StartDate,
+                    EndDate = x.EndDate
+
+                })
+                .ToListAsync();
+
+            int maxPages = (int)Math.Ceiling(filterQuery.Count() / (double)request.PageSize);
+            if (maxPages < 1)
+            {
+                maxPages = 1;
+            }
+
+            PaginationFreeTrialResponse response = new PaginationFreeTrialResponse
+            {
+                MaxPages = maxPages,
+                FreeTrials = FreeTrial
+            };
+
+            return response;
+
+        }
+
+       
+
     }
 }

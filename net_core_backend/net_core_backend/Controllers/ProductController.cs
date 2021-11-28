@@ -15,12 +15,12 @@ namespace net_core_backend.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductService productService;
-        private readonly IPaginationService paginationService;
+   
 
-        public ProductController(IProductService productService, IPaginationService PaginationService)
+        public ProductController(IProductService productService)
         {
             this.productService = productService;
-            this.paginationService = PaginationService;
+          
         }
         
         [HttpPost("toggle-product/{productId}")]

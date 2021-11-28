@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using net_core_backend.Models;
-using net_core_backend.Repository;
 using net_core_backend.Services.Interfaces;
 using System;
 using System.Threading.Tasks;
@@ -17,30 +16,16 @@ namespace net_core_backend.Controllers
         private readonly ILicenseKeyService licenseKeyService;
         private readonly ILoggingService loggingService;
         private readonly IAccessTokenService accessTokenService;
-        private readonly IPaginationService paginationService;
 
-        public LicenseController(ILicenseKeyService licenseKeyService, ILoggingService loggingService, IAccessTokenService accessTokenService, IPaginationService PaginationService)
+
+        public LicenseController(ILicenseKeyService licenseKeyService, ILoggingService loggingService, IAccessTokenService accessTokenService)
         {
             this.licenseKeyService = licenseKeyService;
             this.loggingService = loggingService;
             this.accessTokenService = accessTokenService;
-            this.paginationService = PaginationService;
+       
         }
         
-        [HttpPost("get-page")]
-        public async Task<IActionResult> GetPaginatedLicenses([FromBody] PaginationLicenseRequest pagingParameters)
-        {
-            try
-            {
-                var pagination = await paginationService.GetLicenses(pagingParameters);
-
-                return Ok(pagination);
-            }
-            catch(Exception ex)
-            {
-               return  BadRequest(new { message = ex.Message });
-            }
-        }
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLicense([FromRoute] int id)
