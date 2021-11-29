@@ -21,14 +21,6 @@ namespace net_core_backend.Services
             contextFactory = _contextFactory;
         }
 
-        private int SetPageNumber(int number)
-        {
-            if (number <= 0)
-            {
-                number = 1;
-            }
-            return number;
-        }
         public async Task<PaginationLicenseResponse> GetLicenses(PaginationLicenseRequest request)
         {
             var globalSearchString = "";
@@ -67,7 +59,10 @@ namespace net_core_backend.Services
                 .Skip((request.PageNumber - 1) * request.PageSize)
                 .Take(request.PageSize)
                 .Select(x => new PaginationLicenseItem {
-                    Activations = x.ActivationLogs.Count(),
+                    Activations = x.ActivationLogs
+                                .Select(a => a.FigmaUserId)
+                                .Distinct()
+                                .Count(),
                     Active = x.Active,
                     Email = x.User.Email,
                     Id = x.Id,
