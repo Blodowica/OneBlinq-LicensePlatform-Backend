@@ -19,10 +19,9 @@ namespace net_core_backend.Services
     public class MailingService : IMailingService
     {
         private readonly AppSettings appSettings;
-        private readonly string[] HardcodedEmailAdmins = new string[2]
+        private readonly string[] HardcodedEmailAdmins = new string[1]
         {
-            "someemail@gmail.com",
-            "secondemail@gmail.com",
+            "thomasvandermolen2@gmail.com",
         };
 
         public MailingService(IOptions<AppSettings> appSettings)
