@@ -36,10 +36,9 @@ namespace net_core_backend.Services
                 {
                     License = x,
                     UniqueFigmaIds = x.ActivationLogs
-                        .GroupBy(x => x.FigmaUserId)
-                        .First()
-                        .Select(x => x.FigmaUserId)
-                        .ToList(),
+                                .Select(a => a.FigmaUserId)
+                                .Distinct()
+                                .ToList(),
                     ProductMaxUses = x.Product.MaxUses,
                 })
                 .FirstOrDefaultAsync();
