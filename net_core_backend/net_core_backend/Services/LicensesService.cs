@@ -34,7 +34,11 @@ namespace net_core_backend.Services
                     x.Id,
                     x.User.Email,
                     x.Product.MaxUses,
-                    Activations = x.ActivationLogs.Count(),
+                    Activations = x.ActivationLogs
+                        .GroupBy(x => x.FigmaUserId)
+                        .First()
+                        .Select(x => x.FigmaUserId)
+                        .Count(),
                     x.Active
                 })
                 .ToArrayAsync();
@@ -82,7 +86,11 @@ namespace net_core_backend.Services
                     x.PurchaseLocation,
                     x.EndedReason,
                     x.ExpiresAt,
-                    Activations = x.ActivationLogs.Count(),
+                    Activations = x.ActivationLogs
+                        .GroupBy(x => x.FigmaUserId)
+                        .First()
+                        .Select(x => x.FigmaUserId)
+                        .Count(),
                     x.Active
                 })
                 .FirstOrDefaultAsync();

@@ -11,5 +11,6 @@ namespace net_core_backend.Services.Interfaces
         Task<VerificationResponse> Register(AddUserRequest requestInfo, string ipAddress = null);
         Task<bool> RevokeToken(string token, string ipAddress);
         Task CreateAdmin(AddUserRequest requestInfo);
+        Task<bool> RevokeCookie(string token, string ipAddress);
     }
 }

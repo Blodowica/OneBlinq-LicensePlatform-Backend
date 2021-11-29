@@ -16,19 +16,50 @@ namespace net_core_backend.Services
     public class LoggingService : DataService<DefaultModel>, ILoggingService
     {
         private readonly IContextFactory contextFactory;
-        public LoggingService(IContextFactory _contextFactory) : base(_contextFactory)
+        private readonly IMailingService mailingService;
+
+        public LoggingService(IContextFactory _contextFactory, IMailingService mailingService) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
+            this.mailingService = mailingService;
         }
         public async Task AddActivationLog(string licenseKey, bool successful, String figmaUserId, string message)
         {
             using var db = contextFactory.CreateDbContext();
 
-            Licenses license = db.Licenses.Where(l => l.LicenseKey == licenseKey).FirstOrDefault();
+            var license = await db.Licenses
+                .Include(x => x.User)
+                .Include(x => x.ActivationLogs)
+                .Include(x => x.Product)
+                .Where(x => x.LicenseKey == licenseKey)
+                .Select(x => new
+                {
+                    License = x,
+                    UniqueFigmaIds = x.ActivationLogs
+                        .GroupBy(x => x.FigmaUserId)
+                        .First()
+                        .Select(x => x.FigmaUserId)
+                        .ToList(),
+                    ProductMaxUses = x.Product.MaxUses,
+                })
+                .FirstOrDefaultAsync();
+
+            // If the verification was successful
+            // And the verified unique figma id isn't registered yet
+            // And if the product max uses is more than 0
+            // And if the CURRENT unique figma id count is already at max uses
+            // Send an email to the admins
+            if (successful && 
+                !license.UniqueFigmaIds.Contains(figmaUserId) && 
+                license.ProductMaxUses > 0 && 
+                license.UniqueFigmaIds.Count() == license.ProductMaxUses)
+            {
+                mailingService.SendLicenseAbuseEmail(licenseKey, license.License.User.Email);
+            }
 
             ActivationLogs activationLog = new ActivationLogs(successful)
             {
-                License = license,
+                License = license.License,
                 FigmaUserId = figmaUserId,
                 Message = message,
             };
