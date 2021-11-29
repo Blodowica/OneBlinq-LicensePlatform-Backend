@@ -18,11 +18,13 @@ namespace net_core_backend.Services
     public class GumroadService : DataService<DefaultModel>, IGumroadService
     {
         private readonly IContextFactory contextFactory;
+        private readonly IMailingService mailingService;
         private readonly AppSettings appSettings;
         private readonly HttpClient httpClient;
-        public GumroadService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, HttpClient httpClient) : base(_contextFactory)
+        public GumroadService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, HttpClient httpClient, IMailingService mailingService) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
+            this.mailingService = mailingService;
             this.appSettings = appSettings.Value;
             this.httpClient = httpClient;
         }
@@ -176,6 +178,9 @@ namespace net_core_backend.Services
 
                     await db.AddAsync(user);
                     await db.SaveChangesAsync();
+
+                    // Send a confirmation to user on account creation
+                    mailingService.SendAccountCreationEmail(email);
                 }
                 return user;
             }
@@ -206,7 +211,7 @@ namespace net_core_backend.Services
                         {
                             throw new ArgumentException("Failed to fetch data from Gumroad");
                         }
-                        var result = await response.Content.ReadAsAsync<GumroadProductRequest>();
+                        var result = await response.Content.ReadAsAsync<GumroadProductRequest.GumroadSingleProductRequest>();
                         foreach (var activateablePlugin in result.product.tags)
                         {
                             var activateablePluginToAdd = new ActivateablePlugins

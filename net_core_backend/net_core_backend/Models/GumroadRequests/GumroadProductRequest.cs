@@ -7,8 +7,19 @@ namespace net_core_backend.Models.GumroadRequests
 {
     public class GumroadProductRequest
     {
+        public GumroadProductRequest()
+        {
+            products = new List<Product>();
+        }
+
+        public class GumroadSingleProductRequest
+        {
+            public bool success { get; set; }
+            public Product product { get; set; }
+        }
+
         public bool success { get; set; }
-        public Product product { get; set; }
+        public List<Product> products { get; set; }
 
         public class Monthly
         {

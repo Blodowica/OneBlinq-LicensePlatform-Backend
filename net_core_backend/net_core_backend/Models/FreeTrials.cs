@@ -7,8 +7,8 @@ namespace net_core_backend.Models
 {
     public class FreeTrials : DefaultModel
     {
-        public String FigmaUserId { get; set; }
-        public String PluginName { get; set; }
+        public string FigmaUserId { get; set; }
+        public string PluginName { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public bool Active { get; set; }

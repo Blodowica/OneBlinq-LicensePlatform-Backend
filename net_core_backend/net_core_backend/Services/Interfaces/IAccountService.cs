@@ -14,5 +14,6 @@ namespace net_core_backend.Services.Interfaces
         Task ChangePassword(ChangePasswordRequest model);
         Task<EditUserInfoModel> GetUserInfoDetails();
         Task ChangeUserInfoDetails(EditUserInfoModel model);
+        Task<bool> RevokeCookie(string token, string ipAddress);
     }
 }

@@ -108,6 +108,36 @@ namespace net_core_backend.Controllers
         }
 
 
+        [AllowAnonymous]
+        [HttpPost("revoke-cookie")]
+        public async Task<IActionResult> RevokeCookie()
+        {
+            try
+            {
+                var refreshToken = Request.Cookies["refreshToken"];
+                if (refreshToken == null)
+                {
+                    return BadRequest(new { message = "There wasn't a refresh token cookie in the request" });
+                }
+
+                var status = await accountService.RevokeCookie(refreshToken, ipAddress());
+
+                if (status)
+                {
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(new { message = "The cookie is already inactive" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
         private void setTokenCookie(string token)
         {
             // Run application in https mode only (self-sign for localhost)

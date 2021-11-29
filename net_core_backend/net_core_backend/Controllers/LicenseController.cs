@@ -5,6 +5,7 @@ using net_core_backend.Services.Interfaces;
 using System;
 using System.Threading.Tasks;
 
+
 namespace net_core_backend.Controllers
 {
     [Authorize]
@@ -16,30 +17,18 @@ namespace net_core_backend.Controllers
         private readonly ILoggingService loggingService;
         private readonly IAccessTokenService accessTokenService;
 
+
         public LicenseController(ILicenseKeyService licenseKeyService, ILoggingService loggingService, IAccessTokenService accessTokenService)
         {
             this.licenseKeyService = licenseKeyService;
             this.loggingService = loggingService;
             this.accessTokenService = accessTokenService;
+       
         }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAllLicenses()
-        {
-            try
-            {
-                var licenses = await licenseKeyService.GetAllLicenses();
-                
-                return Ok(licenses);
-            }
-            catch(Exception ex)
-            {
-               return  BadRequest(new { message = ex.Message });
-            }
-        }
+        
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetAllLicenses([FromRoute] int id)
+        public async Task<IActionResult> GetLicense([FromRoute] int id)
         {
             try
             {
@@ -49,6 +38,36 @@ namespace net_core_backend.Controllers
                     return BadRequest($"License with ID: {id} not found");
 
                 return Ok(license);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+        [HttpGet("user-license/{userId}")]
+        public async Task<IActionResult> GetUserLicenses([FromRoute] string userId)
+        {
+            try
+            {
+                var licenses = await licenseKeyService.GetAllUserLicenses(Convert.ToInt32(userId));
+
+                return Ok(licenses);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("toggle-license/{licenseId}")]
+        public async Task<IActionResult> ToggleLicenseState([FromRoute] string licenseId)
+        {
+            try
+            {
+                await licenseKeyService.toggleLicenseState(Convert.ToInt32(licenseId));
+
+                return Ok();
             }
             catch (Exception ex)
             {

@@ -11,26 +11,43 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace net_core_backend.Controllers
 {
+    [Authorize(Roles = "Admin")]
     [ApiController]
     [Route("api/[controller]")]
     public class AccessTokenController : ControllerBase
     {
         private readonly IAccessTokenService accessTokenService;
 
+
         public AccessTokenController(IAccessTokenService accessTokenService)
         {
             this.accessTokenService = accessTokenService;
+
         }
 
-        [Authorize(Roles = "Admin")]
         [HttpPost("create-access-token")]
-        public async Task<IActionResult> CreateAccessToken([FromBody] CreateAccessTokenRequest model)
+        public async Task<IActionResult> CreateAccessToken()
         {
             try
             {
                 var response = await accessTokenService.CreateAccessToken();
 
                 return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("toggle-access-token/{accessTokenId}")]
+        public async Task<IActionResult> ToggleAccessToken([FromRoute] string accessTokenId)
+        {
+            try
+            {
+                await accessTokenService.ToggleAccessToken(Convert.ToInt32(accessTokenId));
+
+                return Ok();
             }
             catch (Exception ex)
             {

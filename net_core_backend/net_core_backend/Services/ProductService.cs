@@ -25,19 +25,16 @@ namespace net_core_backend.Services
             this.httpClient = httpClient;
         }
 
-        public async Task RefreshProduct(int productId)
+        public async Task RefreshProduct()
         {
+            //compare the local and gumroad products to get the local products up to date, this will also generate any new products not in the system
             using (var db = contextFactory.CreateDbContext())
             {
-                var product = await db.Products.FirstOrDefaultAsync(p => p.Id == productId);
-                if (product == null)
-                {
-                    throw new ArgumentException("No product found with given id");
-                }
-                var products = await db.Products.Include(p => p.ActivateablePlugins).Where(p => p.ProductName == product.ProductName).ToListAsync();
-
-                //add what plugins should be activate through the tags
-                using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, "https://api.gumroad.com/v2/products/" + product.GumroadID))
+                //get all local products
+                var localProducts = await db.Products.Include(p => p.ActivateablePlugins).ToListAsync();
+ 
+                //get all gumroad products
+                using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, "https://api.gumroad.com/v2/products/"))
                 {
                     requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", appSettings.GumroadAccessToken);
 
@@ -46,46 +43,82 @@ namespace net_core_backend.Services
                     {
                         throw new ArgumentException("Failed to fetch data from Gumroad");
                     }
-                    var result = await response.Content.ReadAsAsync<GumroadProductRequest>();
+                    var GumroadProductsResult = await response.Content.ReadAsAsync<GumroadProductRequest>();
 
-                    //go through every variant from product in gumroad 
-                    foreach (var productVariant in result.product.variants.Select(v => v.options).ToList().First())
+                    foreach (var gumroadProduct in GumroadProductsResult.products)
                     {
-                        var variant = products.FirstOrDefault(p => p.VariantName == productVariant.name);
-                        if (variant == null)
+                        //go through every variant from products in gumroad
+                        foreach (var allProductsVariant in gumroadProduct.variants.Select(v => v.options).ToList().First())
                         {
-                            //generate a new product variant if there is none yet
-                            variant = new Products
+                            var variant = localProducts.FirstOrDefault(p => p.VariantName == allProductsVariant.name && p.ProductName == gumroadProduct.name);
+                            if (variant == null)
                             {
-                                GumroadID = result.product.id,
-                                VariantName = productVariant.name,
-                                ProductName = result.product.name,
-                                Active = !result.product.deleted
-                            };
+                                //generate a new product variant if there is none locally yet
+                                variant = new Products
+                                {
+                                    GumroadID = gumroadProduct.id,
+                                    VariantName = allProductsVariant.name,
+                                    ProductName = gumroadProduct.name,
+                                    Active = !gumroadProduct.deleted
+                                };
                             
-                            await db.AddAsync(variant);
+                                await db.AddAsync(variant);
+                                await db.SaveChangesAsync();
+                            }
+                            else
+                            {
+                                //update name and possible state of a product that already exists locally
+                                variant.ProductName = gumroadProduct.name;
+                                variant.Active = !gumroadProduct.deleted;
+                            }
+
+                            //read all tags and add them to the product if they are not there yet
+                            foreach (var activateablePlugin in gumroadProduct.tags)
+                            {
+                                if (!variant.ActivateablePlugins.Any(ap => ap.Plugin == activateablePlugin))
+                                {
+                                    var activateablePluginToAdd = new ActivateablePlugins
+                                    {
+                                        Plugin = activateablePlugin
+                                    };
+                                    variant.ActivateablePlugins.Add(activateablePluginToAdd);
+                                }
+                            }
+                            db.Update(variant);
                             await db.SaveChangesAsync();
                         }
-                        else
-                        {
-                            variant.ProductName = result.product.name;
-                            variant.Active = !result.product.deleted;
-                        }
-
-                        //readd all tags to the product
-                        variant.ActivateablePlugins.Clear();
-                        foreach (var activateablePlugin in result.product.tags)
-                        {
-                            var activateablePluginToAdd = new ActivateablePlugins
-                            {
-                                Plugin = activateablePlugin
-                            };
-                            variant.ActivateablePlugins.Add(activateablePluginToAdd);
-                        }
-                        db.Update(variant);
-                        await db.SaveChangesAsync();
                     }
                 }
+            }
+        }
+
+        public async Task ToggleProduct(int productId)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var product = await db.Products.FirstOrDefaultAsync(a => a.Id == productId);
+                if (product == null)
+                {
+                    throw new ArgumentException("no Product found with given id");
+                }
+                product.Active = !product.Active;
+                db.Update(product);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task EditMaxUses(int productId, int maxUses)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var product = await db.Products.FirstOrDefaultAsync(a => a.Id == productId);
+                if (product == null)
+                {
+                    throw new ArgumentException("no Product found with given id");
+                }
+                product.MaxUses = maxUses;
+                db.Update(product);
+                await db.SaveChangesAsync();
             }
         }
     }
