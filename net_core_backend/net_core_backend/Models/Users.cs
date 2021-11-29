@@ -12,6 +12,11 @@ namespace net_core_backend.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Role { get; set; }
+        public DateTime Birthdate { get; set; }
+        public String Address { get; set; }
+        public String City { get; set; }
+        public String PostalCode { get; set; }
+        public String Country { get; set; }
         public virtual ICollection<Licenses> Licenses { get; set; }
         public virtual ICollection<AccessTokens> AccessTokens { get; set; }
         public virtual ICollection<RefreshTokens> RefreshTokens { get; set; }

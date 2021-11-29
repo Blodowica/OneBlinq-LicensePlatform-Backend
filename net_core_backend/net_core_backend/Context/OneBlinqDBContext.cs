@@ -49,6 +49,26 @@ namespace net_core_backend.Models
                 entity.Property(e => e.Role)
                     .HasColumnName("role").IsRequired().HasDefaultValue("User");
 
+                entity.Property(e => e.Birthdate)
+                .HasColumnName("date_of_birth");
+
+
+                entity.Property(e => e.Address)
+                .HasColumnName("address")
+                .HasMaxLength(30);
+
+                entity.Property(e => e.City)
+                .HasColumnName("city")
+                .HasMaxLength(20);
+
+                entity.Property(e => e.PostalCode)
+                .HasColumnName("postal_code")
+                .HasMaxLength(10);
+
+                entity.Property(e => e.Country)
+                .HasColumnName("country")
+                .HasMaxLength(30);
+
                 entity.Property(e => e.GumroadID)
                     .HasColumnName("gumroad_id");
 

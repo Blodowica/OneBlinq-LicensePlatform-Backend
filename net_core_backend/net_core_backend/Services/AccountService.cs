@@ -219,5 +219,84 @@ namespace net_core_backend.Services
                 CreatedByIp = ipAddress
             };
         }
+
+        public async Task ChangePassword(ChangePasswordRequest model)
+        {
+            int userId = httpContext.GetCurrentUserId();
+
+            using var db = contextFactory.CreateDbContext();
+
+            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
+
+            var hash = BC.HashPassword(model.CurrentPassword);
+
+            if (BC.Verify(model.CurrentPassword, user.Password))
+            {
+                user.Password = BC.HashPassword(model.NewPassword);
+
+                db.Update(user);
+                await db.SaveChangesAsync();
+            }
+            else
+            {
+                throw new ArgumentException("Current password is incorrect");
+            }
+        }
+
+        public async Task<EditUserInfoModel> GetUserInfoDetails()
+        {
+            int userId = httpContext.GetCurrentUserId();
+
+            using var db = contextFactory.CreateDbContext();
+
+            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
+
+            return new EditUserInfoModel(user);
+        }
+
+        public async Task ChangeUserInfoDetails(EditUserInfoModel model)
+        {
+            int userId = httpContext.GetCurrentUserId();
+
+            using var db = contextFactory.CreateDbContext();
+
+            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
+
+            if (user.FirstName != model.FirstName)
+            {
+                user.FirstName = model.FirstName;
+            }
+            if (user.LastName != model.LastName)
+            {
+                user.LastName = model.LastName;
+            }
+            if (user.Email != model.Email)
+            {
+                user.Email = model.Email;
+            }
+            if (user.Birthdate.CompareTo(Convert.ToDateTime(model.Birthdate)) != 0)
+            {
+                user.Birthdate = Convert.ToDateTime(model.Birthdate);
+            }
+            if (user.Address != model.Address)
+            {
+                user.Address = model.Address;
+            }
+            if (user.City != model.City)
+            {
+                user.City = model.City;
+            }
+            if (user.PostalCode != model.PostalCode)
+            {
+                user.PostalCode = model.PostalCode;
+            }
+            if (user.Country != model.Country)
+            {
+                user.Country = model.Country;
+            }
+
+            db.Update(user);
+            await db.SaveChangesAsync();
+        }
     }
 }
