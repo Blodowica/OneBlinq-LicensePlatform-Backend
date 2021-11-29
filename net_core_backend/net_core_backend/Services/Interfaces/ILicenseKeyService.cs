@@ -8,7 +8,6 @@ namespace net_core_backend.Services.Interfaces
 {
     public interface ILicenseKeyService
     {
-        Task<GetLicenseResponse[]> GetAllLicenses();
         Task<GetLicenseResponse> GetLicenseDetails(int licenseId);
         Task<List<GetUserLicenseResponse>> GetAllUserLicenses(int userId);
         Task VerifyLicense(VerifyLicenseRequest model);

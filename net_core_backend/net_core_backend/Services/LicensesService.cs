@@ -21,46 +21,6 @@ namespace net_core_backend.Services
             contextFactory = _contextFactory;
         }
 
-        public async Task<GetLicenseResponse[]> GetAllLicenses()
-        {
-            using var db = contextFactory.CreateDbContext();
-
-            var licenses = await db.Licenses
-                .Include(x => x.Product)
-                .Include(x => x.User)
-                .Select(x => new
-                {
-                    x.LicenseKey,
-                    x.Id,
-                    x.User.Email,
-                    x.Product.MaxUses,
-                    Activations = x.ActivationLogs
-                        .GroupBy(x => x.FigmaUserId)
-                        .First()
-                        .Select(x => x.FigmaUserId)
-                        .Count(),
-                    x.Active
-                })
-                .ToArrayAsync();
-
-
-            List<GetLicenseResponse> response = new List<GetLicenseResponse>();
-            foreach (var l in licenses)
-            {
-                response.Add(new GetLicenseResponse()
-                {
-                    Activations = l.Activations,
-                    Email = l.Email,
-                    LicenseId = l.Id,
-                    LicenseKey = l.LicenseKey,
-                    MaxUses = l.MaxUses,
-                    Active = l.Active,
-                });
-            }
-
-            return response.ToArray();
-        }
-
         public async Task<GetLicenseResponse> GetLicenseDetails(int licenseId)
         {
             using var db = contextFactory.CreateDbContext();
@@ -87,10 +47,9 @@ namespace net_core_backend.Services
                     x.EndedReason,
                     x.ExpiresAt,
                     Activations = x.ActivationLogs
-                        .GroupBy(x => x.FigmaUserId)
-                        .First()
-                        .Select(x => x.FigmaUserId)
-                        .Count(),
+                                .Select(a => a.FigmaUserId)
+                                .Distinct()
+                                .Count(),
                     x.Active
                 })
                 .FirstOrDefaultAsync();
@@ -132,7 +91,10 @@ namespace net_core_backend.Services
                    id = l.Id,
                    ProductName = l.Product.ProductName,
                    MaxUses = l.Product.MaxUses,
-                   Activation = l.ActivationLogs.Count,
+                   Activation = l.ActivationLogs
+                                .Select(a => a.FigmaUserId)
+                                .Distinct()
+                                .Count(),
                    ExpirationDate = l.ExpiresAt,
                    Reaccurence = l.Recurrence,
                    Tier = l.Product.VariantName
