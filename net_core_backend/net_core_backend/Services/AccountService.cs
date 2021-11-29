@@ -241,5 +241,73 @@ namespace net_core_backend.Services
                 CreatedByIp = ipAddress
             };
         }
+
+        public async Task ChangePassword(ChangePasswordRequest model)
+        {
+            int userId = httpContext.GetCurrentUserId();
+
+            using var db = contextFactory.CreateDbContext();
+
+            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                throw new ArgumentException("Current user was not found");
+            }
+
+            if (BC.Verify(model.CurrentPassword, user.Password))
+            {
+                user.Password = BC.HashPassword(model.NewPassword);
+
+                db.Update(user);
+                await db.SaveChangesAsync();
+            }
+            else
+            {
+                throw new ArgumentException("Current password is incorrect");
+            }
+        }
+
+        public async Task<EditUserInfoModel> GetUserInfoDetails()
+        {
+            int userId = httpContext.GetCurrentUserId();
+
+            using var db = contextFactory.CreateDbContext();
+
+            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                throw new ArgumentException("Current user was not found");
+            }
+
+            return new EditUserInfoModel(user);
+        }
+
+        public async Task ChangeUserInfoDetails(EditUserInfoModel model)
+        {
+            int userId = httpContext.GetCurrentUserId();
+
+            using var db = contextFactory.CreateDbContext();
+
+            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                throw new ArgumentException("Current user was not found");
+            }
+
+            user.FirstName = model.FirstName ?? user.FirstName;
+            user.LastName = model.LastName ?? user.LastName;
+            user.Email = model.Email ?? user.Email;
+            user.Birthdate = Convert.ToDateTime(model.Birthdate);
+            user.Address = model.Address ?? user.Address;
+            user.City = model.City ?? user.City;
+            user.PostalCode = model.PostalCode ?? user.PostalCode;
+            user.Country = model.Country ?? user.Country;
+
+            db.Update(user);
+            await db.SaveChangesAsync();
+        }
     }
 }

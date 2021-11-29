@@ -174,5 +174,53 @@ namespace net_core_backend.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [Authorize]
+        [HttpGet("get-user-info")]
+        public async Task<IActionResult> GetUserInfo()
+        {
+            try
+            {
+                var userInfo = await accountService.GetUserInfoDetails();
+
+                return Ok(userInfo);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [Authorize]
+        [HttpPost("change-user-password")]
+        public async Task<IActionResult> ChangeUserPassword([FromBody] ChangePasswordRequest model)
+        {
+            try
+            {
+                await accountService.ChangePassword(model);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("change-user-info")]
+        public async Task<IActionResult> ChangeUserInfo([FromBody] EditUserInfoModel model)
+        {
+            try
+            {
+                await accountService.ChangeUserInfoDetails(model);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
