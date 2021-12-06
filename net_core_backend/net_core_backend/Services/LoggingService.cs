@@ -56,12 +56,26 @@ namespace net_core_backend.Services
                 mailingService.SendLicenseAbuseEmail(licenseKey, license.License.User.Email);
             }
 
-            ActivationLogs activationLog = new ActivationLogs(successful)
+            ActivationLogs activationLog = null;
+
+            if (license == null)
             {
-                License = license.License,
-                FigmaUserId = figmaUserId,
-                Message = message,
-            };
+                activationLog = new ActivationLogs(successful)
+                {
+                    License = null,
+                    FigmaUserId = figmaUserId,
+                    Message = message,
+                };
+            }
+            else
+            {
+                activationLog = new ActivationLogs(successful)
+                {
+                    License = license.License,
+                    FigmaUserId = figmaUserId,
+                    Message = message,
+                };
+            }
 
             await db.AddAsync(activationLog);
             await db.SaveChangesAsync();

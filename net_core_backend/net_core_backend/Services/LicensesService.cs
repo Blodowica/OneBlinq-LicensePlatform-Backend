@@ -170,7 +170,7 @@ namespace net_core_backend.Services
 
                 if (!correctLicense)
                 {
-                    throw new ArgumentException($"This license can not be used to access plugin \"{model.PluginName}\"");
+                    throw new ArgumentException($"This license can not be used to access plugin '{model.PluginName}'");
                 }
             }
         }
