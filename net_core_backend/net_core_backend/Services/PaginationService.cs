@@ -21,7 +21,7 @@ namespace net_core_backend.Services
             contextFactory = _contextFactory;
         }
 
-        public async Task<PaginationLicenseResponse> GetLicenses(PaginationLicenseRequest request)
+        public async Task<PaginationResponse<PaginationLicenseItem>> GetLicenses(PaginationLicenseRequest request)
         {
             var globalSearchString = "";
             if (request.GlobalFilter != null)
@@ -77,18 +77,18 @@ namespace net_core_backend.Services
             {
                 maxPages = 1;
             }
-                
-            PaginationLicenseResponse response = new PaginationLicenseResponse
+
+            var response = new PaginationResponse<PaginationLicenseItem>
             {
                 MaxPages = maxPages,
-                Licenses = licenses
+                Records = licenses
             };
 
             return response;
 
         }
 
-        public async Task<PaginationUserResponse> GetUsers(PaginationUserRequest request)
+        public async Task<PaginationResponse<PaginationUserItem>> GetUsers(PaginationUserRequest request)
         {
             var globalSearchString = "";
             if (request.GlobalFilter != null)
@@ -135,17 +135,17 @@ namespace net_core_backend.Services
                 maxPages = 1;
             }
 
-            PaginationUserResponse response = new PaginationUserResponse
+            var response = new PaginationResponse<PaginationUserItem>
             {
                 MaxPages = maxPages,
-                Users = users
+                Records = users
             };
 
             return response;
 
         }
 
-        public async Task<PaginationProductResponse> GetProducts(PaginationProductRequest request)
+        public async Task<PaginationResponse<PaginationProductItem>> GetProducts(PaginationProductRequest request)
         {
             var globalSearchString = "";
             if (request.GlobalFilter != null)
@@ -197,17 +197,17 @@ namespace net_core_backend.Services
                 maxPages = 1;
             }
 
-            PaginationProductResponse response = new PaginationProductResponse
+            var response = new PaginationResponse<PaginationProductItem>
             {
                 MaxPages = maxPages,
-                Products = products
+                Records = products
             };
 
             return response;
 
         }
 
-        public async Task<PaginationAccessTokenResponse> GetAccesTokens(PaginationAccessTokenRequest request)
+        public async Task<PaginationResponse<PaginationAccessTokenItem>> GetAccesTokens(PaginationAccessTokenRequest request)
         {
             var globalSearchString = "";
             if (request.GlobalFilter != null)
@@ -256,10 +256,10 @@ namespace net_core_backend.Services
                 maxPages = 1;
             }
 
-            PaginationAccessTokenResponse response = new PaginationAccessTokenResponse
+            var response = new PaginationResponse<PaginationAccessTokenItem>
             {
                 MaxPages = maxPages,
-                AccessTokens = AccessTokens
+                Records = AccessTokens
             };
 
             return response;
@@ -267,7 +267,7 @@ namespace net_core_backend.Services
         }
 
 
-        public async Task<PaginationFreeTrialResponse> GetFreeTrails(PaginationFreeTrialRequest request)
+        public async Task<PaginationResponse<PaginationFreeTrialItem>> GetFreeTrails(PaginationFreeTrialRequest request)
         {
             var globalSearchString = "";
             if (request.GlobalFilter != null)
@@ -301,7 +301,7 @@ namespace net_core_backend.Services
             var FreeTrial = await filterQuery
                 .Skip((request.PageNumber - 1) * request.PageSize)
                 .Take(request.PageSize)
-                .Select(x => new PaginationFreeTrialsItem
+                .Select(x => new PaginationFreeTrialItem
                 {
                     FigmaUserId = x.FigmaUserId,
                     Active = x.Active,
@@ -319,10 +319,10 @@ namespace net_core_backend.Services
                 maxPages = 1;
             }
 
-            PaginationFreeTrialResponse response = new PaginationFreeTrialResponse
+            var response = new PaginationResponse<PaginationFreeTrialItem>
             {
                 MaxPages = maxPages,
-                FreeTrials = FreeTrial
+                Records = FreeTrial
             };
 
             return response;

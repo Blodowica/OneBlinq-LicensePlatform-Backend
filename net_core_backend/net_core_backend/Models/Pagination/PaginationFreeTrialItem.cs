@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Models.Pagination
 {
-    public class PaginationFreeTrialsItem
+    public class PaginationFreeTrialItem
     {
         public int Id { get; set; }
         public string FigmaUserId { get; set; }

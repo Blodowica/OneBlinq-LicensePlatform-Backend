@@ -9,10 +9,10 @@ namespace net_core_backend.Services.Interfaces
 {
     public interface IPaginationService
     {
-        Task<PaginationLicenseResponse> GetLicenses(PaginationLicenseRequest request);
-        Task<PaginationUserResponse> GetUsers(PaginationUserRequest request);
-        Task<PaginationProductResponse> GetProducts(PaginationProductRequest request);
-        Task<PaginationAccessTokenResponse> GetAccesTokens(PaginationAccessTokenRequest request);
-        Task<PaginationFreeTrialResponse> GetFreeTrails(PaginationFreeTrialRequest request);
+        Task<PaginationResponse<PaginationLicenseItem>> GetLicenses(PaginationLicenseRequest request);
+        Task<PaginationResponse<PaginationUserItem>> GetUsers(PaginationUserRequest request);
+        Task<PaginationResponse<PaginationProductItem>> GetProducts(PaginationProductRequest request);
+        Task<PaginationResponse<PaginationAccessTokenItem>> GetAccesTokens(PaginationAccessTokenRequest request);
+        Task<PaginationResponse<PaginationFreeTrialItem>> GetFreeTrails(PaginationFreeTrialRequest request);
     }
 }
