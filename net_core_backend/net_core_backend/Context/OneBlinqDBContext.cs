@@ -261,8 +261,24 @@ namespace net_core_backend.Models
                     .HasConstraintName("FK_ActivateablePlugins_Products");
             });
 
+            modelBuilder.Entity<UniqueId>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasColumnName("id");
+
+                entity.Property(e => e.Product)
+                    .IsRequired()
+                    .HasColumnName("product");
+
+                entity.Property(e => e.UserProductId)
+                    .IsRequired()
+                    .HasColumnName("userProductId");
+
+            });
+
             OnModelCreatingPartial(modelBuilder);
         }
+
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
