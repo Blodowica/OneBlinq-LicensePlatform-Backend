@@ -224,12 +224,12 @@ namespace net_core_backend.Controllers
         }
 
         [Authorize]
-        [HttpGet("get-admin")]
-        public async Task<IActionResult> GetUserAdmin()
+        [HttpGet("is-user-admin")]
+        public async Task<IActionResult> IsUserAdmin()
         {
             try
             {
-                bool admin = await accountService.GetUserAdmin();
+                bool admin = await accountService.IsUserAdmin();
 
                 return Ok(admin);
             }

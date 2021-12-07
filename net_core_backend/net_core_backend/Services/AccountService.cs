@@ -244,129 +244,119 @@ namespace net_core_backend.Services
 
         public async Task ChangePassword(ChangePasswordRequest model)
         {
-            try
+            var db = contextFactory.CreateDbContext();
+            var user = await GetCurrentUser(db);
+
+            if (user == null)
             {
-                var user = await GetCurrentUser();
-                var db = contextFactory.CreateDbContext();
-
-                if (BC.Verify(model.CurrentPassword, user.Password))
-                {
-                    user.Password = BC.HashPassword(model.NewPassword);
-
-                    db.Update(user);
-                    await db.SaveChangesAsync();
-                }
-                else
-                {
-                    throw new ArgumentException("Current password is incorrect");
-                }
+                throw new ArgumentException("This user does not exist");
             }
-            catch(ArgumentException ex)
+
+            if (BC.Verify(model.CurrentPassword, user.Password))
             {
-                throw new ArgumentException(ex.Message);
+                user.Password = BC.HashPassword(model.NewPassword);
+
+                db.Update(user);
+                await db.SaveChangesAsync();
+            }
+            else
+            {
+                throw new ArgumentException("Current password is incorrect");
             }
         }
 
         public async Task<EditUserInfoModel> GetUserInfoDetails()
         {
-            try
-            {
-                var user = await GetCurrentUser();
+            var db = contextFactory.CreateDbContext();
+            var user = await GetCurrentUser(db);
 
-                return new EditUserInfoModel(user);
-            }
-            catch(ArgumentException ex)
+            if (user == null)
             {
-                throw new ArgumentException(ex.Message);
+                throw new ArgumentException("This user does not exist");
             }
+
+            return new EditUserInfoModel(user);
         }
 
         public async Task ChangeUserInfoDetails(EditUserInfoModel model)
         {
-            try
-            {
-                var user = await GetCurrentUser();
-                var db = contextFactory.CreateDbContext();
 
-                user.FirstName = model.FirstName ?? user.FirstName;
-                user.LastName = model.LastName ?? user.LastName;
-                user.Email = model.Email ?? user.Email;
-                user.Birthdate = Convert.ToDateTime(model.Birthdate);
-                user.Address = model.Address ?? user.Address;
-                user.City = model.City ?? user.City;
-                user.PostalCode = model.PostalCode ?? user.PostalCode;
-                user.Country = model.Country ?? user.Country;
+            var db = contextFactory.CreateDbContext();
+            var user = await GetCurrentUser(db);
 
-                db.Update(user);
-                await db.SaveChangesAsync();
-            }
-            catch (ArgumentException ex)
+            if (user == null)
             {
-                throw new ArgumentException(ex.Message);
+                throw new ArgumentException("This user does not exist");
             }
+
+            user.FirstName = model.FirstName ?? user.FirstName;
+            user.LastName = model.LastName ?? user.LastName;
+            user.Email = model.Email ?? user.Email;
+            user.Birthdate = Convert.ToDateTime(model.Birthdate);
+            user.Address = model.Address ?? user.Address;
+            user.City = model.City ?? user.City;
+            user.PostalCode = model.PostalCode ?? user.PostalCode;
+            user.Country = model.Country ?? user.Country;
+
+            db.Update(user);
+            await db.SaveChangesAsync();
         }
 
-        public async Task<bool> GetUserAdmin()
+        public async Task<bool> IsUserAdmin()
         {
-            try
-            {
-                var user = await GetCurrentUser();
+            var db = contextFactory.CreateDbContext();
+            var user = await GetCurrentUser(db);
 
-                if (user.Role == "Admin")
-                {
-                    return true;
-                }
-
-                return false;
-            }
-            catch (ArgumentException ex)
+            if (user == null)
             {
-                throw new ArgumentException(ex.Message);
+                throw new ArgumentException("This user does not exist");
             }
+
+            if (user.Role == "Admin")
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public async Task<UserNotificationsResponse> GetUserNotifications()
         {
-            try
-            {
-                var user = await GetCurrentUser();
+            var db = contextFactory.CreateDbContext();
+            var user = await GetCurrentUser(db);
 
-                var response = new UserNotificationsResponse()
-                {
-                    AbuseNotifications = user.AbuseNotifications
-                };
-                return response;
-            }
-            catch(ArgumentException ex)
+            if (user == null)
             {
-                throw new ArgumentException(ex.Message);
+                throw new ArgumentException("This user does not exist");
             }
-           
+
+            var response = new UserNotificationsResponse()
+            {
+                AbuseNotifications = user.AbuseNotifications
+            };
+            return response;           
         }
 
         public async Task SetUserNotifications(UserNotificationsRequest model)
         {
-            try
-            {
-                var user = await GetCurrentUser();
-                var db = contextFactory.CreateDbContext();
 
-                user.AbuseNotifications = model.AbuseNotifications;
+            var db = contextFactory.CreateDbContext();
+            var user = await GetCurrentUser(db);
 
-                db.Update(user);
-                await db.SaveChangesAsync();
-            }
-            catch(ArgumentException ex)
+            if (user == null)
             {
-                throw new ArgumentException(ex.Message);
+                throw new ArgumentException("This user does not exist");
             }
+
+            user.AbuseNotifications = model.AbuseNotifications;
+
+            db.Update(user);
+            await db.SaveChangesAsync();
         }
 
-        private async Task<Users> GetCurrentUser()
+        private async Task<Users> GetCurrentUser(OneBlinqDBContext db)
         {
             int userId = httpContext.GetCurrentUserId();
-
-            using var db = contextFactory.CreateDbContext();
 
             var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
 
