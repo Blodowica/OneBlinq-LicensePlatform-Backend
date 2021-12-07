@@ -244,47 +244,125 @@ namespace net_core_backend.Services
 
         public async Task ChangePassword(ChangePasswordRequest model)
         {
-            int userId = httpContext.GetCurrentUserId();
-
-            using var db = contextFactory.CreateDbContext();
-
-            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
-
-            if (user == null)
+            try
             {
-                throw new ArgumentException("Current user was not found");
+                var user = await GetCurrentUser();
+                var db = contextFactory.CreateDbContext();
+
+                if (BC.Verify(model.CurrentPassword, user.Password))
+                {
+                    user.Password = BC.HashPassword(model.NewPassword);
+
+                    db.Update(user);
+                    await db.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new ArgumentException("Current password is incorrect");
+                }
             }
-
-            if (BC.Verify(model.CurrentPassword, user.Password))
+            catch(ArgumentException ex)
             {
-                user.Password = BC.HashPassword(model.NewPassword);
-
-                db.Update(user);
-                await db.SaveChangesAsync();
-            }
-            else
-            {
-                throw new ArgumentException("Current password is incorrect");
+                throw new ArgumentException(ex.Message);
             }
         }
 
         public async Task<EditUserInfoModel> GetUserInfoDetails()
         {
-            int userId = httpContext.GetCurrentUserId();
-
-            using var db = contextFactory.CreateDbContext();
-
-            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
-
-            if (user == null)
+            try
             {
-                throw new ArgumentException("Current user was not found");
-            }
+                var user = await GetCurrentUser();
 
-            return new EditUserInfoModel(user);
+                return new EditUserInfoModel(user);
+            }
+            catch(ArgumentException ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
         }
 
         public async Task ChangeUserInfoDetails(EditUserInfoModel model)
+        {
+            try
+            {
+                var user = await GetCurrentUser();
+                var db = contextFactory.CreateDbContext();
+
+                user.FirstName = model.FirstName ?? user.FirstName;
+                user.LastName = model.LastName ?? user.LastName;
+                user.Email = model.Email ?? user.Email;
+                user.Birthdate = Convert.ToDateTime(model.Birthdate);
+                user.Address = model.Address ?? user.Address;
+                user.City = model.City ?? user.City;
+                user.PostalCode = model.PostalCode ?? user.PostalCode;
+                user.Country = model.Country ?? user.Country;
+
+                db.Update(user);
+                await db.SaveChangesAsync();
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
+        }
+
+        public async Task<bool> GetUserAdmin()
+        {
+            try
+            {
+                var user = await GetCurrentUser();
+
+                if (user.Role == "Admin")
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
+        }
+
+        public async Task<UserNotificationsResponse> GetUserNotifications()
+        {
+            try
+            {
+                var user = await GetCurrentUser();
+
+                var response = new UserNotificationsResponse()
+                {
+                    AbuseNotifications = user.AbuseNotifications
+                };
+                return response;
+            }
+            catch(ArgumentException ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
+           
+        }
+
+        public async Task SetUserNotifications(UserNotificationsRequest model)
+        {
+            try
+            {
+                var user = await GetCurrentUser();
+                var db = contextFactory.CreateDbContext();
+
+                user.AbuseNotifications = model.AbuseNotifications;
+
+                db.Update(user);
+                await db.SaveChangesAsync();
+            }
+            catch(ArgumentException ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
+        }
+
+        private async Task<Users> GetCurrentUser()
         {
             int userId = httpContext.GetCurrentUserId();
 
@@ -294,20 +372,10 @@ namespace net_core_backend.Services
 
             if (user == null)
             {
-                throw new ArgumentException("Current user was not found");
+                throw new ArgumentException("This user does not exist");
             }
 
-            user.FirstName = model.FirstName ?? user.FirstName;
-            user.LastName = model.LastName ?? user.LastName;
-            user.Email = model.Email ?? user.Email;
-            user.Birthdate = Convert.ToDateTime(model.Birthdate);
-            user.Address = model.Address ?? user.Address;
-            user.City = model.City ?? user.City;
-            user.PostalCode = model.PostalCode ?? user.PostalCode;
-            user.Country = model.Country ?? user.Country;
-
-            db.Update(user);
-            await db.SaveChangesAsync();
+            return user;
         }
     }
 }

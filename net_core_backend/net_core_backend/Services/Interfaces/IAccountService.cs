@@ -15,5 +15,8 @@ namespace net_core_backend.Services.Interfaces
         Task<EditUserInfoModel> GetUserInfoDetails();
         Task ChangeUserInfoDetails(EditUserInfoModel model);
         Task<bool> RevokeCookie(string token, string ipAddress);
+        Task<bool> GetUserAdmin();
+        Task<UserNotificationsResponse> GetUserNotifications();
+        Task SetUserNotifications(UserNotificationsRequest model);
     }
 }
