@@ -194,6 +194,12 @@ namespace net_core_backend.Models
                     .HasForeignKey(al => al.LicenseId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ActivationLogs_Licenses");
+
+                entity.HasOne(e => e.UniqueUser)
+                    .WithMany(e => e.ActivationLogs)
+                    .HasForeignKey(entity => entity.UniqueUserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ActivationLogs_UniqueUser");
             });
 
             modelBuilder.Entity<AccessTokens>(entity =>
@@ -261,16 +267,16 @@ namespace net_core_backend.Models
                     .HasConstraintName("FK_ActivateablePlugins_Products");
             });
 
-            modelBuilder.Entity<UniqueId>(entity =>
+            modelBuilder.Entity<UniqueUser>(entity =>
             {
                 entity.Property(e => e.Id)
                     .HasColumnName("id");
 
-                entity.Property(e => e.Product)
+                entity.Property(e => e.ExternalServiceName)
                     .IsRequired()
                     .HasColumnName("product");
 
-                entity.Property(e => e.UserProductId)
+                entity.Property(e => e.ExternalUserServiceId)
                     .IsRequired()
                     .HasColumnName("userProductId");
 

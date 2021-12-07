@@ -16,6 +16,8 @@ namespace net_core_backend.Models
         public string FigmaUserId { get; set; }
 
         public String Message { get; set; }
+        public int UniqueUserId { get; set; }
+        public virtual UniqueUser UniqueUser { get; set; }
 
         public ActivationLogs()
         {
