@@ -146,7 +146,7 @@ namespace net_core_backend.Migrations
                 });
 
             migrationBuilder.CreateTable(
-               name: "UniqueIds",
+               name: "UniqueUsers",
                columns: table => new
                {
                    id = table.Column<int>(nullable: false)
@@ -157,12 +157,6 @@ namespace net_core_backend.Migrations
                constraints: table =>
                {
                    table.PrimaryKey("PK_UniqueIds", x => x.id);
-                   table.ForeignKey(
-                       name: "FK_UniqueIds_Users",
-                       column: x => x.userProductId,
-                       principalTable: "Users",
-                       principalColumn: "id",
-                       onDelete: ReferentialAction.Restrict);
                });
 
 
@@ -220,7 +214,7 @@ namespace net_core_backend.Migrations
                 table: "Users");
 
             migrationBuilder.DropTable(
-            name: "UniqueIds");
+            name: "UniqueUsers");
 
             migrationBuilder.AlterColumn<string>(
                 name: "email",

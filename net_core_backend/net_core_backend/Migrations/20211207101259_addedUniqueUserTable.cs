@@ -6,11 +6,6 @@ namespace net_core_backend.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "UniqueUserId",
-                table: "ActivationLogs",
-                nullable: false,
-                defaultValue: 0);
 
             migrationBuilder.CreateTable(
                 name: "UniqueUser",
@@ -25,6 +20,12 @@ namespace net_core_backend.Migrations
                 {
                     table.PrimaryKey("PK_UniqueUser", x => x.id);
                 });
+
+            migrationBuilder.AddColumn<int>(
+                 name: "UniqueUserId",
+                 table: "ActivationLogs",
+                 nullable: false,
+                 defaultValue: 0);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ActivationLogs_UniqueUserId",
