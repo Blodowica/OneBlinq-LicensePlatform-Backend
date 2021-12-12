@@ -207,6 +207,36 @@ namespace net_core_backend.Controllers
             }
         }
 
+        [HttpPost("forgotten-password/request")]
+        public async Task<IActionResult> ForgottenPasswordRequest([FromBody] string email)
+        {
+            try
+            {
+                await accountService.ForgottenPasswordRequest(email);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("forgotten-password/verify")]
+        public async Task<IActionResult> ForgottenPasswordVerification([FromBody] ForgottenPasswordVerificationRequest request)
+        {
+            try
+            {
+                await accountService.ForgottenPasswordVerification(request);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [Authorize]
         [HttpPost("change-user-info")]
         public async Task<IActionResult> ChangeUserInfo([FromBody] EditUserInfoModel model)

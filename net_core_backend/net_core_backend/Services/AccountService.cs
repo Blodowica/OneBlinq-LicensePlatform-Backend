@@ -23,11 +23,16 @@ namespace net_core_backend.Services
     {
         private readonly IContextFactory contextFactory;
         private readonly IHttpContextAccessor httpContext;
+        private readonly IMailingService mailingService;
         private readonly AppSettings appSettings;
-        public AccountService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, IHttpContextAccessor httpContext) : base(_contextFactory)
+        public AccountService(IContextFactory _contextFactory, 
+            IOptions<AppSettings> appSettings, 
+            IHttpContextAccessor httpContext,
+            IMailingService mailingService) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             this.httpContext = httpContext;
+            this.mailingService = mailingService;
             this.appSettings = appSettings.Value;
         }
 
@@ -156,6 +161,66 @@ namespace net_core_backend.Services
             var jwtToken = GenerateJwtToken(rToken.User);
 
             return new VerificationResponse(rToken.User, jwtToken, newRefreshToken.Token);
+        }
+
+        public async Task ForgottenPasswordRequest(string email)
+        {
+            using var db = contextFactory.CreateDbContext();
+
+            var user = db.Users
+                .Include(x => x.ForgottenPasswordTokens)
+                .Where(x => x.Email.ToLower() == email.ToLower())
+                .FirstOrDefault();
+
+            if (user == null)
+                throw new ArgumentException("This email isn't registered in our system");
+
+            // Remove pending requests on new token generation for this email
+            foreach(var fPasswordReq in user.ForgottenPasswordTokens)
+            {
+                if (fPasswordReq.VerifiedAt != null) continue;
+                
+                fPasswordReq.ExpiresAt = DateTime.Now;
+                db.Update(fPasswordReq);
+            }
+
+            var tokenRequest = new ForgottenPasswordTokens()
+            {
+                ExpiresAt = DateTime.Now.AddMinutes(20),
+                IssuedAt = DateTime.Now,
+                Token = Guid.NewGuid().ToString("N"),
+            };
+
+            // Send email
+            mailingService.SendForgottenPasswordLink(tokenRequest.Token, email);
+
+            user.ForgottenPasswordTokens.Add(tokenRequest);
+            await db.SaveChangesAsync();
+        }
+
+        public async Task ForgottenPasswordVerification(ForgottenPasswordVerificationRequest request)
+        {
+            using var db = contextFactory.CreateDbContext();
+
+            var dateNow = DateTime.Now;
+
+            var verificationEntry = db.ForgottenPasswordTokens
+                .Include(x => x.User)
+                .Where(x => x.Token == request.Token)
+                .FirstOrDefault();
+
+            if (verificationEntry == null)
+                throw new ArgumentException("Invalid forgotten password token.");
+
+            if (verificationEntry.ExpiresAt < dateNow)
+                throw new ArgumentException("The request token has expired. Please try resetting your password again.");
+
+            verificationEntry.VerifiedAt = dateNow;
+            verificationEntry.ExpiresAt = dateNow;
+
+            verificationEntry.User.Password = BC.HashPassword(request.NewPassword);
+            db.Update(verificationEntry);
+            await db.SaveChangesAsync();
         }
 
         public async Task<bool> RevokeToken(string token, string ipAddress)
