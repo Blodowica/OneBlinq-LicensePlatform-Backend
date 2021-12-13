@@ -207,6 +207,7 @@ namespace net_core_backend.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("forgotten-password/request")]
         public async Task<IActionResult> ForgottenPasswordRequest([FromBody] string email)
         {
@@ -222,14 +223,20 @@ namespace net_core_backend.Controllers
             }
         }
 
+        [AllowAnonymous]
         [HttpPost("forgotten-password/verify")]
         public async Task<IActionResult> ForgottenPasswordVerification([FromBody] ForgottenPasswordVerificationRequest request)
         {
             try
             {
-                await accountService.ForgottenPasswordVerification(request);
+                var response = await accountService.ForgottenPasswordVerification(request);
 
-                return Ok();
+                if (response == null)
+                    return BadRequest(new { message = "Validation failed." });
+
+                setTokenCookie(response.RefreshToken);
+
+                return Ok(response);
             }
             catch (Exception ex)
             {

@@ -198,7 +198,7 @@ namespace net_core_backend.Services
             await db.SaveChangesAsync();
         }
 
-        public async Task ForgottenPasswordVerification(ForgottenPasswordVerificationRequest request)
+        public async Task<VerificationResponse> ForgottenPasswordVerification(ForgottenPasswordVerificationRequest request)
         {
             using var db = contextFactory.CreateDbContext();
 
@@ -221,6 +221,12 @@ namespace net_core_backend.Services
             verificationEntry.User.Password = BC.HashPassword(request.NewPassword);
             db.Update(verificationEntry);
             await db.SaveChangesAsync();
+
+            return await Login(new LoginRequest()
+            {
+                Email = verificationEntry.User.Email,
+                Password = request.NewPassword
+            }, null);
         }
 
         public async Task<bool> RevokeToken(string token, string ipAddress)

@@ -46,7 +46,8 @@ namespace net_core_backend.Services
         {
             var subject = "OneBlinq password recovery.";
             var content = $"Did you issue a forgotten password request for OneBlinq? Go to this URL and enter your new password:\n" +
-                $"{appSettings.ProductionFrontendUrl}/recovery?token={token}";
+                $"{appSettings.ProductionFrontendUrl}recovery?token={token}\n" +
+                $"The link will expire in 10 minutes";
             
             SendBasicEmail(subject, content, toEmail);
         }

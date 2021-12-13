@@ -15,6 +15,29 @@ namespace net_core_backend.Context
         {
             using var serviceScope = app.ApplicationServices.CreateScope();
             ApplyMigrations(serviceScope.ServiceProvider.GetService<IContextFactory>());
+            SeedDatabase(serviceScope.ServiceProvider.GetService<IContextFactory>());
+        }
+
+        private static void SeedDatabase(IContextFactory contextFactory)
+        {
+            using var db = contextFactory.CreateDbContext();
+
+            var user = new Users()
+            {
+                FirstName = "Aleks",
+                LastName = "Todorov",
+                GumroadID = "None",
+                Email = "notMyEmail@gmail.com",
+                Role = "User",
+                Password = BCrypt.Net.BCrypt.HashPassword("12345")
+            };
+
+            var dupe = db.Users.FirstOrDefault(x => x.Email == user.Email);
+            if (dupe != null) return;
+
+
+            db.Add(user);
+            db.SaveChanges();
         }
 
         private static void ApplyMigrations(IContextFactory contextFactory)
