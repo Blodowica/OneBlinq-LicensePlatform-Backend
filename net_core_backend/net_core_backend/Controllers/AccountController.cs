@@ -224,22 +224,6 @@ namespace net_core_backend.Controllers
         }
 
         [Authorize]
-        [HttpGet("is-user-admin")]
-        public async Task<IActionResult> IsUserAdmin()
-        {
-            try
-            {
-                bool admin = await accountService.IsUserAdmin();
-
-                return Ok(admin);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [Authorize]
         [HttpGet("get-notification-decisions")]
         public async Task<IActionResult> GetUserNotifications()
         {

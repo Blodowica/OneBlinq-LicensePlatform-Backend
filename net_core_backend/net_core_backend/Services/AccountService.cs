@@ -302,24 +302,6 @@ namespace net_core_backend.Services
             await db.SaveChangesAsync();
         }
 
-        public async Task<bool> IsUserAdmin()
-        {
-            var db = contextFactory.CreateDbContext();
-            var user = await GetCurrentUser(db);
-
-            if (user == null)
-            {
-                throw new ArgumentException("This user does not exist");
-            }
-
-            if (user.Role == "Admin")
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         public async Task<UserNotificationsResponse> GetUserNotifications()
         {
             var db = contextFactory.CreateDbContext();
