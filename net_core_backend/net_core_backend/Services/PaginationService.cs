@@ -277,14 +277,14 @@ namespace net_core_backend.Services
             }
 
             using var db = contextFactory.CreateDbContext();
-
+            var currentTime = DateTime.UtcNow;
             var filterQuery = db.FreeTrials
                 .OrderBy(x => x.Id)
                 //Global filtering
-                .Where(x => (x.Active == false) && (Convert.ToString(x.Id + x.FigmaUserId + x.PluginName + x.Active + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year +
+                .Where(x => (x.EndDate <= currentTime) && (Convert.ToString(x.Id + x.PluginName + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year + " " +
                          x.EndDate.Day + "-" + x.EndDate.Month + "-" + x.EndDate.Year + "statusfalse").ToLower()
                 .Contains(globalSearchString)) ||
-                    (x.Active == true) && (Convert.ToString(x.Id + x.FigmaUserId + x.PluginName + x.Active + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year +
+                    (x.EndDate > currentTime) && (Convert.ToString(x.Id + x.PluginName + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year + " " +
                       x.EndDate.Day + "-" + x.EndDate.Month + "-" + x.EndDate.Year + "statustrue").ToLower()
                 .Contains(globalSearchString))
                     || globalSearchString == "")
@@ -292,9 +292,11 @@ namespace net_core_backend.Services
                 .Where(x => x.Id == request.FilterId || request.FilterId == null)
                 .Where(x => x.FigmaUserId.Contains(request.FilterFigmaId) || request.FilterFigmaId == "")
                 .Where(x => x.PluginName.Contains(request.FilterPluginName) || request.FilterPluginName == "")
-                .Where(x => x.Active == request.FilterActive || request.FilterActive == null)
                 .Where(x => request.FilterStartDate == null || x.StartDate.Date == request.FilterStartDate.Value.Date.AddDays(1))
                 .Where(x => request.FilterEndDate == null || x.EndDate.Date == request.FilterEndDate.Value.Date.AddDays(1))
+                //Expiration filtering to check if license is active or inactive
+                .Where(x => x.EndDate <= currentTime || request.FilterActive == true || request.FilterActive == null)
+                .Where(x => x.EndDate > currentTime || x.EndDate == null || request.FilterActive == false || request.FilterActive == null)
                 .AsQueryable();
 
             //Pagination

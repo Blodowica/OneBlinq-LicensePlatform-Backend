@@ -63,25 +63,39 @@ namespace net_core_backend.Services
             {
                 if (freeTrial.Active) 
                 {
-                    if (freeTrial.EndDate.CompareTo(DateTime.UtcNow) < 0)
-                    {
-                        freeTrial.Active = false;
-                        db.Update(freeTrial);
-                        await db.SaveChangesAsync();
-                    }
-                    else
-                    {
-                        return FreeTrialStates.RUNNING;
-                    }
+                    return FreeTrialStates.RUNNING;
                 }
-
-                if (!freeTrial.Active)
+                else
                 {
                     return FreeTrialStates.EXPIRED;
                 }
             }
 
             return FreeTrialStates.DO_NOT_EXIST;
+        }
+
+        public async Task SetEndDate(int freeTrialId, DateTime newEndDate)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var freeTrial = db.FreeTrials.FirstOrDefault(ft => ft.Id == freeTrialId);
+                freeTrial.EndDate = newEndDate;
+
+                db.Update(freeTrial);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task ToggleFreeTrial(int freeTrialId)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var freeTrial = await db.FreeTrials.FirstOrDefaultAsync(ft => ft.Id == freeTrialId);
+                freeTrial.EndDate = freeTrial.Active ? DateTime.UtcNow.AddMinutes(-1) : DateTime.UtcNow.AddDays(14) ;
+
+                db.Update(freeTrial);
+                await db.SaveChangesAsync();
+            }
         }
     }
 }

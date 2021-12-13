@@ -239,10 +239,6 @@ namespace net_core_backend.Models
                 entity.Property(e => e.EndDate)
                 .IsRequired()
                 .HasColumnName("end_date");
-
-                entity.Property(e => e.Active)
-                .IsRequired()
-                .HasColumnName("active");
             });
 
             modelBuilder.Entity<ActivateablePlugins>(entity =>
