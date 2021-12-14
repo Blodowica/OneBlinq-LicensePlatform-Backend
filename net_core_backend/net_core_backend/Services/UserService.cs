@@ -58,7 +58,7 @@ namespace net_core_backend.Services
                             LicenseKey = l.LicenseKey,
                             ProductName = l.Product.ProductName,
                             Activations = l.ActivationLogs
-                                .Select(a => a.FigmaUserId)
+                                .Select(a => a.UniqueUserId)
                                 .Distinct()
                                 .Count()
                         }).ToList()

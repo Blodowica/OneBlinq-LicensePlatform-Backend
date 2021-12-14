@@ -60,7 +60,7 @@ namespace net_core_backend.Services
                 .Take(request.PageSize)
                 .Select(x => new PaginationLicenseItem {
                     Activations = x.ActivationLogs
-                                .Select(a => a.FigmaUserId)
+                                .Select(a => a.UniqueUserId)
                                 .Distinct()
                                 .Count(),
                     Active = x.Active,

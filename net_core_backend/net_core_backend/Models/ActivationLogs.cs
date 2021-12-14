@@ -13,10 +13,8 @@ namespace net_core_backend.Models
 
         public int? LicenseId { get; set; }
         //ADD user logging data here (e.g. IPadress, MacAdress, etc.)
-        public string FigmaUserId { get; set; }
-
         public String Message { get; set; }
-        public int UniqueUserId { get; set; }
+        public string UniqueUserId { get; set; }
         public virtual UniqueUser UniqueUser { get; set; }
 
         public ActivationLogs()

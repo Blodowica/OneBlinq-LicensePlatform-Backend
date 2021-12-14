@@ -181,9 +181,9 @@ namespace net_core_backend.Models
                     .IsRequired()
                     .HasColumnName("successful");
 
-                entity.Property(e => e.FigmaUserId)
+                entity.Property(e => e.UniqueUserId)
                     .IsRequired()
-                    .HasColumnName("figma_user_id");
+                    .HasColumnName("UniqueUserId");
 
                 entity.Property(e => e.Message)
                     .IsRequired()
