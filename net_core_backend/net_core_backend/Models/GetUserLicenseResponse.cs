@@ -8,6 +8,7 @@ namespace net_core_backend.Models
     public class GetUserLicenseResponse
     {
         public int id { get; set; }
+        public string LicenseKey  { get; set; }
         public string ProductName { get; set; }
         public int Activation { get; set; }
 

@@ -89,6 +89,7 @@ namespace net_core_backend.Services
                .Select(l => new GetUserLicenseResponse
                {
                    id = l.Id,
+                   LicenseKey= l.LicenseKey,
                    ProductName = l.Product.ProductName,
                    MaxUses = l.Product.MaxUses,
                    Activation = l.ActivationLogs
