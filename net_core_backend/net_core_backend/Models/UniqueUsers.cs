@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Models
 {
-    public class UniqueUser
+    public class UniqueUsers
     {
-        public UniqueUser()
+        public UniqueUsers()
         {
             ActivationLogs = new HashSet<ActivationLogs>();
         }

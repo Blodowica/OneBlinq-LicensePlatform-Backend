@@ -17,10 +17,13 @@ namespace net_core_backend.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
 
-            migrationBuilder.DropColumn(
+            migrationBuilder.AddColumn<string>(
                 name: "figma_user_id",
-                table: "ActivationLogs");
-            
+                table: "ActivationLogs",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
+
 
         }
     }

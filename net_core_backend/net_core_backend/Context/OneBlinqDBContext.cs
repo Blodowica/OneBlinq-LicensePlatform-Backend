@@ -24,6 +24,7 @@ namespace net_core_backend.Models
         public virtual DbSet<AccessTokens> AccessTokens { get; set; }
         public virtual DbSet<FreeTrials> FreeTrials { get; set; }
         public virtual DbSet<ActivateablePlugins> ActivateablePlugins { get; set; }
+        public virtual DbSet<UniqueUsers> UniqueUsers { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -183,7 +184,7 @@ namespace net_core_backend.Models
 
                 entity.Property(e => e.UniqueUserId)
                     .IsRequired()
-                    .HasColumnName("UniqueUserId");
+                    .HasColumnName("unique_user_id");
 
                 entity.Property(e => e.Message)
                     .IsRequired()
@@ -267,18 +268,18 @@ namespace net_core_backend.Models
                     .HasConstraintName("FK_ActivateablePlugins_Products");
             });
 
-            modelBuilder.Entity<UniqueUser>(entity =>
+            modelBuilder.Entity<UniqueUsers>(entity =>
             {
                 entity.Property(e => e.Id)
                     .HasColumnName("id");
 
                 entity.Property(e => e.ExternalServiceName)
                     .IsRequired()
-                    .HasColumnName("product");
+                    .HasColumnName("service");
 
                 entity.Property(e => e.ExternalUserServiceId)
                     .IsRequired()
-                    .HasColumnName("userProductId");
+                    .HasColumnName("external_user_Id");
 
             });
 

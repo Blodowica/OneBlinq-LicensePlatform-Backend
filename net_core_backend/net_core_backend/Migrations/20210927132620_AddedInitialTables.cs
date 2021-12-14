@@ -145,20 +145,6 @@ namespace net_core_backend.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
-            migrationBuilder.CreateTable(
-               name: "UniqueUsers",
-               columns: table => new
-               {
-                   id = table.Column<int>(nullable: false)
-                       .Annotation("SqlServer:Identity", "1, 1"),
-                   userProductId = table.Column<string>(maxLength: 100, nullable: true),
-                   product = table.Column<string>(maxLength: 100, nullable: false),
-               },
-               constraints: table =>
-               {
-                   table.PrimaryKey("PK_UniqueIds", x => x.id);
-               });
-
 
 
 
@@ -212,9 +198,6 @@ namespace net_core_backend.Migrations
             migrationBuilder.DropColumn(
                 name: "password",
                 table: "Users");
-
-            migrationBuilder.DropTable(
-            name: "UniqueUsers");
 
             migrationBuilder.AlterColumn<string>(
                 name: "email",
