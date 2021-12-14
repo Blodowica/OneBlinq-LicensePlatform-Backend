@@ -64,7 +64,7 @@ namespace net_core_backend
 
             services.AddSingleton<ILicenseKeyService, LicensesService>();
             
-            services.AddSingleton<IUniqueIdService, UniqueIdService>();
+            
 
             services.AddSingleton<IUserService, UserService>();
 
