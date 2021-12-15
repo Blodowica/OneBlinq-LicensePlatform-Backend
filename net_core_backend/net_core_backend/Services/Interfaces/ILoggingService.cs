@@ -7,6 +7,6 @@ namespace net_core_backend.Services.Interfaces
 {
     public interface ILoggingService
     {
-        Task AddActivationLog(String licenseKey, bool successful, String figmaUserId, string message);
+        Task AddActivationLog(String licenseKey, bool successful, String figmaUserId, string platformName, string message);
     }
 }
