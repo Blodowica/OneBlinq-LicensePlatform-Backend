@@ -17,6 +17,8 @@
     <Compile Remove="Migrations\20211102133755_test.Designer.cs" />
     <Compile Remove="Migrations\20211102210142_AddingMessageAndFigmaIdToActivationLog.cs" />
     <Compile Remove="Migrations\20211102210142_AddingMessageAndFigmaIdToActivationLog.Designer.cs" />
+    <Compile Remove="Migrations\20211207100959_addedUniqueUserTable.cs" />
+    <Compile Remove="Migrations\20211207100959_addedUniqueUserTable.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

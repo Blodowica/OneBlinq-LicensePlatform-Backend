@@ -145,6 +145,9 @@ namespace net_core_backend.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+
+
+
             migrationBuilder.CreateIndex(
                 name: "IX_ActivationLogs_LicenseId",
                 table: "ActivationLogs",
