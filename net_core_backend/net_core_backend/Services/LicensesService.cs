@@ -54,7 +54,7 @@ namespace net_core_backend.Services
                     x.EndedReason,
                     x.ExpiresAt,
                     Activations = x.ActivationLogs
-                                .Select(a => a.FigmaUserId)
+                                .Select(a => a.UniqueUser.ExternalUserServiceId)
                                 .Distinct()
                                 .Count(),
                     x.Active
@@ -99,7 +99,7 @@ namespace net_core_backend.Services
                    ProductName = l.Product.ProductName,
                    MaxUses = l.Product.MaxUses,
                    Activation = l.ActivationLogs
-                                .Select(a => a.FigmaUserId)
+                                .Select(a => a.UniqueUserId)
                                 .Distinct()
                                 .Count(),
                    ExpirationDate = l.ExpiresAt,
