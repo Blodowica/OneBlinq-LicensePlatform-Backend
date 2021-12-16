@@ -85,7 +85,9 @@ namespace net_core_backend.Services
             var licenses = await db.Licenses.
                 Where(l => l.UserId ==  userId)
                 .Include(x => x.Product)
+                .Include(u => u.User)
                 .Include(al => al.ActivationLogs)
+               .ThenInclude(un => un.UniqueUser)  
                .Select(l => new GetUserLicenseResponse
                {
                    id = l.Id,
@@ -98,7 +100,17 @@ namespace net_core_backend.Services
                                 .Count(),
                    ExpirationDate = l.ExpiresAt,
                    Reaccurence = l.Recurrence,
-                   Tier = l.Product.VariantName
+                   Tier = l.Product.VariantName,
+                  Email = l.User.Email,
+                  PurchaseLocation = l.PurchaseLocation,
+                  EndedReason= l.EndedReason,
+                  UniqUsers = l.ActivationLogs.Select(un => new GetUserLicenseResponse.UniqUser { 
+                    Id = un.UniqueUser.Id,
+                    externalUserId = Convert.ToInt32(un.UniqueUser.ExternalUserServiceId),
+                    Service= un.UniqueUser.ExternalServiceName,
+
+                  }).ToList()
+                  
                 
                })
                 .ToListAsync();

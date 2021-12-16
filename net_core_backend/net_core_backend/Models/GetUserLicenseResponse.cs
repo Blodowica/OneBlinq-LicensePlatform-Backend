@@ -12,6 +12,8 @@ namespace net_core_backend.Models
         public string ProductName { get; set; }
         public int Activation { get; set; }
 
+        public string Email { get; set; }
+
         public int MaxUses { get; set; }
 
         public string Reaccurence { get; set; }
@@ -21,6 +23,19 @@ namespace net_core_backend.Models
         public string Satus { get; set; }
 
         public string Tier { get; set; }
+
+        public string PurchaseLocation { get; set; }
+
+        public string EndedReason { get; set; }
+        
+        public List<UniqUser> UniqUsers  {get; set; }
+
+        public class UniqUser
+        {
+            public int Id { get; set; }
+            public int externalUserId { get; set; }
+            public string Service { get; set; }
+        }
     }
 
 }

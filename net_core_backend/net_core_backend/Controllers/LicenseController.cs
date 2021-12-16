@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Controllers
 {
-    [Authorize]
+   [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class LicenseController : ControllerBase
