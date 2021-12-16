@@ -278,19 +278,22 @@ namespace net_core_backend.Services
 
             using var db = contextFactory.CreateDbContext();
             var currentTime = DateTime.UtcNow;
+
             var filterQuery = db.FreeTrials
+                .Include(ft => ft.UniqueUser)
                 .OrderBy(x => x.Id)
                 //Global filtering
-                .Where(x => (x.EndDate <= currentTime) && (Convert.ToString(x.Id + x.PluginName + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year + " " +
+                .Where(x => (x.EndDate <= currentTime) && (Convert.ToString(x.Id + x.PluginName + x.UniqueUser.ExternalServiceName + x.UniqueUser.ExternalUserServiceId + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year + " " +
                          x.EndDate.Day + "-" + x.EndDate.Month + "-" + x.EndDate.Year + "statusfalse").ToLower()
                 .Contains(globalSearchString)) ||
-                    (x.EndDate > currentTime) && (Convert.ToString(x.Id + x.PluginName + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year + " " +
+                    (x.EndDate > currentTime) && (Convert.ToString(x.Id + x.PluginName + x.UniqueUser.ExternalServiceName + x.UniqueUser.ExternalUserServiceId + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year + " " +
                       x.EndDate.Day + "-" + x.EndDate.Month + "-" + x.EndDate.Year + "statustrue").ToLower()
                 .Contains(globalSearchString))
                     || globalSearchString == "")
                 //Column filtering
                 .Where(x => x.Id == request.FilterId || request.FilterId == null)
-                .Where(x => x.FigmaUserId.Contains(request.FilterFigmaId) || request.FilterFigmaId == "")
+                .Where(x => x.UniqueUser.ExternalUserServiceId.Contains(request.FilterUniqueUserId) || request.FilterUniqueUserId == "")
+                .Where(x => x.UniqueUser.ExternalServiceName.Contains(request.FilterPlatform) || request.FilterPlatform == "")
                 .Where(x => x.PluginName.Contains(request.FilterPluginName) || request.FilterPluginName == "")
                 .Where(x => request.FilterStartDate == null || x.StartDate.Date == request.FilterStartDate.Value.Date.AddDays(1))
                 .Where(x => request.FilterEndDate == null || x.EndDate.Date == request.FilterEndDate.Value.Date.AddDays(1))
@@ -305,7 +308,8 @@ namespace net_core_backend.Services
                 .Take(request.PageSize)
                 .Select(x => new PaginationFreeTrialItem
                 {
-                    FigmaUserId = x.FigmaUserId,
+                    UniqueUserId = x.UniqueUser.ExternalUserServiceId,
+                    Platform = x.UniqueUser.ExternalServiceName,
                     Active = x.Active,
                     PluginName = x.PluginName,
                     Id = x.Id,

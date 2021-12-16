@@ -22,7 +22,7 @@ namespace net_core_backend.Services
         {
             using var db = contextFactory.CreateDbContext();
             
-            var freeTrialState = await CheckFreeTrial(model.PluginName, model.FigmaUserId);
+            var freeTrialState = await CheckFreeTrial(model.PluginName, model.UniqueUserId, model.PlatformName);
             if (freeTrialState == FreeTrialStates.EXPIRED)
             {
                 throw new ArgumentException("A free trial was activated earlier and has already expired");
@@ -32,9 +32,21 @@ namespace net_core_backend.Services
                 throw new ArgumentException("A free trial was already activated and is still active");
             }
 
+            var uniqueUser = await db.UniqueUsers.FirstOrDefaultAsync(u => u.ExternalUserServiceId == model.UniqueUserId && u.ExternalServiceName == model.PlatformName);
+            if (uniqueUser == null)
+            {
+                uniqueUser = new UniqueUsers
+                {
+                    ExternalUserServiceId = model.UniqueUserId,
+                    ExternalServiceName = model.PlatformName
+                };
+
+                db.Add(uniqueUser);
+                await db.SaveChangesAsync();
+            }
             // creating a free trial with length of 1 day
-            FreeTrials freeTrial = new FreeTrials(1); // (!) check with PO how long a free trial should be
-            freeTrial.FigmaUserId = model.FigmaUserId;
+            FreeTrials freeTrial = new FreeTrials(14); // (!) check with PO how long a free trial should be
+            freeTrial.UniqueUserId = uniqueUser.Id;
             freeTrial.PluginName = model.PluginName;
 
             await db.AddAsync(freeTrial);
@@ -43,7 +55,7 @@ namespace net_core_backend.Services
 
         public async Task VerifyFreeTrial(FreeTrialRequest model)
         {
-            var freeTrialState = await CheckFreeTrial(model.PluginName, model.FigmaUserId);
+            var freeTrialState = await CheckFreeTrial(model.PluginName, model.UniqueUserId, model.PlatformName);
             if (freeTrialState == FreeTrialStates.EXPIRED)
             {
                 throw new ArgumentException("The free trial has already expired");
@@ -54,21 +66,20 @@ namespace net_core_backend.Services
             }
         }
 
-        public async Task<FreeTrialStates> CheckFreeTrial(string pluginName, string figmaUserId)
+        public async Task<FreeTrialStates> CheckFreeTrial(string pluginName, string uniqueUserId, string platformName)
         {
             using var db = contextFactory.CreateDbContext();
-            var freeTrial = await db.FreeTrials.Where(ft => ft.FigmaUserId == figmaUserId && ft.PluginName == pluginName).FirstOrDefaultAsync();
+            var freeTrial = await db.FreeTrials
+                .Include(ft => ft.UniqueUser)
+                .Where(
+                    ft => ft.PluginName == pluginName && 
+                    ft.UniqueUser.ExternalUserServiceId == uniqueUserId && 
+                    ft.UniqueUser.ExternalServiceName == platformName)
+                .FirstOrDefaultAsync();
 
             if (freeTrial != null)
             {
-                if (freeTrial.Active) 
-                {
-                    return FreeTrialStates.RUNNING;
-                }
-                else
-                {
-                    return FreeTrialStates.EXPIRED;
-                }
+                return freeTrial.Active ? FreeTrialStates.RUNNING : FreeTrialStates.EXPIRED;
             }
 
             return FreeTrialStates.DO_NOT_EXIST;

@@ -8,10 +8,11 @@ namespace net_core_backend.Models
 {
     public class FreeTrials : DefaultModel
     {
-        public string FigmaUserId { get; set; }
+        public int? UniqueUserId { get; set; }
         public string PluginName { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public virtual UniqueUsers UniqueUser { get; set; }
         [NotMapped]
         public bool Active => (EndDate == null || EndDate >= DateTime.UtcNow) ? true : false;
 

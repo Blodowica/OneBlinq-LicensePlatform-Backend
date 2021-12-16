@@ -8,7 +8,8 @@ namespace net_core_backend.Models.Pagination
     public class PaginationFreeTrialItem
     {
         public int Id { get; set; }
-        public string FigmaUserId { get; set; }
+        public string UniqueUserId { get; set; }
+        public string Platform { get; set; }
         public string PluginName { get; set; }
         public DateTime? StartDate { get; set; } = DateTime.UtcNow;
         public DateTime? EndDate { get; set; } = DateTime.UtcNow;

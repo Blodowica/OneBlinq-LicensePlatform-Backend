@@ -8,7 +8,8 @@ namespace net_core_backend.Models.Pagination
     public class PaginationFreeTrialRequest : PaginationBaseRequest
     {
         //per column
-        public string FilterFigmaId { get; set; }
+        public string FilterUniqueUserId { get; set; }
+        public string FilterPlatform { get; set; }
         public string FilterPluginName { get; set; }
         public DateTime? FilterStartDate { get; set; }
         public DateTime? FilterEndDate { get; set; }
