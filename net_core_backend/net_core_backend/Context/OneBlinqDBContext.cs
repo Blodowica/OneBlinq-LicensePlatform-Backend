@@ -24,6 +24,7 @@ namespace net_core_backend.Models
         public virtual DbSet<AccessTokens> AccessTokens { get; set; }
         public virtual DbSet<FreeTrials> FreeTrials { get; set; }
         public virtual DbSet<ActivateablePlugins> ActivateablePlugins { get; set; }
+        public virtual DbSet<UniqueUsers> UniqueUsers { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -185,9 +186,9 @@ namespace net_core_backend.Models
                     .IsRequired()
                     .HasColumnName("successful");
 
-                entity.Property(e => e.FigmaUserId)
+                entity.Property(e => e.UniqueUserId)
                     .IsRequired()
-                    .HasColumnName("figma_user_id");
+                    .HasColumnName("unique_user_id");
 
                 entity.Property(e => e.Message)
                     .IsRequired()
@@ -198,6 +199,12 @@ namespace net_core_backend.Models
                     .HasForeignKey(al => al.LicenseId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ActivationLogs_Licenses");
+
+                entity.HasOne(e => e.UniqueUser)
+                    .WithMany(e => e.ActivationLogs)
+                    .HasForeignKey(entity => entity.UniqueUserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ActivationLogs_UniqueUser");
             });
 
             modelBuilder.Entity<AccessTokens>(entity =>
@@ -265,8 +272,24 @@ namespace net_core_backend.Models
                     .HasConstraintName("FK_ActivateablePlugins_Products");
             });
 
+            modelBuilder.Entity<UniqueUsers>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasColumnName("id");
+
+                entity.Property(e => e.ExternalServiceName)
+                    .IsRequired()
+                    .HasColumnName("service");
+
+                entity.Property(e => e.ExternalUserServiceId)
+                    .IsRequired()
+                    .HasColumnName("external_user_Id");
+
+            });
+
             OnModelCreatingPartial(modelBuilder);
         }
+
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }

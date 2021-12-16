@@ -23,20 +23,21 @@ namespace net_core_backend.Services
             contextFactory = _contextFactory;
             this.mailingService = mailingService;
         }
-        public async Task AddActivationLog(string licenseKey, bool successful, String figmaUserId, string message)
+        public async Task AddActivationLog(string licenseKey, bool successful, string ExternalUniqueUserId, string platformName, string message)
         {
             using var db = contextFactory.CreateDbContext();
 
             var license = await db.Licenses
                 .Include(x => x.User)
                 .Include(x => x.ActivationLogs)
+                    .ThenInclude(x => x.UniqueUser)
                 .Include(x => x.Product)
                 .Where(x => x.LicenseKey == licenseKey)
                 .Select(x => new
                 {
                     License = x,
-                    UniqueFigmaIds = x.ActivationLogs
-                                .Select(a => a.FigmaUserId)
+                    UniqueUserIds = x.ActivationLogs
+                                .Select(a => a.UniqueUser.ExternalUserServiceId)
                                 .Distinct()
                                 .ToList(),
                     ProductMaxUses = x.Product.MaxUses,
@@ -49,17 +50,31 @@ namespace net_core_backend.Services
             // And if the CURRENT unique figma id count is already at max uses
             // Send an email to the admins
             if (successful && 
-                !license.UniqueFigmaIds.Contains(figmaUserId) && 
+                !license.UniqueUserIds.Contains(ExternalUniqueUserId) && 
                 license.ProductMaxUses > 0 && 
-                license.UniqueFigmaIds.Count() == license.ProductMaxUses)
+                license.UniqueUserIds.Count() == license.ProductMaxUses)
             {
                 mailingService.SendLicenseAbuseEmail(licenseKey, license.License.User.Email);
+            }
+
+            var UniqueUser = await db.UniqueUsers.FirstOrDefaultAsync(u => u.ExternalUserServiceId == ExternalUniqueUserId && u.ExternalServiceName == platformName);
+
+            if (UniqueUser == null)
+            {
+                UniqueUser = new UniqueUsers
+                {
+                    ExternalUserServiceId = ExternalUniqueUserId,
+                    ExternalServiceName = platformName
+                };
+
+                db.Add(UniqueUser);
+                await db.SaveChangesAsync();
             }
 
             ActivationLogs activationLog = new ActivationLogs(successful)
             {
                 License = license?.License,
-                FigmaUserId = figmaUserId,
+                UniqueUserId = UniqueUser.Id,
                 Message = message,
             };
 
