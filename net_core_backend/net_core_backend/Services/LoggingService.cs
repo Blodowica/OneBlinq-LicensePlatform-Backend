@@ -73,7 +73,7 @@ namespace net_core_backend.Services
 
             ActivationLogs activationLog = new ActivationLogs(successful)
             {
-                License = license.License,
+                License = license?.License,
                 UniqueUserId = UniqueUser.Id,
                 Message = message,
             };

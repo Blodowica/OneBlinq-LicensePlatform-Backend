@@ -26,7 +26,7 @@ namespace net_core_backend.Models
             this.FirstName = user.FirstName;
             this.LastName = user.LastName;
             this.Email = user.Email;
-            this.Birthdate = $"{user.Birthdate.Year}-{user.Birthdate.Month}-{user.Birthdate.Day}";
+            this.Birthdate = user.Birthdate.ToString("yyyy-MM-dd");
             this.Address = user.Address;
             this.City = user.City;
             this.PostalCode = user.PostalCode;

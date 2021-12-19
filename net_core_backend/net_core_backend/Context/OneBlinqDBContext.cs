@@ -76,6 +76,10 @@ namespace net_core_backend.Models
                 entity.Property(e => e.Password)
                     .HasColumnName("password")
                     .HasMaxLength(250);
+
+                entity.Property(e => e.AbuseNotifications)
+                .HasColumnName("send_abuse_notifications");
+
             });
 
             modelBuilder.Entity<RefreshTokens>(entity =>

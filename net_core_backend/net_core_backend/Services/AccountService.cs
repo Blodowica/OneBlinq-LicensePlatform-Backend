@@ -244,15 +244,12 @@ namespace net_core_backend.Services
 
         public async Task ChangePassword(ChangePasswordRequest model)
         {
-            int userId = httpContext.GetCurrentUserId();
-
-            using var db = contextFactory.CreateDbContext();
-
-            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
+            var db = contextFactory.CreateDbContext();
+            var user = await GetCurrentUser(db);
 
             if (user == null)
             {
-                throw new ArgumentException("Current user was not found");
+                throw new ArgumentException("This user does not exist");
             }
 
             if (BC.Verify(model.CurrentPassword, user.Password))
@@ -270,15 +267,12 @@ namespace net_core_backend.Services
 
         public async Task<EditUserInfoModel> GetUserInfoDetails()
         {
-            int userId = httpContext.GetCurrentUserId();
-
-            using var db = contextFactory.CreateDbContext();
-
-            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
+            var db = contextFactory.CreateDbContext();
+            var user = await GetCurrentUser(db);
 
             if (user == null)
             {
-                throw new ArgumentException("Current user was not found");
+                throw new ArgumentException("This user does not exist");
             }
 
             return new EditUserInfoModel(user);
@@ -286,15 +280,13 @@ namespace net_core_backend.Services
 
         public async Task ChangeUserInfoDetails(EditUserInfoModel model)
         {
-            int userId = httpContext.GetCurrentUserId();
 
-            using var db = contextFactory.CreateDbContext();
-
-            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
+            var db = contextFactory.CreateDbContext();
+            var user = await GetCurrentUser(db);
 
             if (user == null)
             {
-                throw new ArgumentException("Current user was not found");
+                throw new ArgumentException("This user does not exist");
             }
 
             user.FirstName = model.FirstName ?? user.FirstName;
@@ -308,6 +300,54 @@ namespace net_core_backend.Services
 
             db.Update(user);
             await db.SaveChangesAsync();
+        }
+
+        public async Task<UserNotificationsResponse> GetUserNotifications()
+        {
+            var db = contextFactory.CreateDbContext();
+            var user = await GetCurrentUser(db);
+
+            if (user == null)
+            {
+                throw new ArgumentException("This user does not exist");
+            }
+
+            var response = new UserNotificationsResponse()
+            {
+                AbuseNotifications = user.AbuseNotifications
+            };
+            return response;           
+        }
+
+        public async Task SetUserNotifications(UserNotificationsRequest model)
+        {
+
+            var db = contextFactory.CreateDbContext();
+            var user = await GetCurrentUser(db);
+
+            if (user == null)
+            {
+                throw new ArgumentException("This user does not exist");
+            }
+
+            user.AbuseNotifications = model.AbuseNotifications;
+
+            db.Update(user);
+            await db.SaveChangesAsync();
+        }
+
+        private async Task<Users> GetCurrentUser(OneBlinqDBContext db)
+        {
+            int userId = httpContext.GetCurrentUserId();
+
+            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                throw new ArgumentException("This user does not exist");
+            }
+
+            return user;
         }
     }
 }

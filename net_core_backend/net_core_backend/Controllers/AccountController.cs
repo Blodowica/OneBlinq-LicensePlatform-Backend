@@ -222,5 +222,37 @@ namespace net_core_backend.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [Authorize]
+        [HttpGet("get-notification-decisions")]
+        public async Task<IActionResult> GetUserNotifications()
+        {
+            try
+            {
+                var response = await accountService.GetUserNotifications();
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("set-notification-decisions")]
+        public async Task<IActionResult> SetUserNotifications([FromBody] UserNotificationsRequest model)
+        {
+            try
+            {
+                await accountService.SetUserNotifications(model);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
