@@ -17,6 +17,9 @@ namespace net_core_backend.Models
         public String City { get; set; }
         public String PostalCode { get; set; }
         public String Country { get; set; }
+
+        //says if you need to send abuse notifications to this (admin!) user or not
+        public bool AbuseNotifications { get; set; }
         public virtual ICollection<Licenses> Licenses { get; set; }
         public virtual ICollection<AccessTokens> AccessTokens { get; set; }
         public virtual ICollection<RefreshTokens> RefreshTokens { get; set; }

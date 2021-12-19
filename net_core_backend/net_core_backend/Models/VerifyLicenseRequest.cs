@@ -9,7 +9,10 @@ namespace net_core_backend.Models
     public class VerifyLicenseRequest
     {
         [Required]
-        public String FigmaUserId { get; set; } 
+        public String UniqueUserId { get; set; }
+
+        [Required]
+        public String PlatformName { get; set; }
 
         [Required]
         public String PluginName { get; set; }
