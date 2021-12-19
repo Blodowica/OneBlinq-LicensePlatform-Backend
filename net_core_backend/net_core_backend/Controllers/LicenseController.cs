@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Controllers
 {
-   [Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class LicenseController : ControllerBase
@@ -23,9 +23,9 @@ namespace net_core_backend.Controllers
             this.licenseKeyService = licenseKeyService;
             this.loggingService = loggingService;
             this.accessTokenService = accessTokenService;
-       
+
         }
-        
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLicense([FromRoute] int id)
@@ -55,6 +55,27 @@ namespace net_core_backend.Controllers
             }
             catch (Exception ex)
             {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("remove-unique-user/{uniqueId}")]
+
+        public async Task<IActionResult> RemoveUniqueUserIdLogs([FromRoute] int uniqueId)
+        {
+            try
+            {
+                if (uniqueId != 0)
+                {
+                    await loggingService.RemoveUniqueUserIdLogs(uniqueId);
+                    return Ok("User Succesfully Deleted");
+                }
+
+                return BadRequest("Something went wrong while deleting the unique user");
+            }
+            catch (Exception ex)
+            {
+
                 return BadRequest(new { message = ex.Message });
             }
         }

@@ -25,8 +25,7 @@ namespace net_core_backend.Services
         }
         public async Task AddActivationLog(string licenseKey, bool successful, string ExternalUniqueUserId, string platformName, string message)
         {
-            using var db = contextFactory.CreateDbContext();
-
+            using var db = contextFactory.CreateDbContext(); 
             var license = await db.Licenses
                 .Include(x => x.User)
                 .Include(x => x.ActivationLogs)
@@ -82,7 +81,23 @@ namespace net_core_backend.Services
             await db.SaveChangesAsync();
         }
 
-        [Obsolete("This thing doesnt work", true)]
+        public async Task RemoveUniqueUserIdLogs(int uniqueId )
+        {
+      
+            using var db = contextFactory.CreateDbContext();
+            foreach (ActivationLogs item in db.ActivationLogs)
+            {
+                if (item.UniqueUserId == uniqueId)
+                {
+                    db.ActivationLogs.Remove(item);
+                }
+
+            }
+            await db.SaveChangesAsync();
+        } 
+
+
+            [Obsolete("This thing doesnt work", true)]
         public String GetMacAddress()
         {
             String firstMacAddress = NetworkInterface

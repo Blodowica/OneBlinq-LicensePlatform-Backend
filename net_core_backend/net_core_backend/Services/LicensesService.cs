@@ -104,12 +104,19 @@ namespace net_core_backend.Services
                   Email = l.User.Email,
                   PurchaseLocation = l.PurchaseLocation,
                   EndedReason= l.EndedReason,
+
+
                   UniqUsers = l.ActivationLogs.Select(un => new GetUserLicenseResponse.UniqUser { 
                     Id = un.UniqueUser.Id,
                     externalUserId = Convert.ToInt32(un.UniqueUser.ExternalUserServiceId),
                     Service= un.UniqueUser.ExternalServiceName,
+                    CreatedAt= un.CreatedAt,
+                    
 
-                  }).ToList()
+                  }).ToList(),
+                  
+              
+
                   
                 
                })
