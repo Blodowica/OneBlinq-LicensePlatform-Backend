@@ -51,7 +51,6 @@ namespace net_core_backend.Services
             // And if the product max uses is more than 0
             // And if the CURRENT unique figma id count is already at max uses
             // Send an email to the admins
-            var test = !license.UniqueUserIds.Contains(ExternalUniqueUserId);
             if (successful &&
                 !license.UniqueUserIds.Contains(ExternalUniqueUserId) &&
                 license.ProductMaxUses > 0 &&
