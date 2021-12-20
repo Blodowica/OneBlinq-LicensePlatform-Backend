@@ -5,23 +5,13 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Models.Pagination
 {
-    public class PaginationLicenseRequest
+    public class PaginationLicenseRequest : PaginationBaseRequest
     {
-        //Filters
-        //global
-        public string GlobalFilter { get; set; }
-
         //per column
-        public int? FilterId { get; set; }
         public string FilterLicenseKey { get; set; }
         public string FilterEmail { get; set; }
         public int? FilterActivation { get; set; }
         public string FilterActive { get; set; }
         public string FilterProductName { get; set;}
-
-        //Pagination
-        public int PageNumber { get; set; } = 1;
-        public int PageSize { get; set; }
-
     }
 }

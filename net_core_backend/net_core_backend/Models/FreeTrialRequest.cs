@@ -9,8 +9,10 @@ namespace net_core_backend.Models
     public class FreeTrialRequest
     {
         [Required]
-        public String PluginName { set; get; }
+        public string PluginName { set; get; }
         [Required]
-        public  String FigmaUserId { set; get; }
+        public string UniqueUserId { get; set; }
+        [Required]
+        public string PlatformName { get; set; }
     }
 }
