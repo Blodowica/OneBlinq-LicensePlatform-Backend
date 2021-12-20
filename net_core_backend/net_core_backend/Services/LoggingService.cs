@@ -25,7 +25,7 @@ namespace net_core_backend.Services
         }
         public async Task AddActivationLog(string licenseKey, bool successful, string ExternalUniqueUserId, string platformName, string message)
         {
-            using var db = contextFactory.CreateDbContext(); 
+            using var db = contextFactory.CreateDbContext();
             var license = await db.Licenses
                 .Include(x => x.User)
                 .Include(x => x.ActivationLogs)
@@ -36,10 +36,12 @@ namespace net_core_backend.Services
                 {
                     License = x,
                     UniqueUserIds = x.ActivationLogs
-                                .Where(a => a.Successful)
                                 .Select(a => a.UniqueUser.ExternalUserServiceId)
-                                .Distinct()
                                 .ToList(),
+                    UniqueUsersCount = x.ActivationLogs
+                                .Select(a => a.UniqueUserId)
+                                .Distinct()
+                                .Count(),
                     ProductMaxUses = x.Product.MaxUses,
                 })
                 .FirstOrDefaultAsync();
@@ -49,10 +51,10 @@ namespace net_core_backend.Services
             // And if the product max uses is more than 0
             // And if the CURRENT unique figma id count is already at max uses
             // Send an email to the admins
-            if (successful && 
-                !license.UniqueUserIds.Contains(ExternalUniqueUserId) && 
-                license.ProductMaxUses > 0 && 
-                license.UniqueUserIds.Count() == license.ProductMaxUses)
+            if (successful &&
+                !license.UniqueUserIds.Contains(ExternalUniqueUserId) &&
+                license.ProductMaxUses > 0 &&
+                license.UniqueUsersCount == license.ProductMaxUses)
             {
                 mailingService.SendLicenseAbuseEmail(licenseKey, license.License.User.Email);
             }
