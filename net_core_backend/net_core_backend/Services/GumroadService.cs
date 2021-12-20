@@ -17,11 +17,11 @@ namespace net_core_backend.Services
 {
     public class GumroadService : DataService<DefaultModel>, IGumroadService
     {
-        private readonly IContextFactory contextFactory;
+        private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
         private readonly IMailingService mailingService;
         private readonly AppSettings appSettings;
         private readonly HttpClient httpClient;
-        public GumroadService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, HttpClient httpClient, IMailingService mailingService) : base(_contextFactory)
+        public GumroadService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IOptions<AppSettings> appSettings, HttpClient httpClient, IMailingService mailingService) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             this.mailingService = mailingService;

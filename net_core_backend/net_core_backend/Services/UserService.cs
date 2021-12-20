@@ -11,8 +11,8 @@ namespace net_core_backend.Services
 {
     public class UserService : DataService<DefaultModel>, IUserService
     {
-        private readonly IContextFactory contextFactory;
-        public UserService(IContextFactory _contextFactory) : base(_contextFactory)
+        private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
+        public UserService(IDbContextFactory<OneBlinqDBContext> _contextFactory) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
         }

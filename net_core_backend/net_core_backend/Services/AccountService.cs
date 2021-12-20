@@ -21,10 +21,10 @@ namespace net_core_backend.Services
 {
     public class AccountService : DataService<DefaultModel>, IAccountService
     {
-        private readonly IContextFactory contextFactory;
+        private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
         private readonly IHttpContextAccessor httpContext;
         private readonly AppSettings appSettings;
-        public AccountService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, IHttpContextAccessor httpContext) : base(_contextFactory)
+        public AccountService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IOptions<AppSettings> appSettings, IHttpContextAccessor httpContext) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             this.httpContext = httpContext;
@@ -183,7 +183,6 @@ namespace net_core_backend.Services
         {
             using (var db = contextFactory.CreateDbContext())
             {
-
                 if (await db.Users.FirstOrDefaultAsync(u => u.Email == requestInfo.Email) == null)
                 {
                     var user = new Users
@@ -202,7 +201,7 @@ namespace net_core_backend.Services
                     
                 }
                 throw new ArgumentException("Email already used");
-           
+
             }
 
         }
@@ -246,25 +245,27 @@ namespace net_core_backend.Services
         {
             int userId = httpContext.GetCurrentUserId();
 
-            using var db = contextFactory.CreateDbContext();
-
-            var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
-
-            if (user == null)
+            using (var db = contextFactory.CreateDbContext())
             {
-                throw new ArgumentException("Current user was not found");
-            }
 
-            if (BC.Verify(model.CurrentPassword, user.Password))
-            {
-                user.Password = BC.HashPassword(model.NewPassword);
+                var user = await db.Users.Where(u => u.Id == userId).FirstOrDefaultAsync();
 
-                db.Update(user);
-                await db.SaveChangesAsync();
-            }
-            else
-            {
-                throw new ArgumentException("Current password is incorrect");
+                if (user == null)
+                {
+                    throw new ArgumentException("Current user was not found");
+                }
+
+                if (BC.Verify(model.CurrentPassword, user.Password))
+                {
+                    user.Password = BC.HashPassword(model.NewPassword);
+
+                    db.Update(user);
+                    await db.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new ArgumentException("Current password is incorrect");
+                }
             }
         }
 

@@ -14,10 +14,10 @@ namespace net_core_backend.Context
         public static void PrepMigration(IApplicationBuilder app)
         {
             using var serviceScope = app.ApplicationServices.CreateScope();
-            ApplyMigrations(serviceScope.ServiceProvider.GetService<IContextFactory>());
+            ApplyMigrations(serviceScope.ServiceProvider.GetService<IDbContextFactory<OneBlinqDBContext>>());
         }
 
-        private static void ApplyMigrations(IContextFactory contextFactory)
+        private static void ApplyMigrations(IDbContextFactory<OneBlinqDBContext> contextFactory)
         {
             Console.WriteLine("--> Attempting to apply migrations...");
             try

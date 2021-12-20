@@ -14,10 +14,10 @@ namespace net_core_backend.Services
 {
     public class ExampleService : DataService<DefaultModel>, IExampleService
     {
-        private readonly IContextFactory contextFactory;
+        private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
         private readonly IHttpContextAccessor httpContext;
 
-        public ExampleService(IContextFactory _contextFactory, IHttpContextAccessor httpContextAccessor) : base(_contextFactory)
+        public ExampleService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IHttpContextAccessor httpContextAccessor) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             httpContext = httpContextAccessor;

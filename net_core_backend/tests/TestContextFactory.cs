@@ -7,26 +7,20 @@ using System.Text;
 
 namespace tests
 {
-    class TestContextFactory : IContextFactory
+    public class TestContextFactory : IDbContextFactory<OneBlinqDBContext>
     {
+        public DbContextOptions<OneBlinqDBContext> options { get; private set; }
 
         public TestContextFactory()
         {
-
+            options = new DbContextOptionsBuilder<OneBlinqDBContext>()
+                .UseInMemoryDatabase(Guid.NewGuid().ToString())
+                .Options;
         }
-        public OneBlinqDBContext CreateDbContext(string[] smth = null)
+
+        public OneBlinqDBContext CreateDbContext()
         {
-            var options = new DbContextOptionsBuilder<OneBlinqDBContext>();
-            options.UseInMemoryDatabase("TestDb");
-
-            var context = new OneBlinqDBContext(options.Options);
-
-            //guys, check if it is a correct way to do, because tutorials say thta it is
-
-            context.Database.EnsureDeleted();
-            context.Database.EnsureCreated();
-
-            return context;
+            return new OneBlinqDBContext(options);
         }
     }
 }

@@ -15,10 +15,10 @@ namespace net_core_backend.Services
 {
     public class ProductService : DataService<DefaultModel>, IProductService
     {
-        private readonly IContextFactory contextFactory;
+        private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
         private readonly AppSettings appSettings;
         private readonly HttpClient httpClient;
-        public ProductService(IContextFactory _contextFactory, IOptions<AppSettings> appSettings, HttpClient httpClient) : base(_contextFactory)
+        public ProductService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IOptions<AppSettings> appSettings, HttpClient httpClient) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             this.appSettings = appSettings.Value;

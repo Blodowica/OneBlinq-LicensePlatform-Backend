@@ -15,10 +15,10 @@ namespace net_core_backend.Services
 {
     public class LoggingService : DataService<DefaultModel>, ILoggingService
     {
-        private readonly IContextFactory contextFactory;
+        private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
         private readonly IMailingService mailingService;
 
-        public LoggingService(IContextFactory _contextFactory, IMailingService mailingService) : base(_contextFactory)
+        public LoggingService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IMailingService mailingService) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             this.mailingService = mailingService;
