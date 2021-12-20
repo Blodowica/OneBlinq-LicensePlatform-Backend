@@ -23,9 +23,9 @@ namespace net_core_backend.Controllers
             this.licenseKeyService = licenseKeyService;
             this.loggingService = loggingService;
             this.accessTokenService = accessTokenService;
-       
+
         }
-        
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetLicense([FromRoute] int id)
@@ -55,6 +55,27 @@ namespace net_core_backend.Controllers
             }
             catch (Exception ex)
             {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("remove-unique-user/{uniqueId}/{licenseId}")]
+
+        public async Task<IActionResult> RemoveUniqueUserIdLogs([FromRoute] int uniqueId, int licenseId)
+        {
+            try
+            {
+                if (uniqueId != 0)
+                {
+                    await loggingService.RemoveUniqueUserIdLogs(uniqueId, licenseId);
+                    return Ok("User Succesfully Deleted");
+                }
+
+                return BadRequest("Something went wrong while deleting the unique user");
+            }
+            catch (Exception ex)
+            {
+
                 return BadRequest(new { message = ex.Message });
             }
         }
