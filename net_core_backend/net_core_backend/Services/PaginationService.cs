@@ -21,7 +21,7 @@ namespace net_core_backend.Services
             contextFactory = _contextFactory;
         }
 
-        public async Task<PaginationLicenseResponse> GetLicenses(PaginationLicenseRequest request)
+        public async Task<PaginationResponse<PaginationLicenseItem>> GetLicenses(PaginationLicenseRequest request)
         {
             var globalSearchString = "";
             if (request.GlobalFilter != null)
@@ -77,18 +77,18 @@ namespace net_core_backend.Services
             {
                 maxPages = 1;
             }
-                
-            PaginationLicenseResponse response = new PaginationLicenseResponse
+
+            var response = new PaginationResponse<PaginationLicenseItem>
             {
                 MaxPages = maxPages,
-                Licenses = licenses
+                Records = licenses
             };
 
             return response;
 
         }
 
-        public async Task<PaginationUserResponse> GetUsers(PaginationUserRequest request)
+        public async Task<PaginationResponse<PaginationUserItem>> GetUsers(PaginationUserRequest request)
         {
             var globalSearchString = "";
             if (request.GlobalFilter != null)
@@ -135,17 +135,17 @@ namespace net_core_backend.Services
                 maxPages = 1;
             }
 
-            PaginationUserResponse response = new PaginationUserResponse
+            var response = new PaginationResponse<PaginationUserItem>
             {
                 MaxPages = maxPages,
-                Users = users
+                Records = users
             };
 
             return response;
 
         }
 
-        public async Task<PaginationProductResponse> GetProducts(PaginationProductRequest request)
+        public async Task<PaginationResponse<PaginationProductItem>> GetProducts(PaginationProductRequest request)
         {
             var globalSearchString = "";
             if (request.GlobalFilter != null)
@@ -197,17 +197,17 @@ namespace net_core_backend.Services
                 maxPages = 1;
             }
 
-            PaginationProductResponse response = new PaginationProductResponse
+            var response = new PaginationResponse<PaginationProductItem>
             {
                 MaxPages = maxPages,
-                Products = products
+                Records = products
             };
 
             return response;
 
         }
 
-        public async Task<PaginationAccessTokenResponse> GetAccesTokens(PaginationAccessTokenRequest request)
+        public async Task<PaginationResponse<PaginationAccessTokenItem>> GetAccesTokens(PaginationAccessTokenRequest request)
         {
             var globalSearchString = "";
             if (request.GlobalFilter != null)
@@ -256,10 +256,10 @@ namespace net_core_backend.Services
                 maxPages = 1;
             }
 
-            PaginationAccessTokenResponse response = new PaginationAccessTokenResponse
+            var response = new PaginationResponse<PaginationAccessTokenItem>
             {
                 MaxPages = maxPages,
-                AccessTokens = AccessTokens
+                Records = AccessTokens
             };
 
             return response;
@@ -267,7 +267,7 @@ namespace net_core_backend.Services
         }
 
 
-        public async Task<PaginationFreeTrialResponse> GetFreeTrails(PaginationFreeTrialRequest request)
+        public async Task<PaginationResponse<PaginationFreeTrialItem>> GetFreeTrails(PaginationFreeTrialRequest request)
         {
             var globalSearchString = "";
             if (request.GlobalFilter != null)
@@ -277,33 +277,39 @@ namespace net_core_backend.Services
             }
 
             using var db = contextFactory.CreateDbContext();
+            var currentTime = DateTime.UtcNow;
 
             var filterQuery = db.FreeTrials
+                .Include(ft => ft.UniqueUser)
                 .OrderBy(x => x.Id)
                 //Global filtering
-                .Where(x => (x.Active == false) && (Convert.ToString(x.Id + x.FigmaUserId + x.PluginName + x.Active + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year +
+                .Where(x => (x.EndDate <= currentTime) && (Convert.ToString(x.Id + x.PluginName + x.UniqueUser.ExternalServiceName + x.UniqueUser.ExternalUserServiceId + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year + " " +
                          x.EndDate.Day + "-" + x.EndDate.Month + "-" + x.EndDate.Year + "statusfalse").ToLower()
                 .Contains(globalSearchString)) ||
-                    (x.Active == true) && (Convert.ToString(x.Id + x.FigmaUserId + x.PluginName + x.Active + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year +
+                    (x.EndDate > currentTime) && (Convert.ToString(x.Id + x.PluginName + x.UniqueUser.ExternalServiceName + x.UniqueUser.ExternalUserServiceId + x.StartDate.Day + "-" + x.StartDate.Month + "-" + x.StartDate.Year + " " +
                       x.EndDate.Day + "-" + x.EndDate.Month + "-" + x.EndDate.Year + "statustrue").ToLower()
                 .Contains(globalSearchString))
                     || globalSearchString == "")
                 //Column filtering
                 .Where(x => x.Id == request.FilterId || request.FilterId == null)
-                .Where(x => x.FigmaUserId.Contains(request.FilterFigmaId) || request.FilterFigmaId == "")
+                .Where(x => x.UniqueUser.ExternalUserServiceId.Contains(request.FilterUniqueUserId) || request.FilterUniqueUserId == "")
+                .Where(x => x.UniqueUser.ExternalServiceName.Contains(request.FilterPlatform) || request.FilterPlatform == "")
                 .Where(x => x.PluginName.Contains(request.FilterPluginName) || request.FilterPluginName == "")
-                .Where(x => x.Active == request.FilterActive || request.FilterActive == null)
                 .Where(x => request.FilterStartDate == null || x.StartDate.Date == request.FilterStartDate.Value.Date.AddDays(1))
                 .Where(x => request.FilterEndDate == null || x.EndDate.Date == request.FilterEndDate.Value.Date.AddDays(1))
+                //Expiration filtering to check if license is active or inactive
+                .Where(x => x.EndDate <= currentTime || request.FilterActive == true || request.FilterActive == null)
+                .Where(x => x.EndDate > currentTime || x.EndDate == null || request.FilterActive == false || request.FilterActive == null)
                 .AsQueryable();
 
             //Pagination
             var FreeTrial = await filterQuery
                 .Skip((request.PageNumber - 1) * request.PageSize)
                 .Take(request.PageSize)
-                .Select(x => new PaginationFreeTrialsItem
+                .Select(x => new PaginationFreeTrialItem
                 {
-                    FigmaUserId = x.FigmaUserId,
+                    UniqueUserId = x.UniqueUser.ExternalUserServiceId,
+                    Platform = x.UniqueUser.ExternalServiceName,
                     Active = x.Active,
                     PluginName = x.PluginName,
                     Id = x.Id,
@@ -319,10 +325,10 @@ namespace net_core_backend.Services
                 maxPages = 1;
             }
 
-            PaginationFreeTrialResponse response = new PaginationFreeTrialResponse
+            var response = new PaginationResponse<PaginationFreeTrialItem>
             {
                 MaxPages = maxPages,
-                FreeTrials = FreeTrial
+                Records = FreeTrial
             };
 
             return response;

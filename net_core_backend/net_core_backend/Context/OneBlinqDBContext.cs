@@ -239,10 +239,6 @@ namespace net_core_backend.Models
                 .IsRequired()
                 .HasColumnName("plugin_name");
 
-                entity.Property(e => e.FigmaUserId)
-                .IsRequired()
-                .HasColumnName("figma_user_id");
-
                 entity.Property(e => e.StartDate)
                 .IsRequired()
                 .HasColumnName("start_date");
@@ -251,9 +247,15 @@ namespace net_core_backend.Models
                 .IsRequired()
                 .HasColumnName("end_date");
 
-                entity.Property(e => e.Active)
-                .IsRequired()
-                .HasColumnName("active");
+                entity.Property(e => e.UniqueUserId)
+                    .IsRequired()
+                    .HasColumnName("unique_user_id");
+
+                entity.HasOne(e => e.UniqueUser)
+                    .WithMany(e => e.FreeTrials)
+                    .HasForeignKey(entity => entity.UniqueUserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_FreeTrials_UniqueUser");
             });
 
             modelBuilder.Entity<ActivateablePlugins>(entity =>

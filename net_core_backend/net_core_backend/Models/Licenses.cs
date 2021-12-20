@@ -26,7 +26,6 @@ namespace net_core_backend.Models
         public virtual ICollection<ActivationLogs> ActivationLogs { get; set; }
 
         [NotMapped]
-        // Corrected the Active variable, becuase it was working incorrectly
         public bool Active => (ExpiresAt == null || ExpiresAt >= DateTime.UtcNow) ? true : false;
 
         public Licenses()

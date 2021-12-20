@@ -34,7 +34,7 @@ namespace net_core_backend.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
         }
 
@@ -50,7 +50,39 @@ namespace net_core_backend.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("set-end-date/{freeTrialId}")]
+        public async Task<IActionResult> EditEndDate([FromRoute] int freeTrialId, [FromBody] FreeTrialSetEndDateRequest model)
+        {
+            try
+            {
+                await freeTrialService.SetEndDate(freeTrialId, model.newEndDate);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost("toggle-trial/{freeTrialId}")]
+        public async Task<IActionResult> ToggleActive([FromRoute] int freeTrialId)
+        {
+            try
+            {
+                await freeTrialService.ToggleFreeTrial(freeTrialId);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
             }
         }
     }
