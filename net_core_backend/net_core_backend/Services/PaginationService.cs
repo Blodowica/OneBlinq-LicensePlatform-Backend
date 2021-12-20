@@ -38,16 +38,20 @@ namespace net_core_backend.Services
                 .Include(x => x.ActivationLogs)
                 .OrderBy(x => x.Id)
                 //Global filtering
-                .Where(x => ((x.ExpiresAt <= currentTime) && Convert.ToString(x.Id + x.LicenseKey + x.User.Email + x.ActivationLogs.Count() + "/" + x.Product.MaxUses + x.Product.ProductName + "statusfalse").ToLower()
+                .Where(x => ((x.ExpiresAt <= currentTime) && Convert.ToString(x.Id + x.LicenseKey + x.User.Email + x.ActivationLogs.Where(a => a.Successful).Select(a => a.UniqueUserId).Distinct().Count() + "/" + x.Product.MaxUses + x.Product.ProductName + "statusfalse").ToLower()
                     .Contains(globalSearchString)) ||
-                    ((x.ExpiresAt > currentTime || x.ExpiresAt == null) && Convert.ToString(x.Id + x.LicenseKey + x.User.Email + x.ActivationLogs.Count() + "/" + x.Product.MaxUses + x.Product.ProductName + "statustrue").ToLower()
+                    ((x.ExpiresAt > currentTime || x.ExpiresAt == null) && Convert.ToString(x.Id + x.LicenseKey + x.User.Email + x.ActivationLogs.Where(a => a.Successful).Select(a => a.UniqueUserId).Distinct().Count() + "/" + x.Product.MaxUses + x.Product.ProductName + "statustrue").ToLower()
                     .Contains(globalSearchString))
                     || globalSearchString == "")
                 //Column filtering
                 .Where(x => x.Id == request.FilterId || request.FilterId == null)
                 .Where(x => x.LicenseKey.Contains(request.FilterLicenseKey) || request.FilterLicenseKey == "")
                 .Where(x => x.User.Email.Contains(request.FilterEmail) || request.FilterEmail == "")
-                .Where(x => x.ActivationLogs.Count() == request.FilterActivation || request.FilterActivation == null)
+                .Where(x => x.ActivationLogs
+                                .Where(a => a.Successful)
+                                .Select(a => a.UniqueUserId)
+                                .Distinct()
+                                .Count() == request.FilterActivation || request.FilterActivation == null)
                 .Where(x => x.Product.ProductName.Contains(request.FilterProductName) || request.FilterProductName == "")
                 //Expiration filtering to check if license is active or inactive
                 .Where(x => x.ExpiresAt <= currentTime || request.FilterActive == "active" || request.FilterActive == "")
@@ -60,7 +64,8 @@ namespace net_core_backend.Services
                 .Take(request.PageSize)
                 .Select(x => new PaginationLicenseItem {
                     Activations = x.ActivationLogs
-                                .Select(a => a.UniqueUser.ExternalUserServiceId)
+                                .Where(a => a.Successful)
+                                .Select(a => a.UniqueUserId)
                                 .Distinct()
                                 .Count(),
                     Active = x.Active,

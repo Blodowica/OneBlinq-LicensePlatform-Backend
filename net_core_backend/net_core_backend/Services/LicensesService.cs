@@ -38,7 +38,9 @@ namespace net_core_backend.Services
                 .Where(x => x.Id == licenseId)
                 .Select(x => new
                 {
-                    ActivationLogs = x.ActivationLogs.Select(x => new
+                    ActivationLogs = x.ActivationLogs
+                    .OrderByDescending(a => a.CreatedAt)
+                    .Select(x => new
                     {
                         x.Id,
                         x.Message,
@@ -54,7 +56,8 @@ namespace net_core_backend.Services
                     x.EndedReason,
                     x.ExpiresAt,
                     Activations = x.ActivationLogs
-                                .Select(a => a.UniqueUser.ExternalUserServiceId)
+                                .Where(a => a.Successful)
+                                .Select(a => a.UniqueUserId)
                                 .Distinct()
                                 .Count(),
                     x.Active
@@ -102,6 +105,7 @@ namespace net_core_backend.Services
                    ProductName = l.Product.ProductName,
                    MaxUses = l.Product.MaxUses,
                    Activation = l.ActivationLogs
+                                .Where(a => a.Successful)
                                 .Select(a => a.UniqueUserId)
                                 .Distinct()
                                 .Count(),
