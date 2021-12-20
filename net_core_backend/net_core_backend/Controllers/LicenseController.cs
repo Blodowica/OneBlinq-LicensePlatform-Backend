@@ -83,12 +83,12 @@ namespace net_core_backend.Controllers
             {
                 await accessTokenService.CheckAccessToken(accessToken);
                 await licenseKeyService.VerifyLicense(model);
-                await loggingService.AddActivationLog(model.LicenseKey, true, model.UniqueUserId, model.PlatformName, $"User with Figma Id: \"{model.UniqueUserId}\" at {DateTime.UtcNow} successfully verified license with License Key: \"{model.LicenseKey}\"");
+                await loggingService.AddActivationLog(model.LicenseKey, true, model.UniqueUserId, model.PlatformName, $"External ID: \"{model.UniqueUserId}\" at {DateTime.UtcNow} on platform {model.PlatformName} successfully verified license with License Key: \"{model.LicenseKey}\"");
                 return Ok();
             }
             catch (Exception ex)
             {
-                var msg = $"User with Figma Id: \"{model.UniqueUserId}\" at {DateTime.UtcNow} did not verify license with License Key: \"{model.LicenseKey}\" successfully because of the problem: \"{ex.Message}\"";
+                var msg = $"External ID: \"{model.UniqueUserId}\" at {DateTime.UtcNow} on platform {model.PlatformName} failed verification using License Key: \"{model.LicenseKey}\"\nReason: \"{ex.Message}\"";
                 await loggingService.AddActivationLog(model.LicenseKey, false, model.UniqueUserId, model.PlatformName, msg);
                 return BadRequest(new { message = ex.Message });
             }

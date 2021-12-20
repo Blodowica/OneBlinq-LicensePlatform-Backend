@@ -37,6 +37,7 @@ namespace net_core_backend.Services
                 {
                     License = x,
                     UniqueUserIds = x.ActivationLogs
+                                .Where(a => a.Successful)
                                 .Select(a => a.UniqueUser.ExternalUserServiceId)
                                 .Distinct()
                                 .ToList(),
