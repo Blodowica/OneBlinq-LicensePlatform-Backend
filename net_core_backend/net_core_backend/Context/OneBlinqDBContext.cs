@@ -17,6 +17,7 @@ namespace net_core_backend.Models
         }
 
         public virtual DbSet<Users> Users { get; set; }
+        public virtual DbSet<ForgottenPasswordTokens> ForgottenPasswordTokens { get; set; }
         public virtual DbSet<RefreshTokens> RefreshTokens { get; set; }
         public virtual DbSet<Licenses> Licenses { get; set; }
         public virtual DbSet<Products> Products { get; set; }
@@ -29,6 +30,16 @@ namespace net_core_backend.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<ForgottenPasswordTokens>(entity =>
+            {
+                entity.HasOne(l => l.User)
+                    .WithMany(p => p.ForgottenPasswordTokens)
+                    .HasForeignKey(l => l.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_User_ForgottenPass");
+            });
+
             modelBuilder.Entity<Users>(entity =>
             {
                 entity.Property(e => e.Id)
