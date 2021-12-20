@@ -81,17 +81,14 @@ namespace net_core_backend.Services
             await db.SaveChangesAsync();
         }
 
-        public async Task RemoveUniqueUserIdLogs(int uniqueId )
+        public async Task RemoveUniqueUserIdLogs(int uniqueId , int licenseId )
         {
       
             using var db = contextFactory.CreateDbContext();
-            foreach (ActivationLogs item in db.ActivationLogs)
+            foreach (ActivationLogs item in db.ActivationLogs.Where(x => x.UniqueUserId ==  uniqueId && x.LicenseId == licenseId).ToList())
             {
-                if (item.UniqueUserId == uniqueId)
-                {
-                    db.ActivationLogs.Remove(item);
-                }
 
+                db.ActivationLogs.Remove(item);
             }
             await db.SaveChangesAsync();
         } 

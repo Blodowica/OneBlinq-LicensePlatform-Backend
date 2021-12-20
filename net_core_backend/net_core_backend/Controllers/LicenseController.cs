@@ -59,15 +59,15 @@ namespace net_core_backend.Controllers
             }
         }
 
-        [HttpDelete("remove-unique-user/{uniqueId}")]
+        [HttpDelete("remove-unique-user/{uniqueId}/{licenseId}")]
 
-        public async Task<IActionResult> RemoveUniqueUserIdLogs([FromRoute] int uniqueId)
+        public async Task<IActionResult> RemoveUniqueUserIdLogs([FromRoute] int uniqueId, int licenseId)
         {
             try
             {
                 if (uniqueId != 0)
                 {
-                    await loggingService.RemoveUniqueUserIdLogs(uniqueId);
+                    await loggingService.RemoveUniqueUserIdLogs(uniqueId, licenseId);
                     return Ok("User Succesfully Deleted");
                 }
 
