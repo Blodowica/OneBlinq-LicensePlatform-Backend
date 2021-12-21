@@ -39,13 +39,11 @@ namespace tests
             testContextFactory = new TestContextFactory();
 
             // Mocking appSettings
-            var config = new ConfigurationBuilder()
-            .AddJsonFile("appsettings.json", optional: false)
-            .Build();
-
-            var settings = config.Get<AppSettings>();
-
-            var mockAppSettings = Options.Create(settings);
+            var appSettings = new AppSettings
+            {
+                Secret = "1234567890abcdefghryjdghfVYDDDAB"
+            };
+            var mockAppSettings = Options.Create(appSettings);
 
             // Mocking IMailingService 
             var mockMailingService = new Mock<MailingService>(mockAppSettings);
