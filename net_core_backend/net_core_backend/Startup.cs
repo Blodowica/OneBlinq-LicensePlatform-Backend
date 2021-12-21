@@ -50,7 +50,12 @@ namespace net_core_backend
             });
             services.Configure<AppSettings>(Configuration);
 
-            services.AddSingleton<IContextFactory>(new ContextFactory(Configuration.GetConnectionString("SQLCONNSTR_Database")));
+            services.AddDbContextFactory<OneBlinqDBContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("SQLCONNSTR_Database"));
+            });
+
+            //services.AddSingleton<IContextFactory>(new ContextFactory(Configuration.GetConnectionString("SQLCONNSTR_Database")));
 
             services.AddSingleton<IExampleService, ExampleService>();
             

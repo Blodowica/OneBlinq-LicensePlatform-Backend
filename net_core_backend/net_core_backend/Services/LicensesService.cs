@@ -18,10 +18,10 @@ namespace net_core_backend.Services
 {
     public class LicensesService : DataService<DefaultModel>, ILicenseKeyService
     {
-        private readonly IContextFactory contextFactory;
         private readonly AppSettings appSettings;
         private readonly HttpClient httpClient;
-        public LicensesService(IContextFactory _contextFactory, IOptions<AppSettings> _appSettings, HttpClient _httpClient) : base(_contextFactory)
+        private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
+        public LicensesService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IOptions<AppSettings> _appSettings, HttpClient _httpClient) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             appSettings = _appSettings.Value;
