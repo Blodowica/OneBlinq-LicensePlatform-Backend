@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using net_core_backend.Models;
 
 namespace net_core_backend.Migrations
 {
     [DbContext(typeof(OneBlinqDBContext))]
-    partial class OneBlinqDBContextModelSnapshot : ModelSnapshot
+    [Migration("20211214222244_FixedUniqueUserTableAndReference")]
+    partial class FixedUniqueUserTableAndReference
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -111,35 +113,6 @@ namespace net_core_backend.Migrations
                     b.ToTable("ActivationLogs");
                 });
 
-            modelBuilder.Entity("net_core_backend.Models.ForgottenPasswordTokens", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("IssuedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("VerifiedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ForgottenPasswordTokens");
-                });
-
             modelBuilder.Entity("net_core_backend.Models.FreeTrials", b =>
                 {
                     b.Property<int>("Id")
@@ -148,9 +121,18 @@ namespace net_core_backend.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<bool>("Active")
+                        .HasColumnName("active")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime>("EndDate")
                         .HasColumnName("end_date")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("FigmaUserId")
+                        .IsRequired()
+                        .HasColumnName("figma_user_id")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PluginName")
                         .IsRequired()
@@ -161,14 +143,7 @@ namespace net_core_backend.Migrations
                         .HasColumnName("start_date")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("UniqueUserId")
-                        .IsRequired()
-                        .HasColumnName("unique_user_id")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
-
-                    b.HasIndex("UniqueUserId");
 
                     b.ToTable("FreeTrials");
                 });
@@ -350,10 +325,6 @@ namespace net_core_backend.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<bool>("AbuseNotifications")
-                        .HasColumnName("send_abuse_notifications")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Address")
                         .HasColumnName("address")
                         .HasColumnType("nvarchar(30)")
@@ -445,64 +416,6 @@ namespace net_core_backend.Migrations
                         .HasForeignKey("UniqueUserId")
                         .HasConstraintName("FK_ActivationLogs_UniqueUser")
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("net_core_backend.Models.ForgottenPasswordTokens", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("IssuedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Token")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("VerifiedAt")
-                        .HasColumnType("datetime2");
-                        
-                    b.HasKey("Id");
-                    b.HasIndex("UserId");
-                    b.ToTable("ForgottenPasswordTokens");
-                });
-
-            modelBuilder.Entity("net_core_backend.Models.FreeTrials", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnName("id")
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnName("end_date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PluginName")
-                        .IsRequired()
-                        .HasColumnName("plugin_name")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnName("start_date")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("UniqueUserId")
-                        .IsRequired()
-                        .HasColumnName("unique_user_id")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-                    b.HasIndex("UniqueUserId");
-                    b.ToTable("FreeTrials");
                 });
 
             modelBuilder.Entity("net_core_backend.Models.Licenses", b =>

@@ -17,6 +17,7 @@ namespace net_core_backend.Models
         }
 
         public virtual DbSet<Users> Users { get; set; }
+        public virtual DbSet<ForgottenPasswordTokens> ForgottenPasswordTokens { get; set; }
         public virtual DbSet<RefreshTokens> RefreshTokens { get; set; }
         public virtual DbSet<Licenses> Licenses { get; set; }
         public virtual DbSet<Products> Products { get; set; }
@@ -24,10 +25,21 @@ namespace net_core_backend.Models
         public virtual DbSet<AccessTokens> AccessTokens { get; set; }
         public virtual DbSet<FreeTrials> FreeTrials { get; set; }
         public virtual DbSet<ActivateablePlugins> ActivateablePlugins { get; set; }
+        public virtual DbSet<UniqueUsers> UniqueUsers { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
+            modelBuilder.Entity<ForgottenPasswordTokens>(entity =>
+            {
+                entity.HasOne(l => l.User)
+                    .WithMany(p => p.ForgottenPasswordTokens)
+                    .HasForeignKey(l => l.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_User_ForgottenPass");
+            });
+
             modelBuilder.Entity<Users>(entity =>
             {
                 entity.Property(e => e.Id)
@@ -75,6 +87,10 @@ namespace net_core_backend.Models
                 entity.Property(e => e.Password)
                     .HasColumnName("password")
                     .HasMaxLength(250);
+
+                entity.Property(e => e.AbuseNotifications)
+                .HasColumnName("send_abuse_notifications");
+
             });
 
             modelBuilder.Entity<RefreshTokens>(entity =>
@@ -181,9 +197,9 @@ namespace net_core_backend.Models
                     .IsRequired()
                     .HasColumnName("successful");
 
-                entity.Property(e => e.FigmaUserId)
+                entity.Property(e => e.UniqueUserId)
                     .IsRequired()
-                    .HasColumnName("figma_user_id");
+                    .HasColumnName("unique_user_id");
 
                 entity.Property(e => e.Message)
                     .IsRequired()
@@ -194,6 +210,12 @@ namespace net_core_backend.Models
                     .HasForeignKey(al => al.LicenseId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_ActivationLogs_Licenses");
+
+                entity.HasOne(e => e.UniqueUser)
+                    .WithMany(e => e.ActivationLogs)
+                    .HasForeignKey(entity => entity.UniqueUserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_ActivationLogs_UniqueUser");
             });
 
             modelBuilder.Entity<AccessTokens>(entity =>
@@ -228,10 +250,6 @@ namespace net_core_backend.Models
                 .IsRequired()
                 .HasColumnName("plugin_name");
 
-                entity.Property(e => e.FigmaUserId)
-                .IsRequired()
-                .HasColumnName("figma_user_id");
-
                 entity.Property(e => e.StartDate)
                 .IsRequired()
                 .HasColumnName("start_date");
@@ -240,9 +258,15 @@ namespace net_core_backend.Models
                 .IsRequired()
                 .HasColumnName("end_date");
 
-                entity.Property(e => e.Active)
-                .IsRequired()
-                .HasColumnName("active");
+                entity.Property(e => e.UniqueUserId)
+                    .IsRequired()
+                    .HasColumnName("unique_user_id");
+
+                entity.HasOne(e => e.UniqueUser)
+                    .WithMany(e => e.FreeTrials)
+                    .HasForeignKey(entity => entity.UniqueUserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
+                    .HasConstraintName("FK_FreeTrials_UniqueUser");
             });
 
             modelBuilder.Entity<ActivateablePlugins>(entity =>
@@ -261,8 +285,24 @@ namespace net_core_backend.Models
                     .HasConstraintName("FK_ActivateablePlugins_Products");
             });
 
+            modelBuilder.Entity<UniqueUsers>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasColumnName("id");
+
+                entity.Property(e => e.ExternalServiceName)
+                    .IsRequired()
+                    .HasColumnName("service");
+
+                entity.Property(e => e.ExternalUserServiceId)
+                    .IsRequired()
+                    .HasColumnName("external_user_Id");
+
+            });
+
             OnModelCreatingPartial(modelBuilder);
         }
+
 
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }

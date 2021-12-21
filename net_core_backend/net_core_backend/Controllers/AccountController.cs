@@ -207,6 +207,43 @@ namespace net_core_backend.Controllers
             }
         }
 
+        [AllowAnonymous]
+        [HttpPost("forgotten-password/request")]
+        public async Task<IActionResult> ForgottenPasswordRequest([FromBody] string email)
+        {
+            try
+            {
+                await accountService.ForgottenPasswordRequest(email);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [AllowAnonymous]
+        [HttpPost("forgotten-password/verify")]
+        public async Task<IActionResult> ForgottenPasswordVerification([FromBody] ForgottenPasswordVerificationRequest request)
+        {
+            try
+            {
+                var response = await accountService.ForgottenPasswordVerification(request);
+
+                if (response == null)
+                    return BadRequest(new { message = "Validation failed." });
+
+                setTokenCookie(response.RefreshToken);
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [Authorize]
         [HttpPost("change-user-info")]
         public async Task<IActionResult> ChangeUserInfo([FromBody] EditUserInfoModel model)
@@ -214,6 +251,38 @@ namespace net_core_backend.Controllers
             try
             {
                 await accountService.ChangeUserInfoDetails(model);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize]
+        [HttpGet("get-notification-decisions")]
+        public async Task<IActionResult> GetUserNotifications()
+        {
+            try
+            {
+                var response = await accountService.GetUserNotifications();
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [Authorize]
+        [HttpPost("set-notification-decisions")]
+        public async Task<IActionResult> SetUserNotifications([FromBody] UserNotificationsRequest model)
+        {
+            try
+            {
+                await accountService.SetUserNotifications(model);
 
                 return Ok();
             }

@@ -4,10 +4,13 @@ using Microsoft.Extensions.Options;
 using net_core_backend.Context;
 using net_core_backend.Helpers;
 using net_core_backend.Models;
+using net_core_backend.Models.GumroadRequests;
 using net_core_backend.Services.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 
@@ -15,10 +18,14 @@ namespace net_core_backend.Services
 {
     public class LicensesService : DataService<DefaultModel>, ILicenseKeyService
     {
+        private readonly AppSettings appSettings;
+        private readonly HttpClient httpClient;
         private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
         public LicensesService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IOptions<AppSettings> appSettings) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
+            appSettings = _appSettings.Value;
+            httpClient = _httpClient;
         }
 
         public async Task<GetLicenseResponse> GetLicenseDetails(int licenseId)
@@ -31,7 +38,9 @@ namespace net_core_backend.Services
                 .Where(x => x.Id == licenseId)
                 .Select(x => new
                 {
-                    ActivationLogs = x.ActivationLogs.Select(x => new
+                    ActivationLogs = x.ActivationLogs
+                    .OrderByDescending(a => a.CreatedAt)
+                    .Select(x => new
                     {
                         x.Id,
                         x.Message,
@@ -47,7 +56,8 @@ namespace net_core_backend.Services
                     x.EndedReason,
                     x.ExpiresAt,
                     Activations = x.ActivationLogs
-                                .Select(a => a.FigmaUserId)
+                                .Where(a => a.Successful)
+                                .Select(a => a.UniqueUserId)
                                 .Distinct()
                                 .Count(),
                     x.Active
@@ -85,22 +95,44 @@ namespace net_core_backend.Services
             var licenses = await db.Licenses.
                 Where(l => l.UserId ==  userId)
                 .Include(x => x.Product)
+                .Include(u => u.User)
                 .Include(al => al.ActivationLogs)
+               .ThenInclude(un => un.UniqueUser) 
                .Select(l => new GetUserLicenseResponse
                {
                    id = l.Id,
+                   LicenseKey= l.LicenseKey,
                    ProductName = l.Product.ProductName,
                    MaxUses = l.Product.MaxUses,
                    Activation = l.ActivationLogs
-                                .Select(a => a.FigmaUserId)
+                                .Where(a => a.Successful)
+                                .Select(a => a.UniqueUserId)
                                 .Distinct()
                                 .Count(),
                    ExpirationDate = l.ExpiresAt,
                    Reaccurence = l.Recurrence,
-                   Tier = l.Product.VariantName
-                
+                   Tier = l.Product.VariantName,
+                  Email = l.User.Email,
+                  PurchaseLocation = l.PurchaseLocation,
+                  EndedReason= l.EndedReason,
+
+                  
+                  UniqUsers = l.ActivationLogs.OrderByDescending(x => x.CreatedAt).Select(un => new GetUserLicenseResponse.UniqUser { 
+                    Id = un.UniqueUser.Id,
+                    externalUserId = Convert.ToInt32(un.UniqueUser.ExternalUserServiceId),
+                    Service= un.UniqueUser.ExternalServiceName,
+                    CreatedAt= un.CreatedAt,
+                  
+                  }).ToList(),
+                   
                })
                 .ToListAsync();
+
+            foreach (var item in licenses)
+            {
+             var users =  item.UniqUsers.GroupBy(x => x.externalUserId).Select(x => x.FirstOrDefault()).ToList();
+                item.UniqUsers = users;
+            }
             return licenses;
         }
 
@@ -108,18 +140,34 @@ namespace net_core_backend.Services
         {
             using (var db = contextFactory.CreateDbContext())
             {
-                var license = await db.Licenses.FirstOrDefaultAsync(l => l.Id == licenseId);
+                var license = await db.Licenses.Include(l => l.Product).FirstOrDefaultAsync(l => l.Id == licenseId);
                 if (license == null)
                 {
                     throw new ArgumentException("No license found with given id");
                 }
+
+                string shortURL;
+                using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, "https://api.gumroad.com/v2/products/" + license.Product.GumroadID))
+                {
+                    requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", appSettings.GumroadAccessToken);
+
+                    var response = await httpClient.SendAsync(requestMessage);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        throw new ArgumentException("Failed to fetch data from Gumroad");
+                    }
+                    var GumroadProductResult = await response.Content.ReadAsAsync<GumroadProductRequest.GumroadSingleProductRequest>();
+                    string URL = GumroadProductResult.product.short_url;
+                    shortURL = URL[(URL.LastIndexOf("/") + 1)..];
+                }
+
                 if (license.Active)
                 {
                     license.ExpiresAt = DateTime.UtcNow.AddSeconds(-1);
                     license.EndedReason = "Canceled by admin";
                     license.RestartedAt = null;
 
-                    //logic here to send disable license to gumroad
+                    await ToggleLicenseGumroadRequest(shortURL, license.LicenseKey, "disable");
                 }
                 else
                 {
@@ -127,11 +175,31 @@ namespace net_core_backend.Services
                     license.EndedReason = null;
                     license.RestartedAt = DateTime.UtcNow;
 
-                    //logic here to send enable license to gumroad
+                    await ToggleLicenseGumroadRequest(shortURL, license.LicenseKey, "enable");
                 }
 
                 db.Update(license);
                 await db.SaveChangesAsync();
+            }
+        }
+
+        private async Task ToggleLicenseGumroadRequest(string shortURL, string licenseKey, string urlSuffix)
+        {
+            using (var requestMessage = new HttpRequestMessage(HttpMethod.Put, "https://api.gumroad.com/v2/licenses/" + urlSuffix))
+            {
+                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", appSettings.GumroadAccessToken);
+                //add body as form
+                var nvc = new List<KeyValuePair<string, string>>();
+                nvc.Add(new KeyValuePair<string, string>("product_permalink", shortURL));
+                nvc.Add(new KeyValuePair<string, string>("license_key", licenseKey));
+
+                requestMessage.Content = new FormUrlEncodedContent(nvc);
+
+                var response = await httpClient.SendAsync(requestMessage);
+                if (!response.IsSuccessStatusCode)
+                {
+                    throw new ArgumentException("Failed to fetch data from Gumroad");
+                }
             }
         }
 
@@ -170,7 +238,7 @@ namespace net_core_backend.Services
 
                 if (!correctLicense)
                 {
-                    throw new ArgumentException($"This license can not be used to access plugin \"{model.PluginName}\"");
+                    throw new ArgumentException($"This license can not be used to access plugin '{model.PluginName}'");
                 }
             }
         }

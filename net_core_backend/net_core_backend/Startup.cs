@@ -68,6 +68,8 @@ namespace net_core_backend
             services.AddSingleton<IMailingService, MailingService>();
 
             services.AddSingleton<ILicenseKeyService, LicensesService>();
+            
+            
 
             services.AddSingleton<IUserService, UserService>();
 

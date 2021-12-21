@@ -23,22 +23,25 @@ namespace net_core_backend.Services
             contextFactory = _contextFactory;
             this.mailingService = mailingService;
         }
-        public async Task AddActivationLog(string licenseKey, bool successful, String figmaUserId, string message)
+        public async Task AddActivationLog(string licenseKey, bool successful, string ExternalUniqueUserId, string platformName, string message)
         {
             using var db = contextFactory.CreateDbContext();
-
             var license = await db.Licenses
                 .Include(x => x.User)
                 .Include(x => x.ActivationLogs)
+                    .ThenInclude(x => x.UniqueUser)
                 .Include(x => x.Product)
                 .Where(x => x.LicenseKey == licenseKey)
                 .Select(x => new
                 {
                     License = x,
-                    UniqueFigmaIds = x.ActivationLogs
-                                .Select(a => a.FigmaUserId)
-                                .Distinct()
+                    UniqueUserIds = x.ActivationLogs
+                                .Select(a => a.UniqueUser.ExternalUserServiceId)
                                 .ToList(),
+                    UniqueUsersCount = x.ActivationLogs
+                                .Select(a => a.UniqueUserId)
+                                .Distinct()
+                                .Count(),
                     ProductMaxUses = x.Product.MaxUses,
                 })
                 .FirstOrDefaultAsync();
@@ -48,18 +51,32 @@ namespace net_core_backend.Services
             // And if the product max uses is more than 0
             // And if the CURRENT unique figma id count is already at max uses
             // Send an email to the admins
-            if (successful && 
-                !license.UniqueFigmaIds.Contains(figmaUserId) && 
-                license.ProductMaxUses > 0 && 
-                license.UniqueFigmaIds.Count() == license.ProductMaxUses)
+            if (successful &&
+                !license.UniqueUserIds.Contains(ExternalUniqueUserId) &&
+                license.ProductMaxUses > 0 &&
+                license.UniqueUsersCount == license.ProductMaxUses)
             {
                 mailingService.SendLicenseAbuseEmail(licenseKey, license.License.User.Email);
             }
 
+            var UniqueUser = await db.UniqueUsers.FirstOrDefaultAsync(u => u.ExternalUserServiceId == ExternalUniqueUserId && u.ExternalServiceName == platformName);
+
+            if (UniqueUser == null)
+            {
+                UniqueUser = new UniqueUsers
+                {
+                    ExternalUserServiceId = ExternalUniqueUserId,
+                    ExternalServiceName = platformName
+                };
+
+                db.Add(UniqueUser);
+                await db.SaveChangesAsync();
+            }
+
             ActivationLogs activationLog = new ActivationLogs(successful)
             {
-                License = license.License,
-                FigmaUserId = figmaUserId,
+                License = license?.License,
+                UniqueUserId = UniqueUser.Id,
                 Message = message,
             };
 
@@ -67,7 +84,20 @@ namespace net_core_backend.Services
             await db.SaveChangesAsync();
         }
 
-        [Obsolete("This thing doesnt work", true)]
+        public async Task RemoveUniqueUserIdLogs(int uniqueId , int licenseId )
+        {
+      
+            using var db = contextFactory.CreateDbContext();
+            foreach (ActivationLogs item in db.ActivationLogs.Where(x => x.UniqueUserId ==  uniqueId && x.LicenseId == licenseId).ToList())
+            {
+
+                db.ActivationLogs.Remove(item);
+            }
+            await db.SaveChangesAsync();
+        } 
+
+
+            [Obsolete("This thing doesnt work", true)]
         public String GetMacAddress()
         {
             String firstMacAddress = NetworkInterface

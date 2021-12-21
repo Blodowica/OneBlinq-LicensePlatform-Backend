@@ -6,13 +6,11 @@ using System.Threading.Tasks;
 
 namespace net_core_backend.Models
 {
-    public class FreeTrialRequest
+    public class ForgottenPasswordVerificationRequest
     {
         [Required]
-        public string PluginName { set; get; }
+        public string Token { get; set; }
         [Required]
-        public string UniqueUserId { get; set; }
-        [Required]
-        public string PlatformName { get; set; }
+        public string NewPassword { get; set; }
     }
 }

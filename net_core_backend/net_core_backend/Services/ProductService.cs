@@ -45,12 +45,31 @@ namespace net_core_backend.Services
                     }
                     var GumroadProductsResult = await response.Content.ReadAsAsync<GumroadProductRequest>();
 
+                    //set all products no longer registered on gumroad to inactive
+                    foreach (var deletedProduct in localProducts.Where(p => !GumroadProductsResult.products.Any(p2 => p2.id == p.GumroadID)).ToList())
+                    {
+                        deletedProduct.Active = false;
+                        db.Update(deletedProduct);
+                        localProducts.Remove(deletedProduct);
+                    }
+                    await db.SaveChangesAsync();
+
                     foreach (var gumroadProduct in GumroadProductsResult.products)
                     {
-                        //go through every variant from products in gumroad
-                        foreach (var allProductsVariant in gumroadProduct.variants.Select(v => v.options).ToList().First())
+                        var Productvariants = gumroadProduct.variants.Select(v => v.options).ToList().First();
+                        //set all variants no longer registed on gumroad to inactive
+                        foreach (var deletedProduct in localProducts.Where(p => p.GumroadID == gumroadProduct.id).Where(p2 => !Productvariants.Any(v => v.name == p2.VariantName)).ToList())
                         {
-                            var variant = localProducts.FirstOrDefault(p => p.VariantName == allProductsVariant.name && p.ProductName == gumroadProduct.name);
+                            deletedProduct.Active = false;
+                            db.Update(deletedProduct);
+                            localProducts.Remove(deletedProduct);
+                        }
+                        await db.SaveChangesAsync();
+
+                        //go through every variant from products in gumroad
+                        foreach (var allProductsVariant in Productvariants)
+                        {
+                            var variant = localProducts.FirstOrDefault(p => p.VariantName == allProductsVariant.name && p.GumroadID == gumroadProduct.id);
                             if (variant == null)
                             {
                                 //generate a new product variant if there is none locally yet

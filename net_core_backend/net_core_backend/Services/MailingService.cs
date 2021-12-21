@@ -13,6 +13,7 @@ namespace net_core_backend.Services
     public interface IMailingService
     {
         void SendAccountCreationEmail(string toEmail);
+        void SendForgottenPasswordLink(string token, string toEmail);
         void SendLicenseAbuseEmail(string licenseId, string licenseEmail);
     }
 
@@ -39,6 +40,16 @@ namespace net_core_backend.Services
             {
                 SendBasicEmail(subject, content, adminemail);
             }
+        }
+
+        public void SendForgottenPasswordLink(string token, string toEmail)
+        {
+            var subject = "OneBlinq password recovery.";
+            var content = $"Did you issue a forgotten password request for OneBlinq? Go to this URL and enter your new password:\n" +
+                $"{appSettings.ProductionFrontendUrl}recovery?token={token}\n" +
+                $"The link will expire in 10 minutes";
+            
+            SendBasicEmail(subject, content, toEmail);
         }
 
         public void SendAccountCreationEmail(string toEmail)
