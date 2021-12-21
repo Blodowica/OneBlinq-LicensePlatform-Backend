@@ -25,7 +25,7 @@ namespace net_core_backend.Services
         private readonly IHttpContextAccessor httpContext;
         private readonly IMailingService mailingService;
         private readonly AppSettings appSettings;
-        public AccountService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IOptions<AppSettings> appSettings, IHttpContextAccessor httpContext) : base(_contextFactory)
+        public AccountService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IOptions<AppSettings> appSettings, IHttpContextAccessor httpContext, IMailingService mailingService) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             this.httpContext = httpContext;

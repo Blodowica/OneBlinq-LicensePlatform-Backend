@@ -19,7 +19,7 @@ namespace net_core_backend.Context
             SeedDatabase(serviceScope.ServiceProvider.GetService<IDbContextFactory<OneBlinqDBContext>>());
         }
 
-        private static void SeedDatabase(IDbContextFactory<OneBlinqDBContext>>() contextFactory)
+        private static void SeedDatabase(IDbContextFactory<OneBlinqDBContext> contextFactory)
         {
             using var db = contextFactory.CreateDbContext();
 

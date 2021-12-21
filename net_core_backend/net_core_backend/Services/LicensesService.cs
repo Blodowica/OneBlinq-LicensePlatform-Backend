@@ -21,7 +21,7 @@ namespace net_core_backend.Services
         private readonly AppSettings appSettings;
         private readonly HttpClient httpClient;
         private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
-        public LicensesService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IOptions<AppSettings> appSettings) : base(_contextFactory)
+        public LicensesService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IOptions<AppSettings> _appSettings, HttpClient _httpClient) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             appSettings = _appSettings.Value;
