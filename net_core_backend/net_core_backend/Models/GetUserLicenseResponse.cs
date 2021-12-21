@@ -36,7 +36,7 @@ namespace net_core_backend.Models
         public class UniqUser
         {
             public int Id { get; set; }
-            public int externalUserId { get; set; }
+            public string externalUserId { get; set; }
             public string Service { get; set; }
 
             public DateTime CreatedAt { get; set; }

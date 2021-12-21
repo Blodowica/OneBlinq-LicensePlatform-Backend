@@ -62,6 +62,7 @@ namespace net_core_backend.Services
                                 .Select(a => a.UniqueUserId)
                                 .Distinct()
                                 .Count(),
+                            MaxActivations = l.Product.MaxUses,
                         }).ToList()
                     })
                     .FirstOrDefaultAsync();

@@ -6,12 +6,7 @@ namespace net_core_backend.Models
 {
     public partial class OneBlinqDBContext : DbContext
     {
-        public OneBlinqDBContext()
-        {
-        }
-
-        public OneBlinqDBContext(DbContextOptions<OneBlinqDBContext> options)
-            : base(options)
+        public OneBlinqDBContext(DbContextOptions<OneBlinqDBContext> options) : base(options)
         {
 
         }

@@ -1,6 +1,8 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using net_core_backend.Context;
 using net_core_backend.Helpers;
+using net_core_backend.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,13 +22,11 @@ namespace net_core_backend.Services
     public class MailingService : IMailingService
     {
         private readonly AppSettings appSettings;
-        private readonly string[] HardcodedEmailAdmins = new string[1]
-        {
-            "thomasvandermolen2@gmail.com",
-        };
+        private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
 
-        public MailingService(IOptions<AppSettings> appSettings)
+        public MailingService(IDbContextFactory<OneBlinqDBContext> contextFactory, IOptions<AppSettings> appSettings)
         {
+            this.contextFactory = contextFactory;
             this.appSettings = appSettings.Value;
         }
 
@@ -35,10 +35,12 @@ namespace net_core_backend.Services
             var subject = "OneBlinq License Abuse";
             var content = $"One of your customers with email: {licenseEmail} recently overused one of his license keys with id: {licenseId}." +
                 $"\nTo take action please visit: {appSettings.ProductionFrontendUrl}";
-
-            foreach(var adminemail in HardcodedEmailAdmins)
+            using (var db = contextFactory.CreateDbContext())
             {
-                SendBasicEmail(subject, content, adminemail);
+                foreach (var adminToSendEmailTo in db.Users.Where(u => u.Role == "Admin" && u.AbuseNotifications))
+                {
+                    SendBasicEmail(subject, content, adminToSendEmailTo.Email);
+                }
             }
         }
 
