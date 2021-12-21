@@ -11,8 +11,8 @@ namespace net_core_backend.Services
 {
     public class FreeTrialService : DataService<DefaultModel>, IFreeTrialService
     {
-        private readonly IContextFactory contextFactory;
-        public FreeTrialService(IContextFactory _contextFactory) : base(_contextFactory)
+        private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
+        public FreeTrialService(IDbContextFactory<OneBlinqDBContext> _contextFactory) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
         }

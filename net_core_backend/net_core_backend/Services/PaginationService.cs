@@ -14,9 +14,9 @@ namespace net_core_backend.Services
 {
     public class PaginationService : DataService<DefaultModel>, IPaginationService
     {
-        private readonly IContextFactory contextFactory;
+        private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
         
-        public PaginationService(IContextFactory _contextFactory) : base(_contextFactory)
+        public PaginationService(IDbContextFactory<OneBlinqDBContext> _contextFactory) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
         }

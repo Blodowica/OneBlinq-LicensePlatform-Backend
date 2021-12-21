@@ -15,9 +15,9 @@ namespace net_core_backend.Services
 {
     public class AccessTokenService : DataService<DefaultModel>, IAccessTokenService
     {
-        private readonly IContextFactory contextFactory;
+        private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
         private readonly IHttpContextAccessor httpContext;
-        public AccessTokenService(IContextFactory _contextFactory, IHttpContextAccessor httpContext) : base(_contextFactory)
+        public AccessTokenService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IHttpContextAccessor httpContext) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             this.httpContext = httpContext;
