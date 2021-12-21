@@ -119,7 +119,7 @@ namespace net_core_backend.Services
                   
                   UniqUsers = l.ActivationLogs.OrderByDescending(x => x.CreatedAt).Where(x => x.Successful).Select(un => new GetUserLicenseResponse.UniqUser { 
                     Id = un.UniqueUser.Id,
-                    externalUserId = Convert.ToInt32(un.UniqueUser.ExternalUserServiceId),
+                    externalUserId = un.UniqueUser.ExternalUserServiceId,
                     Service= un.UniqueUser.ExternalServiceName,
                     CreatedAt= un.CreatedAt,
                   
