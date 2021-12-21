@@ -47,7 +47,10 @@ namespace tests
 
             var mockAppSettings = Options.Create(settings);
 
-            sut = new AccountService(testContextFactory, mockAppSettings, mockHttpContextAccessor.Object);
+            // Mocking IMailingService 
+            var mockMailingService = new Mock<MailingService>(mockAppSettings);
+
+            sut = new AccountService(testContextFactory, mockAppSettings, mockHttpContextAccessor.Object, mockMailingService.Object);
         }
 
         [Fact]
@@ -92,7 +95,7 @@ namespace tests
 
             await sut.ChangePassword(model);
 
-            // Reload method updates 
+            // Reload method updates the database you are using with the up-to-date data
             db.Entry(user).Reload(); 
 
             var user2 = await db.Users.FirstOrDefaultAsync((u => u.Email == user.Email));
