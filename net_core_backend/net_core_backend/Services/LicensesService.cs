@@ -117,7 +117,7 @@ namespace net_core_backend.Services
                   EndedReason= l.EndedReason,
 
                   
-                  UniqUsers = l.ActivationLogs.OrderByDescending(x => x.CreatedAt).Select(un => new GetUserLicenseResponse.UniqUser { 
+                  UniqUsers = l.ActivationLogs.OrderByDescending(x => x.CreatedAt).Where(x => x.Successful).Select(un => new GetUserLicenseResponse.UniqUser { 
                     Id = un.UniqueUser.Id,
                     externalUserId = Convert.ToInt32(un.UniqueUser.ExternalUserServiceId),
                     Service= un.UniqueUser.ExternalServiceName,
@@ -130,7 +130,7 @@ namespace net_core_backend.Services
 
             foreach (var item in licenses)
             {
-             var users =  item.UniqUsers.GroupBy(x => x.externalUserId).Select(x => x.FirstOrDefault()).ToList();
+             var users =  item.UniqUsers.GroupBy(x => x.Id).Select(x => x.FirstOrDefault()).ToList();
                 item.UniqUsers = users;
             }
             return licenses;
