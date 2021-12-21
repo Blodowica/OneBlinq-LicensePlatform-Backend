@@ -45,21 +45,21 @@ namespace net_core_backend.Services
         public void SendForgottenPasswordLink(string token, string toEmail)
         {
             var subject = "OneBlinq password recovery.";
-            var content = $"Did you issue a forgotten password request for OneBlinq? Go to this URL and enter your new password:\n" +
-                $"{appSettings.ProductionFrontendUrl}recovery?token={token}\n" +
-                $"The link will expire in 10 minutes";
-            
-            SendBasicEmail(subject, content, toEmail);
+
+            string Body = System.IO.File.ReadAllText("forgottenPassword.html");
+            Body = Body.Replace("#Mylink", $"{appSettings.ProductionFrontendUrl}recovery?token={token}\n");
+
+
+            SendBasicEmail(subject, Body, toEmail, true);
         }
 
         public void SendAccountCreationEmail(string toEmail)
         {
             var subject = "OneBlinq license account created.";
-            var content = $"You recently bought a license for one of OneBlinqs plugins. " +
-                $"We have created an account for you on our website so you can monitor your usage.\n" +
-                $"Visit: {appSettings.ProductionFrontendUrl}/login?email={toEmail} and register your password.";
-            
-            SendBasicEmail(subject, content, toEmail);
+            string Body = System.IO.File.ReadAllText("register.html");
+            Body = Body.Replace("#Mylink", $"{appSettings.ProductionFrontendUrl}/login?email={toEmail}");
+
+            SendBasicEmail(subject, Body, toEmail, true);
         }
 
         private void SendBasicEmail(string subjectContent, 
