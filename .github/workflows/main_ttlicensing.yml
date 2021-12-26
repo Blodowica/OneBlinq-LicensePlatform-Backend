@@ -26,6 +26,10 @@ jobs:
         working-directory: ./net_core_backend
 
         run: dotnet build --configuration Release
+        
+      - name: Test
+        working-directory: ./net_core_backend
+        run: dotnet test --no-build --verbosity normal
 
       - name: dotnet publish
         working-directory: ./net_core_backend
