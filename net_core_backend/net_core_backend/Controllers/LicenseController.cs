@@ -60,7 +60,6 @@ namespace net_core_backend.Controllers
             }
         }
 
-        [AllowAnonymous]
         [HttpPost("create")]
         public async Task<IActionResult> CreateLicense([FromBody] CreateLicenseRequest request)
         {
