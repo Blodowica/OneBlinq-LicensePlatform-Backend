@@ -89,24 +89,6 @@ namespace net_core_backend.Controllers
             }
         }
 
-        [AllowAnonymous]
-        [HttpPost("revoke-token")]
-        public async Task<IActionResult> RevokeToken([FromBody] RevokeTokenRequest model = null)
-        {
-            // accept token from request body or cookie
-            var token = model.Token ?? Request.Cookies["refreshToken"];
-
-            if (string.IsNullOrEmpty(token))
-                return BadRequest(new { message = "Token is required" });
-
-            var response = await accountService.RevokeToken(token, ipAddress());
-
-            if (!response)
-                return NotFound(new { message = "Token not found" });
-
-            return Ok(new { message = "Token revoked" });
-        }
-
 
         [AllowAnonymous]
         [HttpPost("revoke-cookie")]
