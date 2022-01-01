@@ -10,7 +10,8 @@ namespace net_core_backend.Services.Interfaces
     {
         Task<GetLicenseResponse> GetLicenseDetails(int licenseId);
         Task<List<GetUserLicenseResponse>> GetAllUserLicenses(int userId);
+        Task CreateLicense(string purchaseLocation, string currency, string recurrence, int userId, int price, int productId);
         Task VerifyLicense(VerifyLicenseRequest model);
-        Task toggleLicenseState(int licenseId);
+        Task ToggleLicenseState(int licenseId);
     }
 }
