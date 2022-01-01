@@ -33,17 +33,6 @@ namespace net_core_backend.Services
             this.appSettings = appSettings.Value;
         }
 
-
-        public async Task<Users> GetUserDetailsJWT(int id)
-        {
-            if (id == 0) throw new ArgumentException("There is no ID in the JWT Token");
-
-            using (var a = contextFactory.CreateDbContext())
-            {
-                return await a.Users.Where(x => x.Id == id).FirstOrDefaultAsync();
-            }
-        }
-
         public async Task<bool> RevokeCookie(string token, string ipAddress)
         {
             using var a = contextFactory.CreateDbContext();
@@ -226,26 +215,6 @@ namespace net_core_backend.Services
             }, null);
         }
 
-        public async Task<bool> RevokeToken(string token, string ipAddress)
-        {
-            using var a = contextFactory.CreateDbContext();
-
-            var rfToken = await a.RefreshTokens.FirstOrDefaultAsync(x => x.Token == token);
-
-            // return false if no user found with token
-            if (rfToken == null) return false;
-
-            // return false if token is not active
-            if (!rfToken.IsActive) return false;
-
-            // revoke token and save
-            rfToken.RevokedAt = DateTime.UtcNow;
-            rfToken.RevokedByIp = ipAddress;
-            a.Update(rfToken);
-            await a.SaveChangesAsync();
-
-            return true;
-        }
 
         public async Task CreateAdmin(AddUserRequest requestInfo)
         {
