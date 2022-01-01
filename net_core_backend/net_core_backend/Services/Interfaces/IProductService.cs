@@ -8,6 +8,7 @@ namespace net_core_backend.Services.Interfaces
 {
     public interface IProductService
     {
+        Task Create(string productName, string variantName, int maxUses);
         Task RefreshProduct();
         Task ToggleProduct(int productId);
         Task EditMaxUses(int productId, int maxUses);
