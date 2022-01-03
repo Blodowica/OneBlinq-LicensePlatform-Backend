@@ -25,6 +25,32 @@ namespace net_core_backend.Services
             this.httpClient = httpClient;
         }
 
+        public async Task Create(string productName, string variantName, int maxUses)
+        {
+            if (productName == null || productName == "")
+            {
+                throw new ArgumentException("Please give a valid productName");
+            }
+
+            using (var db = contextFactory.CreateDbContext())
+            {
+                if (db.Products.FirstOrDefault(p => p.ProductName.ToLower() == productName.ToLower() && p.VariantName.ToLower() == variantName.ToLower()) != null)
+                {
+                    throw new ArgumentException("Product with given productName and variantName already exists");
+                }
+                
+                var product = new Products
+                {
+                    ProductName = productName,
+                    VariantName = variantName,
+                    MaxUses = maxUses
+                };
+
+                db.Add(product);
+                await db.SaveChangesAsync();
+            }
+        }
+
         public async Task RefreshProduct()
         {
             //compare the local and gumroad products to get the local products up to date, this will also generate any new products not in the system

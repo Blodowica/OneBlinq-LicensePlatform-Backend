@@ -44,6 +44,7 @@ namespace net_core_backend.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
         [HttpGet("user-license/{userId}")]
         public async Task<IActionResult> GetUserLicenses([FromRoute] string userId)
         {
@@ -52,6 +53,21 @@ namespace net_core_backend.Controllers
                 var licenses = await licenseKeyService.GetAllUserLicenses(Convert.ToInt32(userId));
 
                 return Ok(licenses);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateLicense([FromBody] CreateLicenseRequest request)
+        {
+            try
+            {
+                await licenseKeyService.CreateLicense(request.PurchaseLocation, request.Currency, request.Recurrence, request.UserId, request.Price, request.ProductId);
+
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -86,7 +102,7 @@ namespace net_core_backend.Controllers
         {
             try
             {
-                await licenseKeyService.toggleLicenseState(Convert.ToInt32(licenseId));
+                await licenseKeyService.ToggleLicenseState(Convert.ToInt32(licenseId));
 
                 return Ok();
             }

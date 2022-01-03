@@ -12,6 +12,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace net_core_backend.Services
@@ -21,11 +22,13 @@ namespace net_core_backend.Services
         private readonly AppSettings appSettings;
         private readonly HttpClient httpClient;
         private readonly IDbContextFactory<OneBlinqDBContext> contextFactory;
+        private readonly Random random;
         public LicensesService(IDbContextFactory<OneBlinqDBContext> _contextFactory, IOptions<AppSettings> _appSettings, HttpClient _httpClient) : base(_contextFactory)
         {
             contextFactory = _contextFactory;
             appSettings = _appSettings.Value;
             httpClient = _httpClient;
+            random = new Random();
         }
 
         public async Task<GetLicenseResponse> GetLicenseDetails(int licenseId)
@@ -136,7 +139,36 @@ namespace net_core_backend.Services
             return licenses;
         }
 
-        public async Task toggleLicenseState(int licenseId)
+        public async Task CreateLicense(string purchaseLocation, string currency, string recurrence, int userId, int price, int productId)
+        {
+            using (var db = contextFactory.CreateDbContext())
+            {
+                var user = db.Users.Find(userId) ?? throw new ArgumentException("No user found with given Id");
+                var product = db.Products.Find(productId) ?? throw new ArgumentException("No product found with given Id");
+
+                string licenseKey = null;
+                while (db.Licenses.FirstOrDefault(l => licenseKey == null || l.LicenseKey == licenseKey) != null)
+                {
+                    licenseKey = RandomLicenseKey();
+                }                
+
+                var license = new Licenses
+                {
+                    PurchaseLocation = purchaseLocation,
+                    Currency = currency,
+                    Recurrence = recurrence,
+                    UserId = userId,
+                    Price = price,
+                    ProductId = productId,
+                    LicenseKey = licenseKey
+                };
+
+                db.Add(license);
+                await db.SaveChangesAsync();
+            }
+        }
+
+        public async Task ToggleLicenseState(int licenseId)
         {
             using (var db = contextFactory.CreateDbContext())
             {
@@ -241,6 +273,12 @@ namespace net_core_backend.Services
                     throw new ArgumentException($"This license can not be used to access plugin '{model.PluginName}'");
                 }
             }
+        }
+
+        private string RandomLicenseKey()
+        {
+            string randomString = Regex.Replace(Guid.NewGuid().ToString("N").ToUpper(), ".{4}", "$0-");
+            return randomString.Remove(19);
         }
     }
 }

@@ -22,7 +22,22 @@ namespace net_core_backend.Controllers
             this.productService = productService;
           
         }
-        
+
+        [HttpPost("create")]
+        public async Task<IActionResult> ToggleProduct([FromBody] CreateProductRequest request)
+        {
+            try
+            {
+                await productService.Create(request.ProductName, request.VariantName, request.MaxUses);
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPost("toggle-product/{productId}")]
         public async Task<IActionResult> ToggleProduct([FromRoute] string productId)
         {

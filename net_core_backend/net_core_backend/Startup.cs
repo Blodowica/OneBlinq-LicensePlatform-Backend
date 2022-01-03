@@ -68,8 +68,6 @@ namespace net_core_backend
             services.AddSingleton<IMailingService, MailingService>();
 
             services.AddSingleton<ILicenseKeyService, LicensesService>();
-            
-            
 
             services.AddSingleton<IUserService, UserService>();
 
@@ -79,9 +77,11 @@ namespace net_core_backend
 
             services.AddSingleton<IFreeTrialService, FreeTrialService>();
 
-            services.AddSingleton<HttpClient>();
+            services.AddSingleton<IUniqueUserService, UniqueUserService>();
+
             services.AddSingleton<IPaginationService, PaginationService>();
 
+            services.AddSingleton<HttpClient>();
 
             // Causes error when running, don't exactly know why (for pagination)
            /* services.AddScoped<ILicenseRepository, LicenseRepository>();*/
