@@ -34,7 +34,7 @@ namespace net_core_backend.Services
 
             using (var db = contextFactory.CreateDbContext())
             {
-                if (db.Products.FirstOrDefault(p => p.ProductName == productName && p.VariantName == variantName) != null)
+                if (db.Products.FirstOrDefault(p => p.ProductName.ToLower() == productName.ToLower() && p.VariantName.ToLower() == variantName.ToLower()) != null)
                 {
                     throw new ArgumentException("Product with given productName and variantName already exists");
                 }

@@ -277,11 +277,8 @@ namespace net_core_backend.Services
 
         private string RandomLicenseKey()
         {
-            const string chars = "ABCDEFGHIJKLMNPQRSTUVWXYZ0123456789";
-            string randomString = new string(Enumerable.Repeat(chars, 32)
-              .Select(s => s[random.Next(s.Length)]).ToArray());
-            string randomStringWithDashes = Regex.Replace(randomString, ".{8}", "$0-");
-            return randomStringWithDashes.Remove(randomStringWithDashes.Length - 1);
+            string randomString = Regex.Replace(Guid.NewGuid().ToString("N").ToUpper(), ".{4}", "$0-");
+            return randomString.Remove(19);
         }
     }
 }

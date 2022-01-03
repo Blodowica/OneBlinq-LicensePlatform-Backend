@@ -30,17 +30,10 @@ namespace net_core_backend.Services
                 string randomId = null;
                 while (randomId == null || await db.UniqueUsers.FirstOrDefaultAsync(u => u.ExternalUserServiceId == randomId) != null)
                 {
-                    randomId = RandomId();
+                    randomId = Guid.NewGuid().ToString("N");
                 }
                 return new CreateUniqueIdResponse(randomId);
             }
-        }
-
-        private string RandomId()
-        {
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            return new string(Enumerable.Repeat(chars, 20)
-              .Select(s => s[random.Next(s.Length)]).ToArray());
         }
     }
 }
