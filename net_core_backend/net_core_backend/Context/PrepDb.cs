@@ -17,6 +17,7 @@ namespace net_core_backend.Context
 
             ApplyMigrations(serviceScope.ServiceProvider.GetService<IDbContextFactory<OneBlinqDBContext>>());
             SeedDatabase(serviceScope.ServiceProvider.GetService<IDbContextFactory<OneBlinqDBContext>>());
+            SeedAdminDatabas(serviceScope.ServiceProvider.GetService<IDbContextFactory<OneBlinqDBContext>>());
         }
 
         private static void SeedDatabase(IDbContextFactory<OneBlinqDBContext> contextFactory)
@@ -33,15 +34,36 @@ namespace net_core_backend.Context
                 Password = BCrypt.Net.BCrypt.HashPassword("12345")
             };
 
+      
+
             var dupe = db.Users.FirstOrDefault(x => x.Email == user.Email);
             if (dupe != null) return;
-
 
             db.Add(user);
             db.SaveChanges();
         }
+        private static void SeedAdminDatabas(IDbContextFactory<OneBlinqDBContext> contextFactory)
+        {
+            using var db = contextFactory.CreateDbContext();
 
-        private static void ApplyMigrations(IDbContextFactory<OneBlinqDBContext> contextFactory)
+            var Adminuser = new Users()
+            {
+                FirstName = "Micheal",
+                LastName = "Jackson",
+                GumroadID = "None",
+                Email = "notHisEmail@gmail.com",
+                Role = "Admin",
+                Password = BCrypt.Net.BCrypt.HashPassword("12345")
+            };
+
+            var dupe = db.Users.FirstOrDefault(x => x.Email == Adminuser.Email);
+            if (dupe != null) return;
+
+            db.Add(Adminuser);
+            db.SaveChanges();
+        }
+
+            private static void ApplyMigrations(IDbContextFactory<OneBlinqDBContext> contextFactory)
         {
             Console.WriteLine("--> Attempting to apply migrations...");
             try
