@@ -31,29 +31,7 @@ namespace tests
         {
             String licenseKey = "SuperSecretLicenseKey";
 
-            var product = new Products()
-            {
-                ProductName = "Cool name",
-            };
-
-            var user = new Users()
-            {
-                Email = "coll@gmail.com"
-            };
-
-            var license = new Licenses()
-            {
-                LicenseKey = licenseKey,
-                Product = product,
-                User = user
-            };
-
             var db = testContextFactory.CreateDbContext();
-            await db.Products.AddAsync(product);
-            await db.Users.AddAsync(user);
-            await db.SaveChangesAsync();
-            await db.Licenses.AddAsync(license);
-            await db.SaveChangesAsync();
 
             bool successful = true;
             String ExternalUniqueUserId = "SuperUniqueUserId";
@@ -110,21 +88,16 @@ namespace tests
             await db.ActivationLogs.AddAsync(actLog2);
             await db.SaveChangesAsync();
 
-            var dbUniqueUser = await db.UniqueUsers.Include(us => us.ActivationLogs).FirstOrDefaultAsync(us => us.ExternalUserServiceId == uniqueUser.ExternalUserServiceId);
+            var dbUniqueUser = await db.UniqueUsers.FirstOrDefaultAsync(us => us.ExternalUserServiceId == uniqueUser.ExternalUserServiceId);
             var dbLicense = await db.Licenses.FirstOrDefaultAsync(l => l.LicenseKey == licenseKey);
 
             await sut.RemoveUniqueUserIdLogs(dbUniqueUser.Id, dbLicense.Id);
 
-            db.Entry(dbUniqueUser).Reload();
-            db.Update(dbUniqueUser);
+            var dbActLog1 = await db.ActivationLogs.FirstOrDefaultAsync(al => al.Message == actLog1.Message);
+            var dbActLog2 = await db.ActivationLogs.FirstOrDefaultAsync(al => al.Message == actLog2.Message);
 
-            var dbActLog = await db.ActivationLogs.FirstOrDefaultAsync(al => al.Message == actLog1.Message);
-            var dbUpdateUniqueUser = await db.UniqueUsers.
-                Include(us => us.ActivationLogs).
-                FirstOrDefaultAsync(us => us.ExternalUserServiceId == externalUserServiceId);
-
-            dbActLog.ShouldBeNull();
-            dbUpdateUniqueUser.ActivationLogs.ShouldNotContain(actLog1);
+            dbActLog1.ShouldBeNull();
+            dbActLog2.ShouldBeNull();
         }
     }
 }

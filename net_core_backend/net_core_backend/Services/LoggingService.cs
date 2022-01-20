@@ -32,18 +32,19 @@ namespace net_core_backend.Services
                     .ThenInclude(x => x.UniqueUser)
                 .Include(x => x.Product)
                 .Where(x => x.LicenseKey == licenseKey)
-                //.Select(x => new
-                //{
-                //    License = x,
-                //    UniqueUserIds = x.ActivationLogs
-                //                .Select(a => a.UniqueUser.ExternalUserServiceId)
-                //                .ToList(),
-                //    UniqueUsersCount = x.ActivationLogs
-                //                .Select(a => a.UniqueUserId)
-                //                .Distinct()
-                //                .Count(),
-                //    ProductMaxUses = x.Product.MaxUses,
-                //})
+                .Select(x => new
+                {
+                    License = x,
+                    UniqueUserIds = x.ActivationLogs
+                                .Select(a => a.UniqueUser.ExternalUserServiceId)
+                                .ToList(),
+                    UniqueUsersList = x.ActivationLogs
+                                .Select(a => a.UniqueUserId)
+                                .Distinct(),
+                                // Adding count breaks the test, so we moved to the if statement instead
+                                
+                    ProductMaxUses = x.Product.MaxUses,
+                })
                 .FirstOrDefaultAsync();
 
             // If the verification was successful
@@ -51,13 +52,14 @@ namespace net_core_backend.Services
             // And if the product max uses is more than 0
             // And if the CURRENT unique figma id count is already at max uses
             // Send an email to the admins
-            //if (successful &&
-            //    !license.UniqueUserIds.Contains(ExternalUniqueUserId) &&
-            //    license.ProductMaxUses > 0 &&
-            //    license.UniqueUsersCount == license.ProductMaxUses)
-            //{
-            //    mailingService.SendLicenseAbuseEmail(licenseKey, license.License.User.Email);
-            //}
+            if (successful &&
+                license != null &&
+                !license.UniqueUserIds.Contains(ExternalUniqueUserId) &&
+                license.ProductMaxUses > 0 &&
+                license.UniqueUsersList.Count() == license.ProductMaxUses)
+            {
+                mailingService.SendLicenseAbuseEmail(licenseKey, license.License.User.Email);
+            }
 
             var UniqueUser = await db.UniqueUsers.FirstOrDefaultAsync(u => u.ExternalUserServiceId == ExternalUniqueUserId && u.ExternalServiceName == platformName);
 
@@ -75,7 +77,7 @@ namespace net_core_backend.Services
 
             ActivationLogs activationLog = new ActivationLogs(successful)
             {
-                //License = license?.License,
+                License = license?.License,
                 UniqueUserId = UniqueUser.Id,
                 Message = message,
             };
