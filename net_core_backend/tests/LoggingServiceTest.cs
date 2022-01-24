@@ -44,7 +44,6 @@ namespace tests
 
             var activationLog = await db.ActivationLogs.FirstOrDefaultAsync(al => al.Message == message);
 
-            activationLog.ShouldNotBeNull();
             activationLog.Message.ShouldBe(message);
         }
 

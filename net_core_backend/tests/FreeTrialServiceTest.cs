@@ -96,7 +96,7 @@ namespace tests
             var dbFreeTrial = await db.FreeTrials.FirstOrDefaultAsync(ft => ft.PluginName == freeTrial.PluginName);
             DateTime newEndDate = DateTime.Now.AddDays(14);
 
-            Should.NotThrow(sut.SetEndDate(dbFreeTrial.Id, newEndDate));
+            await sut.SetEndDate(dbFreeTrial.Id, newEndDate);
 
             db.Entry(dbFreeTrial).Reload();
 
