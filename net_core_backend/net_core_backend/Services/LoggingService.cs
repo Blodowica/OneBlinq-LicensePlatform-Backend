@@ -38,9 +38,10 @@ namespace net_core_backend.Services
                     UniqueUserIds = x.ActivationLogs
                                 .Select(a => a.UniqueUser.ExternalUserServiceId)
                                 .ToList(),
-                    UniqueUsersList = x.ActivationLogs
+                    UniqueUsersCount = x.ActivationLogs
                                 .Select(a => a.UniqueUserId)
-                                .Distinct(),
+                                .Distinct()
+                                .Count(),
                                 // Adding count breaks the test, so we moved to the if statement instead
                                 
                     ProductMaxUses = x.Product.MaxUses,
@@ -56,7 +57,7 @@ namespace net_core_backend.Services
                 license != null &&
                 !license.UniqueUserIds.Contains(ExternalUniqueUserId) &&
                 license.ProductMaxUses > 0 &&
-                license.UniqueUsersList.Count() == license.ProductMaxUses)
+                license.UniqueUsersCount == license.ProductMaxUses)
             {
                 mailingService.SendLicenseAbuseEmail(licenseKey, license.License.User.Email);
             }
