@@ -38,10 +38,11 @@ namespace net_core_backend.Services
                     UniqueUserIds = x.ActivationLogs
                                 .Select(a => a.UniqueUser.ExternalUserServiceId)
                                 .ToList(),
-                    UniqueUsersCount = x.ActivationLogs
+                    UniqueUsersList = x.ActivationLogs
                                 .Select(a => a.UniqueUserId)
-                                .Distinct()
-                                .Count(),
+                                .Distinct(),
+                                // Adding count breaks the test, so we moved to the if statement instead
+                                
                     ProductMaxUses = x.Product.MaxUses,
                 })
                 .FirstOrDefaultAsync();
@@ -52,9 +53,10 @@ namespace net_core_backend.Services
             // And if the CURRENT unique figma id count is already at max uses
             // Send an email to the admins
             if (successful &&
+                license != null &&
                 !license.UniqueUserIds.Contains(ExternalUniqueUserId) &&
                 license.ProductMaxUses > 0 &&
-                license.UniqueUsersCount == license.ProductMaxUses)
+                license.UniqueUsersList.Count() == license.ProductMaxUses)
             {
                 mailingService.SendLicenseAbuseEmail(licenseKey, license.License.User.Email);
             }
@@ -97,7 +99,7 @@ namespace net_core_backend.Services
         } 
 
 
-            [Obsolete("This thing doesnt work", true)]
+            [Obsolete("This thing doesn't work, unfortunately ;(", true)]
         public String GetMacAddress()
         {
             String firstMacAddress = NetworkInterface

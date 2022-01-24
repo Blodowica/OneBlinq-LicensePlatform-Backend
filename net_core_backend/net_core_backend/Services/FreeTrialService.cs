@@ -44,8 +44,9 @@ namespace net_core_backend.Services
                 db.Add(uniqueUser);
                 await db.SaveChangesAsync();
             }
-            // creating a free trial with length of 1 day
-            FreeTrials freeTrial = new FreeTrials(14); // (!) check with PO how long a free trial should be
+
+            // creating a free trial with length of 14 day
+            FreeTrials freeTrial = new FreeTrials(14);
             freeTrial.UniqueUserId = uniqueUser.Id;
             freeTrial.PluginName = model.PluginName;
 
